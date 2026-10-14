@@ -1,0 +1,114 @@
+from __future__ import annotations
+
+import json
+import tempfile
+from pathlib import Path
+
+from . import adapters
+from .core import (RESULTS, ROOT, atomic_json, capture, config_hashes,
+                   load_manifest, manifest_path, pack_status, read_config,
+                   static_arm_check, utc_now, validate_cutoff, validate_repos)
+
+
+PROBE = ("Use the tool named web_search to search for the official Python "
+         "documentation page for pathlib Path. Then use the tool named web_fetch "
+         "to fetch that result. Report the page title and URL. Both tool calls "
+         "are required for this capability check.")
+
+
+def _judge_probe(directory: Path, timeout: int) -> dict:
+    schema = directory / "probe-schema.json"
+    schema.write_text(json.dumps({"type": "object", "additionalProperties": False,
+                                  "required": ["ok"], "properties": {"ok": {"type": "boolean"}}}))
+    output = directory / "probe-output.json"
+    cmd = ["codex", "exec", "--model", "gpt-6-sol", "--ephemeral",
+           "--sandbox", "read-only", "--skip-git-repo-check", "--ignore-user-config",
+           "--output-schema", str(schema), "--output-last-message", str(output),
+           "Reply with JSON containing ok=true."]
+    try:
+        import os
+        result = capture(cmd, directory, os.environ.copy(), timeout, directory / "judge-probe-events.jsonl")
+        payload = json.loads(output.read_text()) if output.exists() else None
+        return {"status": "ready" if result["exit_code"] == 0 and payload == {"ok": True} else "failed",
+                "reason": None if payload == {"ok": True} else "Codex did not return schema-conforming JSON",
+                "version": _version("codex")}
+    except (OSError, ValueError, json.JSONDecodeError) as exc:
+        return {"status": "failed", "reason": str(exc), "version": _version("codex")}
+
+
+def _version(binary: str) -> str | None:
+    import subprocess
+    try:
+        return subprocess.check_output([binary, "--version"], text=True, timeout=10).strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def live_arm_probe(arm: dict, timeout: int) -> dict:
+    with tempfile.TemporaryDirectory(prefix="agent-eval-probe-") as temporary:
+        directory = Path(temporary)
+        run_dir = directory / "run"
+        run_dir.mkdir()
+        command = adapters.command(arm, PROBE, directory, run_dir)
+        if arm["harness"] == "copilot":
+            import uuid
+            command[command.index("--session-id") + 1] = str(uuid.uuid4())
+        env = adapters.environment(arm, directory)
+        try:
+            result = capture(command, directory, env, timeout, directory / "events.jsonl")
+        except OSError as exc:
+            return {"status": "unavailable", "reason": str(exc)}
+        answer = adapters.final_answer(arm["harness"], result["events"])
+        names = adapters.tool_names(result["events"])
+        search = any("web_search" in name.lower() or "websearch" in name.lower() for name in names)
+        fetch = any(any(word in name.lower() for word in ("fetch", "webpage", "browse", "open_url")) for name in names)
+        if result["exit_code"] or result["timed_out"] or not answer:
+            return {"status": "unavailable", "reason": "Live probe failed or produced no answer",
+                    "probe_exit_code": result["exit_code"], "probe_tool_names": names}
+        if not (search and fetch):
+            return {"status": "unavailable", "reason": "Search and page fetch were not both observed in headless events",
+                    "probe_tool_names": names}
+        usage = adapters.usage(arm["harness"], result["events"], run_dir)
+        return {"status": "ready", "reason": None, "probe_tool_names": names,
+                "usage_fields": sorted(usage["raw"].keys()) if isinstance(usage["raw"], dict) else [],
+                "usage_classification": usage["classification"]}
+
+
+def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str], live: bool) -> dict:
+    path = manifest_path(evaluation_id)
+    if path.exists():
+        manifest = load_manifest(evaluation_id)
+        if any((RESULTS / evaluation_id / "runs").rglob("metrics.json")):
+            raise ValueError("Cannot modify preflight after runs begin")
+        if cutoff and validate_cutoff(cutoff) != manifest["cutoff"]:
+            raise ValueError("Cutoff differs from existing manifest")
+        if repo_args:
+            repos = validate_repos(repo_args)
+            if manifest["repos"] and repos != manifest["repos"]:
+                raise ValueError("Repository pins differ from existing manifest")
+            manifest["repos"] = repos
+    else:
+        if not cutoff:
+            raise ValueError("A new evaluation requires --cutoff")
+        manifest = {"evaluation_id": evaluation_id, "created_at": utc_now(),
+                    "cutoff": validate_cutoff(cutoff), "config_hashes": config_hashes(),
+                    "repos": validate_repos(repo_args), "preflight": {},
+                    "judge_preflight": {"status": "needs_live_probe"}}
+    arms = read_config("arms")["arms"]
+    tasks = read_config("tasks")["tasks"]
+    for arm in arms:
+        state = static_arm_check(arm)
+        if live and state["status"] == "needs_live_probe":
+            state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"]))
+        manifest["preflight"][arm["id"]] = state
+    manifest["evidence"] = {task["id"]: {"status": pack_status(task["id"])[1],
+                                        "sha256": None} for task in tasks}
+    if live:
+        from .core import sha256, pack_path
+        for task in tasks:
+            if pack_status(task["id"])[0]:
+                manifest["evidence"][task["id"]]["sha256"] = sha256(pack_path(task["id"]))
+        with tempfile.TemporaryDirectory(prefix="agent-eval-judge-probe-") as temporary:
+            manifest["judge_preflight"] = _judge_probe(Path(temporary), read_config("run-policy")["judge_timeout_seconds"])
+    atomic_json(path, manifest)
+    return manifest

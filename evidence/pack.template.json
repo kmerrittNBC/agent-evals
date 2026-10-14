@@ -1,0 +1,7 @@
+{
+  "reference_answer": "REPLACE with a concise answer at the cutoff",
+  "sources": [{"title":"REPLACE","url":"https://example.org","retrieved_at":"2026-10-14T17:00:00-04:00","snapshot_or_excerpt":"REPLACE"}],
+  "repo_facts": [{"repo":"REPLACE","commit":"REPLACE","facts":["REPLACE"]}],
+  "ambiguities": ["REPLACE"],
+  "decision_changing_errors": ["REPLACE"]
+}

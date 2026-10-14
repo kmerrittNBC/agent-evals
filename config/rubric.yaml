@@ -1,0 +1,10 @@
+{
+  "dimensions": ["factual_accuracy","task_completion","source_quality","synthesis_and_judgment","ambiguity_handling","actionability_and_clarity"],
+  "scale": {"min": 1, "max": 5},
+  "headline_thresholds": {
+    "Excellent": {"minimum_median_overall": 4.5, "minimum_completion_rate": 1.0, "maximum_critical_errors": 0},
+    "Good": {"minimum_median_overall": 4.0, "minimum_completion_rate": 0.8, "maximum_critical_errors": 1},
+    "Practical": {"minimum_median_overall": 3.0, "minimum_completion_rate": 0.6, "maximum_critical_errors": 2}
+  },
+  "unrated_if_completed_below": 3
+}

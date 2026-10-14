@@ -1,0 +1,10 @@
+{
+  "arms": [
+    {"id":"pi-luna","harness":"pi","binary":"pi","model":"github-copilot/gpt-6-luna","reasoning":"medium","billing":"copilot"},
+    {"id":"copilot-luna","harness":"copilot","binary":"copilot","model":"gpt-6-luna","reasoning":"medium","billing":"copilot"},
+    {"id":"opencode-luna","harness":"opencode","binary":"opencode","model":"github-copilot/gpt-6-luna","reasoning":"medium","billing":"copilot","search_provider":"unconfigured"},
+    {"id":"pi-sol","harness":"pi","binary":"pi","model":"github-copilot/gpt-6-sol","reasoning":"medium","billing":"copilot"},
+    {"id":"claude-opus","harness":"claude","binary":"claude","model":"claude-opus-5-5","reasoning":"medium","billing":"anthropic"},
+    {"id":"antigravity-flash","harness":"antigravity","binary":"agy","model":"gemini-3.8-flash-medium","reasoning":"medium","billing":"google"}
+  ]
+}

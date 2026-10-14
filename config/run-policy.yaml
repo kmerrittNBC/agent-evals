@@ -1,0 +1,9 @@
+{
+  "timeout_seconds": 900,
+  "probe_timeout_seconds": 180,
+  "judge_timeout_seconds": 300,
+  "seed": 20261014,
+  "continuation_response": "Proceed using the available evidence. State any necessary assumptions and explain what would change your conclusion.",
+  "max_continuations": 1,
+  "cutoff_requires_timezone": true
+}
