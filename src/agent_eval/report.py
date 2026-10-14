@@ -104,8 +104,8 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
     lines = [f"# Agent evaluation: {evaluation_id}", "", f"Information cutoff: {manifest['cutoff']}",
              "", "Five tasks per arm. Ratings and rankings are exploratory, not statistically conclusive.",
              "", "## Arm summary", "",
-             "| Arm | Rating | Completed | Quality median | Final seconds median (range) | First substantive seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |",
-             "|---|---|---:|---:|---|---|---:|---:|---|"]
+             "| Arm | Rating | Completed | Quality median | First visible seconds median (range) | First substantive seconds median (range) | Final seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |",
+             "|---|---|---:|---:|---|---|---|---:|---:|---|"]
     for arm in arms:
         selected = [row for row in rows if row["arm_id"] == arm["id"]]
         judgments = []
@@ -114,14 +114,16 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
             if path.exists():
                 judgments.append(json.loads(path.read_text()))
         final = [_number(row["time_final_seconds"]) for row in selected if row["status"] == "completed"]
+        visible = [_number(row["time_first_visible_seconds"]) for row in selected]
         substantive = [_number(row["time_first_substantive_seconds"]) for row in selected]
         credits = [_number(row["copilot_credits"]) for row in selected]
         quality = [j["overall_quality"] for j in judgments]
         rating = _rating(judgments, len(tasks))
         lines.append(f"| {arm['id']} | {rating} | {sum(row['status'] == 'completed' for row in selected)}/5 | "
                      f"{statistics.median(quality) if quality else 'unavailable'} | "
-                     f"{_fmt([x for x in final if x is not None])} | "
+                     f"{_fmt([x for x in visible if x is not None])} | "
                      f"{_fmt([x for x in substantive if x is not None])} | "
+                     f"{_fmt([x for x in final if x is not None])} | "
                      f"{sum(bool(row['asked_clarification']) for row in selected)} | "
                      f"{sum(len(j['critical_errors']) for j in judgments)} | "
                      f"{('~' if any(str(row['credit_classification']).startswith('estimated') for row in selected) else '') + _fmt([x for x in credits if x is not None]) if arm['billing'] == 'copilot' else 'separate native usage'} |")

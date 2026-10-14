@@ -6,7 +6,7 @@ from pathlib import Path
 
 from . import adapters
 from .core import (RESULTS, ROOT, atomic_json, capture, config_hashes,
-                   load_manifest, manifest_path, pack_status, read_config,
+                   discover_angular_root, load_manifest, manifest_path, pack_status, read_config,
                    static_arm_check, utc_now, validate_cutoff, validate_repos)
 
 
@@ -74,7 +74,11 @@ def live_arm_probe(arm: dict, timeout: int) -> dict:
                 "usage_classification": usage["classification"]}
 
 
-def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str], live: bool) -> dict:
+def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
+              angular_root: str | None, live: bool) -> dict:
+    def same_pin(left: dict, right: dict) -> bool:
+        return left["path"] == right["path"] and left["commit"] == right["commit"]
+
     path = manifest_path(evaluation_id)
     if path.exists():
         manifest = load_manifest(evaluation_id)
@@ -84,15 +88,30 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str], live
             raise ValueError("Cutoff differs from existing manifest")
         if repo_args:
             repos = validate_repos(repo_args)
-            if manifest["repos"] and repos != manifest["repos"]:
-                raise ValueError("Repository pins differ from existing manifest")
-            manifest["repos"] = repos
+            for name, info in repos.items():
+                if name in manifest["repos"] and not same_pin(manifest["repos"][name], info):
+                    raise ValueError("Repository pin differs from existing manifest")
+            manifest["repos"].update(repos)
+        if angular_root:
+            repos, group = discover_angular_root(angular_root)
+            if manifest.get("angular_root") and manifest["angular_root"] != group:
+                raise ValueError("Angular root selection differs from existing manifest")
+            for name, info in repos.items():
+                if name in manifest["repos"] and not same_pin(manifest["repos"][name], info):
+                    raise ValueError("Angular repository pin differs from existing manifest")
+            manifest["repos"].update(repos)
+            manifest["angular_root"] = group
     else:
         if not cutoff:
             raise ValueError("A new evaluation requires --cutoff")
+        repos = validate_repos(repo_args)
+        group = None
+        if angular_root:
+            discovered, group = discover_angular_root(angular_root)
+            repos.update(discovered)
         manifest = {"evaluation_id": evaluation_id, "created_at": utc_now(),
                     "cutoff": validate_cutoff(cutoff), "config_hashes": config_hashes(),
-                    "repos": validate_repos(repo_args), "preflight": {},
+                    "repos": repos, "angular_root": group, "preflight": {},
                     "judge_preflight": {"status": "needs_live_probe"}}
     arms = read_config("arms")["arms"]
     tasks = read_config("tasks")["tasks"]
@@ -101,12 +120,12 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str], live
         if live and state["status"] == "needs_live_probe":
             state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"]))
         manifest["preflight"][arm["id"]] = state
-    manifest["evidence"] = {task["id"]: {"status": pack_status(task["id"])[1],
+    manifest["evidence"] = {task["id"]: {"status": pack_status(task["id"], manifest)[1],
                                         "sha256": None} for task in tasks}
     if live:
         from .core import sha256, pack_path
         for task in tasks:
-            if pack_status(task["id"])[0]:
+            if pack_status(task["id"], manifest)[0]:
                 manifest["evidence"][task["id"]]["sha256"] = sha256(pack_path(task["id"]))
         with tempfile.TemporaryDirectory(prefix="agent-eval-judge-probe-") as temporary:
             manifest["judge_preflight"] = _judge_probe(Path(temporary), read_config("run-policy")["judge_timeout_seconds"])

@@ -19,12 +19,17 @@ Run `python3 -m agent_eval --help` for commands. A typical sequence is:
 
 ```sh
 python3 -m agent_eval preflight --evaluation-id pilot --cutoff 2026-10-14T17:00:00-04:00 \
-  --repo financial-hq-ui=/absolute/path --repo other-angular=/absolute/path
+  --repo financial-hq-ui=/absolute/path --repo other-angular=/absolute/path \
+  --angular-root /absolute/path/to/sportsengine
 python3 -m agent_eval preflight --evaluation-id pilot --live
 python3 -m agent_eval run --evaluation-id pilot --full
 python3 -m agent_eval judge --evaluation-id pilot
 python3 -m agent_eval report --evaluation-id pilot
 ```
+
+If you need help with CLI installation, sign-in, the OpenCode search provider,
+or the Copilot search probe, give a separate agent the prompt in
+[`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md). It requests no evaluation run.
 
 `preflight --live` spends a small amount of model usage to verify the exact
 model, search, and page fetch in each headless harness, plus a schema-conforming
@@ -47,6 +52,10 @@ judge packs, and results stay outside those workspaces. The runner verifies
 their contents did not change after each run. The tool allowlists further limit
 file editing. This is an integrity check, not an OS-level security boundary;
 run untrusted agents in a separate sandbox if that guarantee is required.
+For IG-05, `--angular-root` discovers immediate child Git repositories whose
+root `package.json` declares `@angular/core`, pins each HEAD, and exports all
+of them into the same agent workspace. Uncommitted work is never exported;
+the manifest records whether each source checkout was dirty.
 
 ## Measurements and review
 

@@ -15,7 +15,7 @@ def _scrub_text(value: str) -> str:
     # those models. Hide only first-person harness labels.
     for identity in ("Copilot CLI", "Claude Code", "Antigravity CLI", "OpenCode"):
         value = re.sub(re.escape(identity), "[redacted harness]", value, flags=re.I)
-    return value[:6000]
+    return value
 
 
 def anonymized_transcript(events: list[dict], arms: list[dict]) -> list[dict]:
@@ -69,6 +69,9 @@ def anonymized_transcript(events: list[dict], arms: list[dict]) -> list[dict]:
                       "result": str(state.get("output", ""))[:6000] if isinstance(state, dict) else ""}
         if not visible and not detail:
             continue
+        if detail:
+            detail = {key: _scrub_text(value) if isinstance(value, str) else value
+                      for key, value in detail.items()}
         transcript.append({"event_index": entry["index"],
                            "elapsed_seconds": entry["elapsed_seconds"],
                            "phase": entry.get("phase", 0), "event_type": kind,
@@ -122,7 +125,7 @@ def judge_one(evaluation_id: str, task: dict, arm: dict, manifest: dict) -> dict
     judgment_path = run_dir / "judgment.json"
     if judgment_path.exists():
         return json.loads(judgment_path.read_text())
-    okay, reason = pack_status(task["id"])
+    okay, reason = pack_status(task["id"], manifest)
     if not okay:
         raise ValueError(f"{task['id']}: {reason}")
     if manifest["evidence"][task["id"]]["sha256"] != sha256(pack_path(task["id"])):

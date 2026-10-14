@@ -3,7 +3,7 @@
     {"id":"IG-01","prompt":"Can you give me a matrix of the Terminal-Bench and DeepSWE results for GPT-6 Luna and Sol, Qwen3.8-27B, GLM-5.3, and DeepSeek V4.1 Flash?","repos":[]},
     {"id":"IG-02","prompt":"I saw a recent Angular router security advisory. Do we need to update financial HQ UI, and how urgent is it?","repos":["financial-hq-ui"]},
     {"id":"IG-03","prompt":"There was a recent Nx security issue. Are either of our Angular repos affected, and what should we do?","repos":["financial-hq-ui","other-angular"]},
-    {"id":"IG-04","prompt":"Can our current Playwright setup test file drops and capture HARs, or do we need to upgrade?","repos":["financial-hq-ui","other-angular"]},
-    {"id":"IG-05","prompt":"Could we standardize our Angular repos on Node 26 now? What would block us?","repos":["financial-hq-ui","other-angular"]}
+    {"id":"IG-04","prompt":"Can our current Playwright setup test file drops and capture HARs, or do we need to upgrade?","repos":["financial-hq-ui"]},
+    {"id":"IG-05","prompt":"Could we standardize our Angular repos on Node 26 now? What would block us?","repos":["@angular-root"]}
   ]
 }

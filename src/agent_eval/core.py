@@ -72,17 +72,51 @@ def validate_repos(repo_args: list[str]) -> dict[str, dict]:
         commit = git(path, "rev-parse", "HEAD")
         if not commit or len(commit) != 40:
             raise ValueError(f"Could not pin commit for {path}")
-        if git(path, "status", "--porcelain"):
-            raise ValueError(f"Repository has uncommitted changes: {path}")
-        repos[name] = {"path": str(path), "commit": commit}
+        repos[name] = {"path": str(path), "commit": commit,
+                       "working_tree_dirty": bool(git(path, "status", "--porcelain"))}
     return repos
+
+
+def discover_angular_root(value: str) -> tuple[dict[str, dict], dict]:
+    root = Path(value).expanduser().resolve()
+    if not root.is_dir():
+        raise ValueError(f"Angular repo root not found: {root}")
+    repos: dict[str, dict] = {}
+    for child in sorted(root.iterdir()):
+        if not child.is_dir() or not (child / ".git").exists():
+            continue
+        try:
+            commit = git(child, "rev-parse", "HEAD")
+            data = json.loads(git(child, "show", f"{commit}:package.json"))
+        except (OSError, json.JSONDecodeError, subprocess.SubprocessError):
+            continue
+        deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
+        if "@angular/core" not in deps:
+            continue
+        name = f"sportsengine/{child.name}"
+        repos[name] = {"path": str(child), "commit": commit,
+                       "working_tree_dirty": bool(git(child, "status", "--porcelain")),
+                       "angular_version_spec": deps["@angular/core"]}
+    if not repos:
+        raise ValueError(f"No Angular Git repos found under {root}")
+    return repos, {"path": str(root), "repo_names": sorted(repos)}
+
+
+def task_repo_names(task: dict, manifest: dict) -> list[str]:
+    names: list[str] = []
+    for name in task["repos"]:
+        if name == "@angular-root":
+            names.extend(manifest.get("angular_root", {}).get("repo_names", []))
+        else:
+            names.append(name)
+    return names
 
 
 def pack_path(task_id: str) -> Path:
     return ROOT / "evidence" / task_id / "pack.json"
 
 
-def pack_status(task_id: str) -> tuple[bool, str]:
+def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
     path = pack_path(task_id)
     if not path.exists():
         return False, "judge evidence pack missing"
@@ -95,6 +129,18 @@ def pack_status(task_id: str) -> tuple[bool, str]:
         return False, "judge evidence pack is incomplete"
     if "REPLACE" in json.dumps(pack) or not pack["reference_answer"] or not pack["sources"]:
         return False, "judge evidence pack contains placeholders or no sources"
+    if manifest is not None:
+        task = next(task for task in read_config("tasks")["tasks"] if task["id"] == task_id)
+        selected = task_repo_names(task, manifest)
+        if task["repos"] and not selected:
+            return False, "task has no pinned repositories"
+        facts = {item["repo"]: item["commit"] for item in pack["repo_facts"]}
+        for name in selected:
+            info = manifest["repos"].get(name)
+            if info is None:
+                return False, f"missing pinned repo {name}"
+            if facts.get(name, facts.get(Path(info["path"]).name)) != info["commit"]:
+                return False, f"judge evidence pack repo pin differs for {name}"
     return True, "ready"
 
 
@@ -159,18 +205,26 @@ def prepare_workspace(repos: dict[str, dict], task: dict, destination: Path) -> 
         info = repos[name]
         source = Path(info["path"])
         target = destination / name
-        target.mkdir()
+        target.mkdir(parents=True)
         proc = subprocess.Popen(["git", "-C", str(source), "archive", "--format=tar", info["commit"]],
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         assert proc.stdout is not None
+        links: list[tuple[Path, str]] = []
         with tarfile.open(fileobj=proc.stdout, mode="r|") as tar:
             for member in tar:
                 member_path = (target / member.name).resolve()
                 if not member_path.is_relative_to(target.resolve()):
                     proc.kill()
                     raise ValueError("Unsafe path in git archive")
-                if member.issym() or member.islnk():
+                if member.issym():
+                    if Path(member.linkname).is_absolute() or not (member_path.parent / member.linkname).resolve().is_relative_to(target.resolve()):
+                        proc.kill()
+                        raise ValueError("Unsafe symlink in git archive")
+                    links.append((member_path, member.linkname))
                     continue
+                if member.islnk():
+                    proc.kill()
+                    raise ValueError("Unsupported hard link in git archive")
                 tar.extract(member, target, filter="data")
         stderr = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
         if proc.wait() != 0:
@@ -178,6 +232,8 @@ def prepare_workspace(repos: dict[str, dict], task: dict, destination: Path) -> 
         proc.stdout.close()
         if proc.stderr:
             proc.stderr.close()
+        for link_path, link_target in links:
+            link_path.symlink_to(link_target)
         commits[name] = info["commit"]
     for path in destination.rglob("*"):
         if path.is_file():
@@ -266,7 +322,7 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
         raise ValueError(f"Arm {arm['id']} has not passed live preflight")
     with tempfile.TemporaryDirectory(prefix="agent-eval-") as temporary:
         workspace = Path(temporary) / "workspace"
-        prepare_workspace(manifest["repos"], task, workspace)
+        prepare_workspace(manifest["repos"], {"repos": task_repo_names(task, manifest)}, workspace)
         before = tree_digest(workspace)
         env = adapters.environment(arm, workspace)
         session = None

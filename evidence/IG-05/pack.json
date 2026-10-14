@@ -1,0 +1,155 @@
+{
+  "reference_answer": "As of October 14, 2026, do not standardize all 12 pinned Angular repositories on Node 26. Node 26 is still Current, while 24 is LTS. Angular 22 permits Node 26, but Angular 21 and 20 support only 20/22/24, Angular 19 excludes 26, and Angular 8 is far older. Nx 22/23 itself supports Node 26, so Angular and other build dependencies are the main framework gates. The fleet has Angular 8, 19, 20, 21 and 22 plus .nvmrc and CI pins ranging from Node 14 through 24. A safe plan is a compatibility inventory, migrations of older Angular apps and related TypeScript/build tooling, lockfile/native dependency tests, CI/runtime updates, then a pilot on the Angular 22 repo before a fleet-wide standard; Node 24 is a more plausible interim common supported line for Angular 20-22 but not the Angular 8/19 repos.",
+  "sources": [
+    {
+      "title": "Angular version compatibility",
+      "url": "https://angular.dev/reference/versions",
+      "retrieved_at": "2026-10-14T15:03:00-04:00",
+      "snapshot_or_excerpt": "Angular 22 supports Node ^22.22.3 || ^24.15.0 || ^26.0.0. Angular 21 and 20 list Node 20/22/24, not 26. Angular 19 lists 18/20/22. Angular 8.1 lists Node ^10.9.0."
+    },
+    {
+      "title": "Nx Node support matrix",
+      "url": "https://nx.dev/docs/technologies/node/introduction",
+      "retrieved_at": "2026-10-14T15:03:00-04:00",
+      "snapshot_or_excerpt": "Nx 23.x and 22.x support Node 26.x. Nx states Node 26 is Current and enters LTS in October 2026."
+    },
+    {
+      "title": "Node.js release status",
+      "url": "https://nodejs.org/en/about/previous-releases",
+      "retrieved_at": "2026-10-14T15:03:00-04:00",
+      "snapshot_or_excerpt": "On October 14, 2026, Node 26 is Current; Node 24 and 22 are LTS."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "sportsengine/membership_ui",
+      "commit": "ab1c6d00c9f98922d39c5a17a8e83030a547ee71",
+      "facts": [
+        "@angular/core 19.2.19",
+        "nx not declared",
+        ".nvmrc 18.20.2",
+        "package engines.node ^18.19.1 || ^20.11.1 || ^22.0.0"
+      ]
+    },
+    {
+      "repo": "sportsengine/payments",
+      "commit": "f3ffd452232e27bd1e2a7dbec3203b6fa4a7b668",
+      "facts": [
+        "@angular/core 8.1.2",
+        "nx not declared",
+        ".nvmrc 14.21.3",
+        "package engines.node not declared"
+      ]
+    },
+    {
+      "repo": "sportsengine/people-and-orgs-ui-library",
+      "commit": "75b2f8102055a3835fcd0d8849d094f71bfa25ba",
+      "facts": [
+        "@angular/core 21.2.19",
+        "nx 22.7.1",
+        ".nvmrc 24.16.0",
+        "package engines.node >=22.13"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-commerce-ui",
+      "commit": "5b4037f60e70085cc5b534789576475034feb1e4",
+      "facts": [
+        "@angular/core ^21.2.17",
+        "nx 22.5.3",
+        ".nvmrc 24.16.0",
+        "package engines.node not declared"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-fe-angular-services",
+      "commit": "4dbc4c67137d9788f5339ea362ac61a62c587d68",
+      "facts": [
+        "@angular/core ~20.3.25",
+        "nx not declared",
+        ".nvmrc 20.19.5",
+        "package engines.node not declared"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-financial-admin-ui-library",
+      "commit": "ec94a1b92f328592141af94906f6fab64c764f13",
+      "facts": [
+        "@angular/core ^21.2.0",
+        "nx not declared",
+        ".nvmrc 22.13.0",
+        "package engines.node >=22.13.0"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-financial-hq-ui",
+      "commit": "534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0",
+      "facts": [
+        "@angular/core 22.1.7",
+        "nx 23.2.1",
+        ".nvmrc 24.16.0",
+        "package engines.node not declared"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-financial-reports-ui",
+      "commit": "e76c2c97485c36d1a311155e7ac3e0f4fa766a36",
+      "facts": [
+        "@angular/core ^20.3.16",
+        "nx not declared",
+        ".nvmrc 22.13.0",
+        "package engines.node >=22.13.0"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-financial-settings-ui",
+      "commit": "d68d6d9d06552c76af4c009e653d024432e6c380",
+      "facts": [
+        "@angular/core 20.3.26",
+        "nx not declared",
+        ".nvmrc 22.13.0",
+        "package engines.node >=22.13.0"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-payments-ui",
+      "commit": "5ba24790accddcf853b5f2c6120da74a771f0ead",
+      "facts": [
+        "@angular/core 20.3.18",
+        "nx not declared",
+        ".nvmrc 22.13.0",
+        "package engines.node >=22.13.0"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-product-management-ui",
+      "commit": "748fa3c1296396cac3e2f9035d2bb8434a6339db",
+      "facts": [
+        "@angular/core ^21.2.0",
+        "nx 22.5.3",
+        ".nvmrc 20.19.0",
+        "package engines.node >=20"
+      ]
+    },
+    {
+      "repo": "sportsengine/se-store-ui",
+      "commit": "e6609707b935a55fa052b08e45c5e4a6ea1605e5",
+      "facts": [
+        "@angular/core ^19.2.20",
+        "nx not declared",
+        ".nvmrc 20.19.0",
+        "package engines.node >=20"
+      ]
+    }
+  ],
+  "ambiguities": [
+    "Does standardize mean every Angular repo or a subset? The pinned evaluation scope is all 12 Angular package roots under ~/sportsengine.",
+    "A declaration in package.json or .nvmrc does not prove all CI/deployment runtimes; inspect workflows and images.",
+    "Framework support does not guarantee every native package and private integration works on Node 26."
+  ],
+  "decision_changing_errors": [
+    "Claiming Angular 20/21 or Angular 8 officially supports Node 26.",
+    "Ignoring the older Angular repos or treating Nx support as proof that the whole fleet is ready.",
+    "Calling Node 26 LTS on October 14, 2026."
+  ]
+}

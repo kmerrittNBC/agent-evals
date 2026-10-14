@@ -4,8 +4,8 @@ import argparse
 import json
 import sys
 
-from .core import (RESULTS, load_manifest, pack_status, randomized_slots,
-                   read_config, run_one)
+from .core import (RESULTS, load_manifest, pack_path, pack_status, randomized_slots,
+                   read_config, run_one, sha256, task_repo_names)
 from .judge import judge_one
 from .preflight import preflight
 from .report import make_report
@@ -20,6 +20,7 @@ def main() -> int:
         if name == "preflight":
             part.add_argument("--cutoff")
             part.add_argument("--repo", action="append", default=[])
+            part.add_argument("--angular-root")
             part.add_argument("--live", action="store_true")
         elif name in ("run", "judge"):
             part.add_argument("--arm", action="append")
@@ -34,7 +35,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "preflight":
-            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.live)
+            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.angular_root, args.live)
             print(json.dumps({"manifest": str(RESULTS / args.evaluation_id / "manifest.json"),
                               "arms": {key: value["status"] for key, value in result["preflight"].items()},
                               "judge": result["judge_preflight"]["status"],
@@ -76,10 +77,13 @@ def main() -> int:
             if manifest["judge_preflight"]["status"] != "ready":
                 raise ValueError("Codex judge has not passed live preflight")
             for task in selected_tasks:
-                okay, reason = pack_status(task["id"])
+                okay, reason = pack_status(task["id"], manifest)
                 if not okay:
                     raise ValueError(f"{task['id']}: {reason}")
-                if any(repo not in manifest["repos"] for repo in task["repos"]):
+                if manifest["evidence"][task["id"]]["sha256"] != sha256(pack_path(task["id"])):
+                    raise ValueError(f"{task['id']}: evidence changed since live preflight")
+                names = task_repo_names(task, manifest)
+                if (task["repos"] and not names) or any(repo not in manifest["repos"] for repo in names):
                     raise ValueError(f"{task['id']}: missing pinned repo")
             if any(manifest["preflight"][arm["id"]]["status"] not in ("ready", "unavailable") for arm in selected_arms):
                 raise ValueError("All selected arms must pass live preflight or be recorded unavailable")
