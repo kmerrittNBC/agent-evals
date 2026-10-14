@@ -13,7 +13,7 @@ from .core import (RESULTS, ROOT, atomic_json, capture, load_manifest,
 def _scrub_text(value: str) -> str:
     # Preserve model names in the task and answer: IG-01 explicitly asks about
     # those models. Hide only first-person harness labels.
-    for identity in ("Copilot CLI", "Claude Code", "Antigravity CLI", "OpenCode"):
+    for identity in ("Copilot CLI", "Claude Code", "Antigravity CLI"):
         value = re.sub(re.escape(identity), "[redacted harness]", value, flags=re.I)
     return value
 
@@ -29,7 +29,7 @@ def anonymized_transcript(events: list[dict], arms: list[dict]) -> list[dict]:
             continue
         kind = str(obj.get("type", obj.get("event", "")))
         visible = adapters.event_text("pi", obj) or adapters.event_text("copilot", obj) or \
-                  adapters.event_text("opencode", obj) or adapters.event_text("claude", obj) or \
+                  adapters.event_text("claude", obj) or \
                   adapters.event_text("antigravity", obj)
         detail = None
         if "tool" in kind.lower() or "function" in kind.lower():

@@ -73,7 +73,7 @@ def main() -> int:
             if args.full and (args.arm or args.task):
                 raise ValueError("--full cannot be combined with filters")
             if not args.full and not (args.arm or args.task):
-                raise ValueError("Use --full for all 30 slots, or select --arm/--task for a pilot")
+                raise ValueError("Use --full for all 25 slots, or select --arm/--task for a pilot")
             if manifest["judge_preflight"]["status"] != "ready":
                 raise ValueError("Codex judge has not passed live preflight")
             for task in selected_tasks:

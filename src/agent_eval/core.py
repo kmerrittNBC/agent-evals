@@ -193,8 +193,6 @@ def static_arm_check(arm: dict) -> dict:
                 details.update(status="unavailable", reason="Pi web search/fetch extensions are missing")
         except (OSError, subprocess.SubprocessError):
             details.update(status="unavailable", reason="Could not list Pi models")
-    if arm["harness"] == "opencode" and arm.get("search_provider") in (None, "unconfigured"):
-        details.update(status="unavailable", reason="OpenCode search provider and charge must be configured")
     return details
 
 

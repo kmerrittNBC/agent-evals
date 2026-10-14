@@ -5,7 +5,6 @@ the runner will use it for an evaluation.
 """
 from __future__ import annotations
 
-import json
 import os
 import shutil
 from pathlib import Path
@@ -31,14 +30,6 @@ def pi_binary_env() -> dict[str, str]:
 
 def environment(arm: dict, workspace: Path) -> dict[str, str]:
     env = pi_binary_env() if arm["harness"] == "pi" else os.environ.copy()
-    if arm["harness"] == "opencode":
-        # OpenCode's documented env override makes this per-process and keeps
-        # permissions independent from a user's global config.
-        env["OPENCODE_CONFIG_CONTENT"] = json.dumps({
-            "permission": {"*": "deny", "read": "allow", "glob": "allow",
-                           "grep": "allow", "websearch": "allow", "webfetch": "allow",
-                           "question": "allow"}
-        })
     env["AGENT_EVAL_WORKSPACE"] = str(workspace)
     return env
 
@@ -63,12 +54,6 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
                "-C", str(workspace), "--session-id", session or run_dir.name,
                "--available-tools=web_search,web_fetch,view,grep,glob,ask_user"]
         return cmd
-    if harness == "opencode":
-        cmd = [binary, "run", "--format", "json", "--model", model,
-               "--variant", effort]
-        if session:
-            cmd += ["--session", session]
-        return cmd + [prompt]
     if harness == "claude":
         cmd = [binary, "-p", prompt, "--model", model, "--effort", effort,
                "--output-format", "stream-json", "--verbose", "--restricted",
@@ -100,10 +85,6 @@ def event_text(harness: str, obj: object) -> str:
         data = obj.get("data", {})
         if obj.get("type") in ("assistant.message_delta", "assistant.message"):
             return data.get("deltaContent") or data.get("content") or ""
-    if harness == "opencode":
-        part = obj.get("part", {})
-        if obj.get("type") == "text":
-            return part.get("text", "") if isinstance(part, dict) else ""
     if harness == "claude":
         if obj.get("type") == "assistant":
             return _content_text(obj.get("message", {}).get("content"))
@@ -150,7 +131,7 @@ def final_answer(harness: str, events: list[dict]) -> str:
 
 def session_id(harness: str, events: list[dict]) -> str | None:
     keys = {"pi": ("sessionId",), "copilot": ("sessionId", "session_id"),
-            "opencode": ("sessionID", "sessionId"), "claude": ("session_id",),
+            "claude": ("session_id",),
             "antigravity": ("conversation_id",)}[harness]
     for entry in events:
         obj = entry.get("data")

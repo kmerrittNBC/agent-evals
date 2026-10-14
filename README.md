@@ -1,9 +1,9 @@
 # Coding agent information-gathering evaluation
 
-This repository runs the five prompts in `config/tasks.yaml` through six pinned
+This repository runs the five prompts in `config/tasks.yaml` through five pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
 judgment, and a traceable report for every attempted run. The first evaluation
-is 30 agent runs and up to 30 judgments. No evaluation has been run yet.
+is 25 agent runs and up to 25 judgments. No evaluation has been run yet.
 
 ## Requirements
 
@@ -27,8 +27,8 @@ python3 -m agent_eval judge --evaluation-id pilot
 python3 -m agent_eval report --evaluation-id pilot
 ```
 
-If you need help with CLI installation, sign-in, the OpenCode search provider,
-or the Copilot search probe, give a separate agent the prompt in
+If you need help with CLI installation, sign-in, or the Copilot search probe,
+give a separate agent the prompt in
 [`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md). It requests no evaluation run.
 
 `preflight --live` spends a small amount of model usage to verify the exact
@@ -37,14 +37,14 @@ Codex judgment. The runner refuses `run` until all provisioned arms have
 passed those probes. An unavailable arm is recorded as unavailable; its model
 is never replaced. `run` also refuses missing repository commits or judge
 packs. Use `--arm` and `--task` on `run` for a pilot. The full run has a separate
-`--full` flag and requires all 30 slots to be preflighted. A failed or timed-out
+`--full` flag and requires all 25 slots to be preflighted. A failed or timed-out
 run remains in the record; rerunning it requires a new evaluation ID.
 
 If a GitHub billing record can be attributed to one isolated run, attach it
 with `python3 -m agent_eval reconcile-credits --evaluation-id pilot --task IG-01
 --arm copilot-luna --billing-credits 0.36 --billing-record-id RECORD-ID`.
 The report marks a matching `totalNanoAiu / 1e9` value reconciled; a mismatch
-stays approximate. Pi and OpenCode credits remain unavailable unless a native
+stays approximate. Pi credits remain unavailable unless a native
 field or an attributable billing record is present.
 
 Agent workspaces contain exported repository trees only. The configuration,
@@ -80,6 +80,5 @@ flags or event structure, update and re-probe the adapter before a full run.
 
 The source plan is the user-provided pasted document. CLI behavior was checked
 against installed Pi/Copilot/Codex help and the official
-[OpenCode](https://dev.opencode.ai/docs/cli),
 [Claude Code](https://code.claude.com/docs/en/cli-usage), and
 [Antigravity CLI](https://www.antigravity.google/docs/cli/headless/) references.
