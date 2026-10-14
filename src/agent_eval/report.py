@@ -103,7 +103,11 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
         writer.writerows(rows)
     lines = [f"# Agent evaluation: {evaluation_id}", "", f"Information cutoff: {manifest['cutoff']}",
              "", "Five tasks per arm. Ratings and rankings are exploratory, not statistically conclusive.",
-             "", "## Arm summary", "",
+             "", "## Preflight", "", "| Arm | Status | Reason |", "|---|---|---|"]
+    for arm in arms:
+        state = manifest["preflight"][arm["id"]]
+        lines.append(f"| {arm['id']} | {state['status']} | {state.get('reason') or '—'} |")
+    lines += ["", "## Arm summary", "",
              "| Arm | Rating | Completed | Quality median | First visible seconds median (range) | First substantive seconds median (range) | Final seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |",
              "|---|---|---:|---:|---|---|---|---:|---:|---|"]
     for arm in arms:

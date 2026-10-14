@@ -55,6 +55,25 @@ class RunnerContractTests(unittest.TestCase):
             {"name": "web_search"}, {"name": "web_fetch"}]}}}]
         self.assertEqual(adapters.tool_names(events), [])
 
+    def test_antigravity_search_and_fetch_count_as_activity(self):
+        events = [{"data": {"event": "step_update", "step_update": {
+            "step_type": "tool", "state": "DONE", "tool_name": name}}}
+            for name in ("search_web", "read_url_content")]
+        self.assertEqual(adapters.tool_activity(events),
+                         {"search_calls": 1, "fetch_calls": 1, "other_tool_calls": 0})
+
+    def test_claude_permission_denial_does_not_count_as_web_activity(self):
+        events = [
+            {"data": {"type": "assistant", "message": {"role": "assistant", "content": [
+                {"type": "tool_use", "id": "search-1", "name": "WebSearch"},
+                {"type": "tool_use", "id": "fetch-1", "name": "WebFetch"}]} }},
+            {"data": {"type": "user", "message": {"role": "user", "content": [
+                {"type": "tool_result", "tool_use_id": "search-1", "is_error": True, "content": "permission denied"},
+                {"type": "tool_result", "tool_use_id": "fetch-1", "content": "fetched page"}]} }}]
+        self.assertEqual(adapters.completed_claude_tool_names(events), ["WebFetch"])
+        self.assertEqual(adapters.tool_activity(events),
+                         {"search_calls": 0, "fetch_calls": 1, "other_tool_calls": 0})
+
     def test_judge_transcript_hides_identity_and_usage(self):
         arms = [{"id": "pi-luna", "harness": "pi", "binary": "pi", "model": "github-copilot/gpt-6-luna"}]
         events = [{"index": 0, "channel": "stdout", "elapsed_seconds": 2.0,

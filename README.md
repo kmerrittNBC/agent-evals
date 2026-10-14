@@ -2,13 +2,23 @@
 
 This repository runs the five prompts in `config/tasks.yaml` through five pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
-judgment, and a traceable report for every attempted run. The first evaluation
-is 25 agent runs and up to 25 judgments. No evaluation has been run yet.
+judgment, and a traceable report for every attempted run. The first full run is
+in [`results/ig-2026-10-14-five-arm-v2/report.md`](results/ig-2026-10-14-five-arm-v2/report.md)
+(local, ignored by Git). It attempted all 25 slots; unavailable and failed
+slots remain visible in the report.
+
+A separate [Antigravity command-permission follow-up](results/ig-2026-10-14-antigravity-command-allowed/report.md)
+completed IG-01 and IG-02 after explicitly allowing commands in its sandbox.
+The remaining three tasks hit the account's individual quota and are recorded
+as failures. These follow-up results are not pooled with the first run.
 
 ## Requirements
 
 - Python 3.11 or newer; no Python packages are required.
 - The CLIs in `config/arms.yaml`, authenticated for the exact models.
+- On this Mac, source `~/.zshrc_local` before preflight or run so Antigravity
+  inherits the required certificate configuration. Do not copy its contents
+  into this repository.
 - A pinned Git checkout of each relevant Angular repository for IG-02 through
   IG-05. The runner exports the commits into temporary read-only directories.
 - Completed judge-only packs in `evidence/IG-*/pack.json`. See the template and
@@ -30,6 +40,17 @@ python3 -m agent_eval report --evaluation-id pilot
 If you need help with CLI installation, sign-in, or the Copilot search probe,
 give a separate agent the prompt in
 [`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md). It requests no evaluation run.
+
+Pi's installed `pi-web-search` extension is configured with the
+`github-copilot` provider and sends a native `web_search` request through the
+Copilot model endpoint. Pi's `pi-web-fetch` extension renders and extracts
+pages locally, then can use the configured Copilot model to process their
+contents. A working Pi search does not establish that Copilot CLI exposes its
+own `web_search` tool. In the first run, Copilot CLI 1.0.96 exposed
+`web_fetch` but not `web_search` in the live headless probe. The GitHub
+[web-search organization policy](https://docs.github.com/en/copilot/reference/supported-surfaces-for-policies)
+does not govern Copilot CLI, so its disabled setting is not an established
+cause. The CLI arm remains unavailable pending a verified tool or setup fix.
 
 `preflight --live` spends a small amount of model usage to verify the exact
 model, search, and page fetch in each headless harness, plus a schema-conforming

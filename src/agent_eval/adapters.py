@@ -5,6 +5,7 @@ the runner will use it for an evaluation.
 """
 from __future__ import annotations
 
+import json
 import os
 import shutil
 from pathlib import Path
@@ -58,6 +59,8 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
         cmd = [binary, "-p", prompt, "--model", model, "--effort", effort,
                "--output-format", "stream-json", "--verbose", "--restricted",
                "--tools", "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion",
+               "--allowedTools", "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion",
+               "--permission-mode", "dontAsk",
                "--disallowedTools", "mcp__*"]
         if session:
             cmd += ["--resume", session]
@@ -177,6 +180,34 @@ def tool_names(events: list[dict]) -> list[str]:
     return list(dict.fromkeys(names))
 
 
+def completed_claude_tool_names(events: list[dict]) -> list[str]:
+    """Only count Claude tools with a successful tool_result, not permission requests."""
+    requested: dict[str, str] = {}
+    completed: list[str] = []
+    for entry in events:
+        obj = entry.get("data")
+        if not isinstance(obj, dict):
+            continue
+        message = obj.get("message", {})
+        if not isinstance(message, dict):
+            continue
+        blocks = message.get("content", [])
+        if not isinstance(blocks, list):
+            continue
+        if obj.get("type") == "assistant":
+            for block in blocks:
+                if isinstance(block, dict) and block.get("type") == "tool_use":
+                    if isinstance(block.get("id"), str) and isinstance(block.get("name"), str):
+                        requested[block["id"]] = block["name"]
+        elif obj.get("type") == "user":
+            for block in blocks:
+                if isinstance(block, dict) and block.get("type") == "tool_result" and not block.get("is_error"):
+                    name = requested.get(block.get("tool_use_id"))
+                    if name:
+                        completed.append(name)
+    return completed
+
+
 def tool_activity(events: list[dict]) -> dict[str, int]:
     counts = {"search_calls": 0, "fetch_calls": 0, "other_tool_calls": 0}
     for entry in events:
@@ -195,9 +226,16 @@ def tool_activity(events: list[dict]) -> dict[str, int]:
                 name = step.get("tool_name")
         if not isinstance(name, str):
             continue
-        if "web_search" in name.lower() or "websearch" in name.lower():
+        if any(term in name.lower() for term in ("web_search", "websearch", "search_web")):
             counts["search_calls"] += 1
-        elif any(term in name.lower() for term in ("fetch", "browse", "webpage")):
+        elif any(term in name.lower() for term in ("fetch", "browse", "webpage", "read_url_content")):
+            counts["fetch_calls"] += 1
+        else:
+            counts["other_tool_calls"] += 1
+    for name in completed_claude_tool_names(events):
+        if name == "WebSearch":
+            counts["search_calls"] += 1
+        elif name == "WebFetch":
             counts["fetch_calls"] += 1
         else:
             counts["other_tool_calls"] += 1

@@ -59,9 +59,10 @@ def live_arm_probe(arm: dict, timeout: int) -> dict:
         except OSError as exc:
             return {"status": "unavailable", "reason": str(exc)}
         answer = adapters.final_answer(arm["harness"], result["events"])
-        names = adapters.tool_names(result["events"])
-        search = any("web_search" in name.lower() or "websearch" in name.lower() for name in names)
-        fetch = any(any(word in name.lower() for word in ("fetch", "webpage", "browse", "open_url")) for name in names)
+        names = (adapters.completed_claude_tool_names(result["events"])
+                 if arm["harness"] == "claude" else adapters.tool_names(result["events"]))
+        search = any(any(word in name.lower() for word in ("web_search", "websearch", "search_web")) for name in names)
+        fetch = any(any(word in name.lower() for word in ("fetch", "webpage", "browse", "open_url", "read_url_content")) for name in names)
         if result["exit_code"] or result["timed_out"] or not answer:
             return {"status": "unavailable", "reason": "Live probe failed or produced no answer",
                     "probe_exit_code": result["exit_code"], "probe_tool_names": names}
