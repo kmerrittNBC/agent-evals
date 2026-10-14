@@ -26,3 +26,9 @@ The five pinned arms are in `config/arms.yaml`. Please:
 
 Read `README.md` and `config/arms.yaml` first. Preserve the exact task prompts
 and model choices. Keep credentials out of Git and recorded event streams.
+
+## Local setup note
+
+Antigravity CLI sign-in on this Mac required a certificate configuration fix
+in `~/.zshrc_local`. Keep the certificate values and file contents out of this
+repository.
