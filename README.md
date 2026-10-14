@@ -68,8 +68,8 @@ runner. If an adapter has no reliable intermediate answer stream, that time
 is unavailable. The report keeps observed measurements distinct from judge
 opinions and links to all answers and judgments.
 
-Judge-only evidence is never passed to agent sessions. Do not commit private
-repository facts or security notes without reviewing repository access.
+Judge-only evidence is never passed to agent sessions. Review repository access
+before sharing or pushing private repository facts and security notes.
 
 ## Implementation notes
 
