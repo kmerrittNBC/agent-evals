@@ -1,0 +1,32 @@
+{
+  "source": "User-supplied screenshot of GitHub personal Billing and licensing > AI usage, confirmed by the account holder as evaluation-only Copilot usage",
+  "source_image": "source.png",
+  "source_image_sha256": "4718b61071bffa47deb58f6763a51b5776a4e300695e3abf7692f8f83a62052e",
+  "period_start": "2026-10-01",
+  "period_end": "2026-10-15",
+  "scope": "personal account; all Copilot evaluation activity in the displayed period",
+  "plan_displayed": "Copilot Pro Plus",
+  "included_credit_allowance_displayed": 7000,
+  "included_credits_used_rounded_display": 418,
+  "additional_usage_usd_displayed": 0,
+  "models": [
+    {
+      "model": "GPT-6 Sol",
+      "included_ai_credits": 367.98,
+      "included_usage_usd_displayed": 3.68
+    },
+    {
+      "model": "GPT-6 Luna",
+      "included_ai_credits": 50.32,
+      "included_usage_usd_displayed": 0.50
+    }
+  ],
+  "derived": {
+    "model_credits_sum": 418.30,
+    "sol_to_luna_credit_ratio": 7.3128,
+    "sol_share_of_model_credits": 0.8797,
+    "assumed_luna_to_sol_use_count_ratio": 2,
+    "assumption_normalized_sol_to_luna_credit_intensity_ratio": 14.6256
+  },
+  "attribution_limit": "The screenshot groups all Copilot activity by model. It includes evaluation probes and any pilot or rerun usage; it cannot allocate Luna credits between Pi and OpenCode or assign credits to individual attempts. The normalized ratio assumes 2 Luna uses per Sol use across all activity; only the scored attempt mix is known to be 2:1."
+}
