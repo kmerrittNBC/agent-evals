@@ -1,168 +1,87 @@
 # Coding agent capability evaluation
 
-The three columns are information gathering (IG), defined repository updates
-(DU), and architectural planning/refactoring (AR). The task criteria are in
-[`docs/repo-task-design.md`](docs/repo-task-design.md). IG remains in
-`config/tasks.yaml`; the two new columns are in
-`config/defined-updates.yaml` and `config/architecture.yaml`.
+This repository compares **model plus coding-agent pairs** on the work a development team might assign an agent. It evaluates three task categories:
 
-This repository runs the five prompts in `config/tasks.yaml` through four pinned
-model/harness arms. It keeps the agent transcript, a fresh blinded Codex
-judgment, and a traceable report for every attempted run. The first full run is
-in [`results/ig-2026-10-14-five-arm-v2/report.md`](results/ig-2026-10-14-five-arm-v2/report.md)
-(local, ignored by Git). It used the earlier, broader prompts and evidence
-packs. Its scores should not be pooled with runs of the current prompts. It
-attempted all 25 slots; unavailable and failed slots remain visible in the
-report. Use a new evaluation ID for the current five prompts.
+| Category | What the agent does | Tasks |
+|---|---|---:|
+| Information gathering (IG) | Researches several sources or pinned repositories and synthesizes an answer. | 5 |
+| Defined repository updates (DU) | Changes code against a prepared failing check and nearby regression checks. | 5 |
+| Architectural planning and refactoring (AR) | Produces a concrete implementation plan (four tasks) or makes a bounded refactor (one task). | 5 |
 
-A separate [Antigravity command-permission follow-up](results/ig-2026-10-14-antigravity-command-allowed/report.md)
-completed IG-01 and IG-02 after explicitly allowing commands in its sandbox.
-The remaining three tasks hit the account's individual quota and are recorded
-as failures. These follow-up results are not pooled with the first run.
-Antigravity is inactive in the current configuration; its adapter and historical
-results remain available if it is added back later.
+The four configured pairs are **Pi + GPT-6 Luna**, **Pi + GPT-6 Sol**, **OpenCode + GPT-6 Luna**, and **Claude Code + Opus 5.5**. Each pair receives the same prompt and repository revision for a task, in a fresh session with a 15-minute limit. A full run is **15 tasks × 4 pairs = 60 initial attempts**. The study measures those first attempts; it does not measure improvement after follow-up prompts or graphical-interface usability.
 
-## Repository task columns
+The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-10-15.md) discusses the account-level Sol/Luna usage comparison and its limits.
 
-DU has five code tasks: two Go todo API changes and three runner validation or
-integrity fixes. Each has a prepared test that fails at the frozen commit, an
-exact red/green command, and a nearby regression command. AR has five tasks
-across RelayView, agent-harness-evals, data-analysis-agent, and this runner:
-four request a concrete architecture plan and one requests a bounded code
-refactor. Each task record freezes its prompt, deliverable, commit, tools,
-time limit, setup and acceptance context. Judge packs are under
-`evidence/DU-*/` and `evidence/AR-*/`.
-The verified red and green exit codes are recorded in
-`checks/baseline-results.json`; reference patches are not stored.
+**Read the results:** [Executive report](docs/executive-report-2026-10-15.md) · [IG run](results/local-repos-20261015-122649/report.md) · [adjudicated DU run](results/du-2026-10-15-adjudicated/report.md) · [AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain what each category is meant to represent. Earlier pilots and excluded-arm probes remain under `results/`; do not pool their scores with these three runs.
 
-Use a fresh evaluation ID for each column. For example, DU:
+## Run all 15 tasks
+
+Run the commands below from this repository's root. **Use three new evaluation IDs**, one per category: `--full` runs five tasks against all four configured pairs, or 20 slots per ID. Replace the example absolute repository paths with your local checkouts. The checkouts must contain the frozen commits named in the DU and AR task files; they do not need to be checked out at those commits. IG pins the source checkouts' current `HEAD`, which must agree with its judge packs. Choose a timezone-qualified information cutoff appropriate to the evidence you will judge.
 
 ```sh
-python3 -m agent_eval preflight --column du --evaluation-id du-pilot \
-  --cutoff 2026-10-15T00:00:00-04:00 \
-  --repo lit-go-todos=/home/anodyine/Projects/lit-go-todos \
-  --repo agent-evals=/home/anodyine/Projects/agent-evals
-python3 -m agent_eval preflight --column du --evaluation-id du-pilot --live
-python3 -m agent_eval run --evaluation-id du-pilot --arm pi-luna --task DU-01
-python3 -m agent_eval judge --evaluation-id du-pilot --arm pi-luna --task DU-01
-python3 -m agent_eval report --evaluation-id du-pilot
+RELAYVIEW_REPO=/absolute/path/to/relayview
+HARNESS_EVALS_REPO=/absolute/path/to/agent-harness-evals
+TODOS_REPO=/absolute/path/to/lit-go-todos
+DATA_ANALYSIS_REPO=/absolute/path/to/data-analysis-agent
+AGENT_EVALS_REPO="$PWD"
+CUTOFF=2026-10-15T00:00:00-04:00
+IG_ID=ig-new-run
+DU_ID=du-new-run
+AR_ID=ar-new-run
 ```
 
-For AR, pass `--column ar` and `--repo` assignments for `relayview`,
-`agent-harness-evals`, `data-analysis-agent`, and `agent-evals`. A full
-column run uses `run --evaluation-id ID --full` after live preflight; it has
-20 arm/task slots. Do not reuse a pilot ID for a full run. The existing IG
-manifests and five IG prompts remain valid and separate.
+For each category, the first `preflight` records task and repository pins. The second runs live model, search/fetch, writable-tool (DU/AR), and judge probes. Inspect its reported arm, task, evidence, and judge statuses before starting `run --full`. Live probes consume model usage. Use a different ID if you repeat a run; an existing attempt cannot be overwritten.
 
-DU and AR tasks use a fresh detached Git worktree at the task's frozen commit,
-even if the source checkout has uncommitted work or has advanced to a newer
-HEAD. The runner never checks out or resets the active source tree. It copies
-prepared DU checks into the disposable worktree, runs the frozen red command
-before live work, grants editing tools for these columns, and runs green and
-regression checks after each attempt in a second detached worktree. It replays
-the saved code patch there with pristine prepared checks, so formatting or
-editing a prepared check cannot change the evaluator's tests. It saves the
-patch, untracked files, separately archived prepared-check edits, replayed
-check results, events, answer and metrics under `results/ID/runs/` before
-removing the worktrees. The judge sees the task pack, answer, code patch,
-candidate test edits and pristine-check results in a fresh blinded process.
-Bubblewrap is required for these columns: agent
-processes see the active project tree read-only, the disposable worktree and
-run output writable, and their normal home for CLI authentication. The live
-probe verifies file-writing access inside that boundary. This protects active
-project checkouts from writes by the agent process; it is not a general
-container isolation boundary for other writable home files.
-
-## Requirements
-
-- Python 3.11 or newer; no Python packages are required.
-- The CLIs in `config/arms.yaml`, authenticated for the exact models.
-- Pinned Git checkouts of RelayView and agent-harness-evals for IG-02 through
-  IG-05. The runner exports the commits into temporary read-only directories.
-- Completed judge-only packs in `evidence/IG-*/pack.json`. See the template and
-  `evidence/README.md`. These are intentionally absent from agent workspaces.
-- A confirmed information cutoff (`--cutoff`, ISO 8601 with timezone).
-
-Run `python3 -m agent_eval --help` for commands. A typical sequence is:
+### 1. Information gathering: IG-01 through IG-05
 
 ```sh
-python3 -m agent_eval preflight --evaluation-id pilot --cutoff 2026-10-15T00:00:00-04:00 \
-  --repo relayview=/home/anodyine/Projects/relayview \
-  --repo agent-harness-evals=/home/anodyine/Projects/agent-harness-evals
-python3 -m agent_eval preflight --evaluation-id pilot --live
-python3 -m agent_eval run --evaluation-id pilot --full
-python3 -m agent_eval judge --evaluation-id pilot
-python3 -m agent_eval report --evaluation-id pilot
+python3 -m agent_eval preflight --column ig --evaluation-id "$IG_ID" --cutoff "$CUTOFF" \
+  --repo "relayview=$RELAYVIEW_REPO" \
+  --repo "agent-harness-evals=$HARNESS_EVALS_REPO"
+python3 -m agent_eval preflight --column ig --evaluation-id "$IG_ID" --live
+python3 -m agent_eval run --evaluation-id "$IG_ID" --full
+python3 -m agent_eval judge --evaluation-id "$IG_ID"
+python3 -m agent_eval report --evaluation-id "$IG_ID"
 ```
 
-If you need help with CLI installation or sign-in,
-give a separate agent the prompt in
-[`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md). It requests no evaluation run.
+### 2. Defined repository updates: DU-01 through DU-05
 
-Pi's installed `pi-web-search` extension is configured with the
-`github-copilot` provider and sends a native `web_search` request through the
-Copilot model endpoint. Pi's `pi-web-fetch` extension renders and extracts
-pages locally, then can use the configured Copilot model to process their
-contents. The standalone Copilot CLI arm was removed after its headless probe
-could not use web search. Pi still uses the Copilot-backed Luna and Sol models.
+```sh
+python3 -m agent_eval preflight --column du --evaluation-id "$DU_ID" --cutoff "$CUTOFF" \
+  --repo "lit-go-todos=$TODOS_REPO" \
+  --repo "agent-evals=$AGENT_EVALS_REPO"
+python3 -m agent_eval preflight --column du --evaluation-id "$DU_ID" --live
+python3 -m agent_eval run --evaluation-id "$DU_ID" --full
+python3 -m agent_eval judge --evaluation-id "$DU_ID"
+python3 -m agent_eval report --evaluation-id "$DU_ID"
+```
 
-The OpenCode arm was readmitted (ADR 0002) after OpenCode v2 shipped a keyless
-`tinyfish` search provider: OpenCode's own hosted endpoint, requiring no
-account, key, or billing. The adapter pins that provider through a per-process
-`OPENCODE_CONFIG_CONTENT` config (deny-by-default permissions allowing only
-read, glob, grep, websearch, webfetch, and question) and runs every invocation
-with `--standalone` so a private server inherits that config instead of
-attaching to a background service.
+### 3. Architectural planning and refactoring: AR-01 through AR-05
 
-`preflight --live` spends a small amount of model usage to verify the exact
-model, search, and page fetch in each headless harness, plus a schema-conforming
-Codex judgment. The runner refuses `run` until all provisioned arms have
-passed those probes. An unavailable arm is recorded as unavailable; its model
-is never replaced. `run` also refuses missing repository commits or judge
-packs. Use `--arm` and `--task` on `run` for a pilot. The full run has a separate
-`--full` flag and requires all 20 slots to be preflighted. A failed or timed-out
-run remains in the record; rerunning it requires a new evaluation ID.
-The stopped four-arm evaluation has a recorded run plan; start a new evaluation
-ID for the current four-arm configuration.
+```sh
+python3 -m agent_eval preflight --column ar --evaluation-id "$AR_ID" --cutoff "$CUTOFF" \
+  --repo "relayview=$RELAYVIEW_REPO" \
+  --repo "agent-harness-evals=$HARNESS_EVALS_REPO" \
+  --repo "data-analysis-agent=$DATA_ANALYSIS_REPO" \
+  --repo "agent-evals=$AGENT_EVALS_REPO"
+python3 -m agent_eval preflight --column ar --evaluation-id "$AR_ID" --live
+python3 -m agent_eval run --evaluation-id "$AR_ID" --full
+python3 -m agent_eval judge --evaluation-id "$AR_ID"
+python3 -m agent_eval report --evaluation-id "$AR_ID"
+```
 
-If a GitHub billing record can be attributed to one isolated run, attach it
-with `python3 -m agent_eval reconcile-credits --evaluation-id pilot --task IG-01
---arm pi-luna --billing-credits 0.36 --billing-record-id RECORD-ID`.
-The report marks a matching `totalNanoAiu / 1e9` value reconciled; a mismatch
-stays approximate. Pi credits remain unavailable unless a native
-field or an attributable billing record is present.
+Each report is written to `results/ID/report.md`, with a CSV summary, manifest, run plan, and per-attempt artifacts under `results/ID/`. To try one slot before a full run, use a **separate pilot ID** and filter by both task and pair, for example `python3 -m agent_eval run --evaluation-id ig-pilot --task IG-01 --arm pi-luna` after preflighting that ID. Do not reuse the pilot ID for `--full`.
 
-Agent workspaces contain exported repository trees only. The configuration,
-judge packs, and results stay outside those workspaces. The runner verifies
-their contents did not change after each run. The tool allowlists further limit
-file editing. This is an integrity check, not an OS-level security boundary;
-run untrusted agents in a separate sandbox if that guarantee is required.
-Uncommitted work is never exported; the manifest records whether each source
-checkout was dirty.
+## Requirements and run behavior
 
-## Measurements and review
+- Python 3.11 or newer and Git. The Python runner uses the standard library; repository-specific checks also need their declared toolchains and dependencies (for example, Go for the todo API tasks).
+- Authenticated `pi`, `opencode`, `claude`, and `codex` CLIs with access to the exact models in [`config/arms.yaml`](config/arms.yaml). The judge uses `codex exec` with GPT-6 Sol. [`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md) is a separate installation/sign-in handoff prompt.
+- **Linux with Bubblewrap (`bwrap`) for DU and AR.** Their writable agent processes run in disposable Git worktrees behind a Bubblewrap boundary. The current runner marks those arms unavailable when `bwrap` is missing; a macOS host cannot complete the DU/AR commands above as written. IG uses read-only repository exports and does not require `bwrap`.
+- Complete judge-only [`evidence/IG-*`, `evidence/DU-*`, and `evidence/AR-*`](evidence/README.md) packs. The runner checks them against pinned commits and refuses changed packs after live preflight. Keep source excerpts and timestamps consistent with the chosen cutoff.
+- Working web search and page fetch for each headless agent. Pi uses `pi-web-search` through GitHub Copilot and `pi-web-fetch`; OpenCode uses its pinned `tinyfish` search route and `webfetch`; Claude Code uses `WebSearch` and `WebFetch`. The live probe verifies that both tools were actually called. The standalone Copilot CLI and Antigravity CLI are not among the current four pairs; the executive report explains their exclusion.
 
-Each `events.jsonl` entry has a monotonic offset from run start and the raw
-harness event. `metrics.json` identifies the source and confidence of every
-usage field. The judge receives anonymized events and answer only; it cannot
-see the arm name, raw provider billing fields, or other runs. The first
-substantive answer event is judged, then its timestamp is computed by the
-runner. If an adapter has no reliable intermediate answer stream, that time
-is unavailable. The report keeps observed measurements distinct from judge
-opinions and links to all answers and judgments.
+DU and AR use detached worktrees at their frozen commits, leaving active checkouts untouched. DU preflight confirms that the prepared check is red. After each code attempt, the runner replays the saved patch in another clean worktree and runs the prepared and regression checks with pristine evaluator files. It saves patches, untracked files, prepared-check edits, check results, events, answers, and metrics before removing the worktrees. Bubblewrap protects the active project tree from agent writes; it is not a general isolation boundary for all home-directory files. IG exports pinned repository trees read-only. Uncommitted changes in a source checkout are not exported.
 
-Judge-only evidence is never passed to agent sessions. Review repository access
-before sharing or pushing private repository facts and security notes.
+The runner records unavailable and failed slots instead of substituting a different model. The blinded judge sees a task-specific evidence pack and the saved answer; for code tasks it also sees the patch and validation results. The judge does not receive the pair name, raw billing fields, or other attempts. Review repository access and sensitive content before publishing evidence packs or run artifacts.
 
-## Implementation notes
-
-The `.yaml` files use JSON syntax, which is valid YAML; Python's standard
-`json` module reads them without an added dependency. CLI commands are built
-in `src/agent_eval/adapters.py` and checked by preflight. If a vendor changes
-flags or event structure, update and re-probe the adapter before a full run.
-
-The source plan is the user-provided pasted document. CLI behavior was checked
-against installed Pi/Copilot/Codex help and the official
-[Claude Code](https://code.claude.com/docs/en/cli-usage),
-[OpenCode](https://opencode.ai/v2/docs/websearch), and
-[Antigravity CLI](https://www.antigravity.google/docs/cli/headless/) references.
+For an isolated Copilot run with an attributable GitHub billing record, see `python3 -m agent_eval reconcile-credits --help`. A matching credit record can be attached to that single task/pair; account-level usage alone cannot assign credits to individual attempts. The task files under `config/` use JSON syntax valid as YAML, so no YAML package is required. Run `python3 -m agent_eval --help` for the complete CLI command list.
