@@ -31,6 +31,24 @@ def pi_binary_env() -> dict[str, str]:
 
 def environment(arm: dict, workspace: Path) -> dict[str, str]:
     env = pi_binary_env() if arm["harness"] == "pi" else os.environ.copy()
+    if arm["harness"] == "opencode":
+        # OpenCode v2's server process reads OPENCODE_CONFIG_CONTENT, keeping this
+        # per-process and independent from the user's global config. Permissions
+        # are deny-by-default (last matching rule wins; unmatched actions "ask",
+        # which headless runs auto-reject). tinyfish is the vendor-hosted keyless
+        # search provider: no account, key, or billing.
+        env["OPENCODE_CONFIG_CONTENT"] = json.dumps({
+            "permissions": [
+                {"action": "*", "resource": "*", "effect": "deny"},
+                {"action": "read", "resource": "*", "effect": "allow"},
+                {"action": "glob", "resource": "*", "effect": "allow"},
+                {"action": "grep", "resource": "*", "effect": "allow"},
+                {"action": "websearch", "resource": "*", "effect": "allow"},
+                {"action": "webfetch", "resource": "*", "effect": "allow"},
+                {"action": "question", "resource": "*", "effect": "allow"},
+            ],
+            "websearch": {"provider": arm.get("search_provider", "tinyfish")},
+        })
     env["AGENT_EVAL_WORKSPACE"] = str(workspace)
     return env
 
@@ -42,7 +60,12 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
     model = arm["model"]
     effort = arm["reasoning"]
     if harness == "pi":
-        cmd = [binary, "--print", "--mode", "json", "--model", model,
+        # Explicit --provider/--model instead of "provider/model" in --model: a
+        # default provider profile (~/.config/pi/provider-profile) otherwise
+        # hijacks unresolvable combined references.
+        provider, _, model_id = model.partition("/")
+        cmd = [binary, "--print", "--mode", "json",
+               "--provider", provider, "--model", model_id,
                "--thinking", effort, "--tools", "read,grep,find,ls,web_search,web_fetch",
                "--no-context-files", "--no-skills", "--no-approve",
                "--session", str(run_dir / "pi-session.jsonl")]
@@ -55,6 +78,16 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
                "-C", str(workspace), "--session-id", session or run_dir.name,
                "--available-tools=web_search,web_fetch,view,grep,glob,ask_user"]
         return cmd
+    if harness == "opencode":
+        # --standalone forces a private server that inherits this process's
+        # OPENCODE_CONFIG_CONTENT instead of attaching to a user's background
+        # service with unrelated config. v2 pins the effort variant to the model
+        # string as provider/model#variant.
+        cmd = [binary, "run", "--standalone", "--format", "json",
+               "--model", f"{model}#{effort}"]
+        if session:
+            cmd += ["--session", session]
+        return cmd + [prompt]
     if harness == "claude":
         cmd = [binary, "-p", prompt, "--model", model, "--effort", effort,
                "--output-format", "stream-json", "--verbose", "--restricted",
@@ -88,6 +121,10 @@ def event_text(harness: str, obj: object) -> str:
         data = obj.get("data", {})
         if obj.get("type") in ("assistant.message_delta", "assistant.message"):
             return data.get("deltaContent") or data.get("content") or ""
+    if harness == "opencode":
+        part = obj.get("part", {})
+        if obj.get("type") == "text":
+            return part.get("text", "") if isinstance(part, dict) else ""
     if harness == "claude":
         if obj.get("type") == "assistant":
             return _content_text(obj.get("message", {}).get("content"))
@@ -134,7 +171,7 @@ def final_answer(harness: str, events: list[dict]) -> str:
 
 def session_id(harness: str, events: list[dict]) -> str | None:
     keys = {"pi": ("sessionId",), "copilot": ("sessionId", "session_id"),
-            "claude": ("session_id",),
+            "opencode": ("sessionID", "sessionId"), "claude": ("session_id",),
             "antigravity": ("conversation_id",)}[harness]
     for entry in events:
         obj = entry.get("data")
@@ -155,7 +192,8 @@ def tool_names(events: list[dict]) -> list[str]:
         if not isinstance(obj, dict):
             continue
         event_type = str(obj.get("type", obj.get("event", ""))).lower()
-        if any(term in event_type for term in ("tool_execution_start", "tool.execution_start", "tool_call", "function", "question")):
+        if any(term in event_type for term in ("tool_execution_start", "tool.execution_start",
+                                               "tool_call", "tool_use", "function", "question")):
             for container in (obj, obj.get("data"), obj.get("part"), obj.get("tool_call"),
                               obj.get("toolCall"), obj.get("step_update")):
                 if isinstance(container, dict):
@@ -216,7 +254,7 @@ def tool_activity(events: list[dict]) -> dict[str, int]:
             continue
         kind = str(obj.get("type", obj.get("event", "")))
         name = None
-        if kind in ("tool_execution_start", "tool.execution_start", "tool"):
+        if kind in ("tool_execution_start", "tool.execution_start", "tool", "tool_use"):
             container = obj.get("data") or obj.get("part") or obj
             if isinstance(container, dict):
                 name = container.get("toolName") or container.get("tool") or container.get("name")
@@ -257,6 +295,16 @@ def usage(harness: str, events: list[dict], run_dir: Path) -> dict:
             return {"classification": "measured", "source": "copilot --usage-output-file", "raw": raw}
         except (OSError, json.JSONDecodeError):
             pass
+    if harness == "opencode":
+        # v2 reports cost and tokens on each step_finish part rather than a
+        # usage object; the last one summarizes the run.
+        for entry in reversed(events):
+            obj = entry.get("data")
+            if isinstance(obj, dict) and obj.get("type") == "step_finish":
+                part = obj.get("part", {})
+                if isinstance(part, dict) and ("tokens" in part or "cost" in part):
+                    return {"classification": "measured", "source": "opencode step_finish",
+                            "raw": {key: part[key] for key in ("tokens", "cost") if key in part}}
     for entry in reversed(events):
         obj = entry.get("data")
         if not isinstance(obj, dict):
