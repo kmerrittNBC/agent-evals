@@ -1,0 +1,30 @@
+{
+  "method": "Pinned commit + saved source patch + pristine prepared check; commands executed directly in isolated Git worktree. Last command for DU-04/claude-opus is an additional collision probe.",
+  "results": [
+    {
+      "command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.004s\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "go",
+        "test",
+        "./..."
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.006s\n",
+      "stderr": "",
+      "timed_out": false
+    }
+  ]
+}

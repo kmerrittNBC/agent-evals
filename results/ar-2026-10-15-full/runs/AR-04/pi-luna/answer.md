@@ -1,0 +1,5 @@
+Created the implementation plan at [`docs/speculative/plans/2026-08-21-durable-question-clarification-runs.md`](data-analysis-agent/docs/speculative/plans/2026-08-21-durable-question-clarification-runs.md). It documents the current API, in-memory run storage and Lit state flow; compares backend-, frontend- and Tauri-owned storage; and recommends FastAPI-owned SQLite with a lightweight frontend run locator and a sidecar lifecycle that lets active runs outlive the desktop window.
+
+The plan specifies run IDs and idempotency, status transitions and crash recovery, SSE reconnection, error handling, migration and rollback, privacy boundaries, and backend, frontend and desktop tests. No code was changed.
+
+**Checks:** the focused run-store tests passed (7 tests), and the plan has no trailing whitespace. Full backend tests could not complete because `pytest` and FastAPI are unavailable; the standard-library run hit the same missing FastAPI dependency when importing `test_main`. Frontend tests could not run because Vitest and `node_modules` are absent.

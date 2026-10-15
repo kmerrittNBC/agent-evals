@@ -1,0 +1,58 @@
+{
+  "task_id": "AR-02",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:09:12.847251+00:00",
+  "elapsed_seconds": 208.604059,
+  "answer": "## Decision\n\n**Fail closed on standalone research MCP sidecar loss.** Close the bridge/client, mark the research trial interrupted, and retain its directory, `started` marker, and compact evidence. Do not restart under the same trial identity or retry an uncertain call.\n\nThe current standalone sidecar uses a `VolatileWorkLedger`; restarting it would create fresh allowance. Its exclusive `started` marker prevents that. The owner-managed research-trial path is different: its SQLite ledger durably reserves work and preserves uncertain maxima, but it is a supervised broker over private pipes—not restart support for the standalone MCP sidecar.\n\nA safe same-trial restart is possible only as a later, explicitly approved design backed by durable owner accounting, generation fencing, and a new client/service identity. A reconnect loop or restoring an in-memory quota snapshot is not sufficient.\n\n## Plan recorded\n\nAdded [`docs/speculative/research-mcp-sidecar-recovery.md`](relayview/docs/speculative/research-mcp-sidecar-recovery.md) with the decision, contract comparison, staged tests and implementation gates, and rollback. Added a pointer in [`docs/authoritative/research-mcp.md`](relayview/docs/authoritative/research-mcp.md); it explicitly leaves the current fail-closed contract unchanged.\n\nThe safe-restart proposal requires:\n\n- **No quota reset:** use the owner’s durable ledger; retain maximum reservations for uncertain work; never replay an uncertain provider effect. An explicit retry is a new charged call.\n- **No credential exposure:** reacquire credentials only through the trusted encrypted source and a fresh bounded inherited descriptor. Keep them out of argv, environment, agent workspaces, MCP traffic, logs, and durable evidence.\n- **No stale client attaching to a new session:** give each service generation a unique private socket path and immutable client configuration; fence old generations and reject stale identity in a versioned handshake. Do not reuse or repoint the old socket path.\n- **Rollback to interruption:** disable restart and preserve ledger state, markers, and evidence. Never roll back accounting or continue the interrupted trial under a different artifact.\n\n## Checks\n\n- Focused MCP and owner-trial tests: **50 passed** across 4 files.\n- `npm run docs:references`: **passed**.\n- `git diff --check`: **passed**.\n- `npm run typecheck`: **failed** on four `TS2344` errors in `node_modules/saxes/saxes.d.ts`. No project-source error was reported. Installation also warned that this environment’s Node 24.11.0 is below some dependencies’ declared Node 24.15.0 minimum.\n\nNo runtime code or recovery behavior was changed; the restart design remains a proposal.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 811,
+      "cacheRead": 94177,
+      "cacheWrite": 676,
+      "reasoning": 254,
+      "totalTokens": 95667,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.0004055,
+        "cacheRead": 0.00094177,
+        "cacheWrite": 8.45e-05,
+        "total": 0.00143207
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 202.797181,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 208.604059,
+      "started_at": "2026-10-15T18:09:12.847251+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 43
+  },
+  "changes": {
+    "tracked_patch_bytes": 970,
+    "untracked_paths": [
+      "docs/speculative/research-mcp-sidecar-recovery.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

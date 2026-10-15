@@ -1,0 +1,34 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "Accurately describes authority verification, durable admission, read-only retries, exact merged observation, and the limits of provider-side guarantees."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "Answers every requested part, including timeout, states, conflicts, concurrent admission, and test scope."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "Cites the pinned coordinator, store, migration, contract, adapter, and relevant tests with specific locations."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "Correctly separates coordinator dispatch behavior from provider execution and production behavior."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Treats an unresolved timeout as unknown and qualifies what the tests can establish."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "Gives the direct answer first, then a clear trace of admission, dispatch, reconciliation, and evidence."
+    }
+  },
+  "overall_quality": 5,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [],
+  "first_substantive_event_index": 1249
+}

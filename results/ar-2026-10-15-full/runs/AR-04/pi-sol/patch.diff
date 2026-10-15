@@ -1,0 +1,9 @@
+diff --git a/docs/speculative/plans/README.md b/docs/speculative/plans/README.md
+index d5e5821..708d5e2 100644
+--- a/docs/speculative/plans/README.md
++++ b/docs/speculative/plans/README.md
+@@ -14,3 +14,4 @@ Use dated plan files so older plans remain available for comparison.
+ - [2026-05-21-mvp-implementation-schedule.md](2026-05-21-mvp-implementation-schedule.md): aggressive lower-bound schedule from vertical-slice review through MVP hardening.
+ - [2026-05-26-python-backend-language-validation.md](2026-05-26-python-backend-language-validation.md): bakeoff plan for deciding between Python-centered orchestration and Go orchestration with Python validation/execution workers.
+ - [2026-06-08-go-hybrid-backend-migration.md](2026-06-08-go-hybrid-backend-migration.md): speculative migration plan for a Go local backend control plane with Python analysis harnesses.
++- [2026-10-15-durable-question-run-boundary.md](2026-10-15-durable-question-run-boundary.md): proposed local SQLite ownership, API/state contract, restart recovery, migration, tests, and rollback for question runs.

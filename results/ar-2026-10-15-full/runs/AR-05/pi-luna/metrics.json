@@ -1,0 +1,109 @@
+{
+  "task_id": "AR-05",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:56:17.354977+00:00",
+  "elapsed_seconds": 178.906841,
+  "answer": "Implemented in `./agent-evals`:\n\n- Added `src/agent_eval/workspaces.py` to own pinned snapshot provisioning and temporary workspace cleanup.\n- Added a `workspace_provider` seam to `run_one`, and extracted the harness prompt/continuation and event handling into `capture_conversation` in `core.py`.\n- Added tests for workspace lifecycle, provider injection, and the clarification, continuation, event, and answer contracts.\n\nA future writable-worktree provider could create a worktree at the pinned commits, yield its path, and remove it on context exit; conversation capture would use it unchanged. The current runner still treats workspace modifications as failures, so accepting agent writes would also require changing that integrity policy.\n\nNo `AGENTS.md` was found. Task prompts, arm models, and output schema were not changed.\n\nChecks passed: `python3 -m unittest discover -s tests -v` (18 tests), `python3 -m compileall -q src tests`, and `git diff --check`.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 208,
+      "cacheRead": 42689,
+      "cacheWrite": 761,
+      "reasoning": 0,
+      "totalTokens": 43661,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.000104,
+        "cacheRead": 0.00042689000000000003,
+        "cacheWrite": 9.5125e-05,
+        "total": 0.0006263149999999999
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 176.442302,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 178.906841,
+      "started_at": "2026-10-15T18:56:17.354977+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 35
+  },
+  "changes": {
+    "tracked_patch_bytes": 16117,
+    "untracked_paths": [
+      "src/agent_eval/workspaces.py"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-94u5_f9i/validation",
+        "/tmp/agent-eval-94u5_f9i/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/pi-luna",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/pi-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.026s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

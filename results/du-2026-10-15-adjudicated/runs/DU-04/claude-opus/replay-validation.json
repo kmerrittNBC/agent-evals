@@ -1,0 +1,46 @@
+{
+  "method": "Pinned commit + saved source patch + pristine prepared check; commands executed directly in isolated Git worktree. Last command for DU-04/claude-opus is an additional collision probe.",
+  "results": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".................\n----------------------------------------------------------------------\nRan 17 tests in 0.016s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "python3",
+        "-c",
+        "import tempfile\nfrom pathlib import Path\nfrom src.agent_eval.core import tree_digest\nwith tempfile.TemporaryDirectory() as temp:\n root=Path(temp);(root/'a').write_text('bc');(root/'ab').write_text('c');link=root/'link';link.symlink_to('a');before=tree_digest(root);link.unlink();link.symlink_to('ab');after=tree_digest(root);assert before!=after, 'retargeting valid link a -> ab left digest unchanged'\n"
+      ],
+      "exit_code": 1,
+      "stdout": "",
+      "stderr": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\n    root=Path(temp);(root/'a').write_text('bc');(root/'ab').write_text('c');link=root/'link';link.symlink_to('a');before=tree_digest(root);link.unlink();link.symlink_to('ab');after=tree_digest(root);assert before!=after, 'retargeting valid link a -> ab left digest unchanged'\n                                                                                                                                                                                                              ^^^^^^^^^^^^^\nAssertionError: retargeting valid link a -> ab left digest unchanged\n",
+      "timed_out": false
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..8b95ce6 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -66,6 +66,8 @@ def validate_repos(repo_args: list[str]) -> dict[str, dict]:
+         name, value = item.split("=", 1)
+         if name not in required or not Path(value).is_absolute():
+             raise ValueError(f"Invalid repository assignment: {item}")
++        if name in repos:
++            raise ValueError(f"Duplicate --repo assignment for {name}")
+         path = Path(value).resolve()
+         if not path.is_dir():
+             raise ValueError(f"Repository not found: {path}")
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..77a285d 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -7,7 +7,8 @@ from unittest.mock import patch
+ 
+ from src.agent_eval import adapters
+ from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
+-                                 static_arm_check, tree_digest, validate_cutoff)
++                                 static_arm_check, tree_digest, validate_cutoff,
++                                 validate_repos)
+ from src.agent_eval.judge import anonymized_transcript, validate_judgment
+ from src.agent_eval.preflight import live_arm_probe
+ from src.agent_eval.report import _credit
+@@ -35,6 +36,28 @@ class RunnerContractTests(unittest.TestCase):
+             (workspace / "relayview/package.json").write_text("changed")
+             self.assertNotEqual(before, tree_digest(workspace))
+ 
++    def test_repo_assignments_reject_repeated_names_and_pin_single_assignment(self):
++        with tempfile.TemporaryDirectory() as temp:
++            repos = []
++            for name in ("first", "second"):
++                repo = Path(temp) / name
++                repo.mkdir()
++                subprocess.run(["git", "init", "-q", str(repo)], check=True)
++                subprocess.run(["git", "-C", str(repo), "-c", "user.name=Eval",
++                                "-c", "user.email=eval@example.test", "commit", "-qm",
++                                "pin", "--allow-empty"], check=True)
++                repos.append(repo)
++            commit = subprocess.check_output(
++                ["git", "-C", str(repos[0]), "rev-parse", "HEAD"], text=True).strip()
++            assignment = f"relayview={repos[0]}"
++            self.assertEqual(validate_repos([assignment]), {
++                "relayview": {"path": str(repos[0]), "commit": commit,
++                              "working_tree_dirty": False}})
++            for second in (assignment, f"relayview={repos[1]}"):
++                with self.subTest(second=second), self.assertRaisesRegex(
++                        ValueError, "Duplicate --repo assignment for relayview"):
++                    validate_repos([assignment, second])
++
+     def test_no_usage_is_not_zero_credits(self):
+         self.assertEqual(_credit({"classification": "unavailable", "raw": None}), (None, "unavailable"))
+         self.assertEqual(_credit({"classification": "measured", "raw": {"totalNanoAiu": 100}}), (1e-07, "estimated"))

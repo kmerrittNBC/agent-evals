@@ -1,0 +1,69 @@
+[
+  {
+    "task_id": "DU-01",
+    "arm_id": "pi-luna",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "collision_check": null
+  },
+  {
+    "task_id": "DU-03",
+    "arm_id": "opencode-luna",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "collision_check": null
+  },
+  {
+    "task_id": "DU-04",
+    "arm_id": "pi-luna",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "collision_check": null
+  },
+  {
+    "task_id": "DU-05",
+    "arm_id": "pi-luna",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "collision_check": null
+  },
+  {
+    "task_id": "DU-05",
+    "arm_id": "opencode-luna",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0
+    ],
+    "collision_check": null
+  },
+  {
+    "task_id": "DU-04",
+    "arm_id": "claude-opus",
+    "patch_applied": true,
+    "frozen_checks_intact": true,
+    "exit_codes": [
+      0,
+      0,
+      1
+    ],
+    "collision_check": "Traceback (most recent call last):\n  File \"<string>\", line 5, in <module>\n    root=Path(temp);(root/'a').write_text('bc');(root/'ab').write_text('c');link=root/'link';link.symlink_to('a');before=tree_digest(root);link.unlink();link.symlink_to('ab');after=tree_digest(root);assert before!=after, 'retargeting valid link a -> ab left digest unchanged'\n                                                                                                                                                                                                              ^^^^^^^^^^^^^\nAssertionError: retargeting valid link a -> ab left digest unchanged\n"
+  }
+]

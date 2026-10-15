@@ -1,0 +1,77 @@
+{
+  "task_id": "AR-01",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:59:45.725041+00:00",
+  "elapsed_seconds": 254.579951,
+  "answer": "I wrote the refactor plan as a new speculative document, `docs/speculative/pull-request-effect-lifecycle-refactor.md`. No source code changed and nothing is committed.\n\n**Recommendation.** Add one shared \"lifecycle runner\", `runDurableEffect(spec)` in a new `src/pr/effectLifecycle.ts`. It would own the shared sequence: check authority, record the intent, claim the right to send, send once, then confirm from a read or mark the outcome unknown. Each of the three existing stores keeps its own SQL and just exposes a small common interface. The runner supports both ways the coordinators currently decide who may send: draft and merge claim it when the intent is first recorded, while ready uses its separate `preflight` state. That keeps today's behavior exactly. Merge needs one extra step: split `requestExactMerge` into the checks, the provider call, and the result check, while still exporting the combined function so `contract.test.ts` doesn't change.\n\n**Seams compared.**\n- **Shared store base (SQL only):** lowest risk, but the logic that actually prevents duplicate sends would still be copied across three coordinators.\n- **Lifecycle runner (recommended):** puts the no-duplicate rule in one place where it can be tested with fakes.\n- **One combined table and coordinator:** rejected, because it needs a data migration and would mix three different kinds of authority behind one switch.\n\n**What stays separate for each effect:**\n- **Who may trigger it:** draft needs a confirmed publication, a policy that requires a PR, and the local operator; ready needs a verified milestone; merge needs a verified Human decision.\n- **Draft-only setup:** which binding revision to use (current or pinned) and the default base branch.\n- **Checks before sending:** ready's exact head/base check, and all of merge's gates (checks, approvals, fast-forward only).\n- **What counts as confirmed:** each effect has its own test of the provider's answer.\n- **Provider rules:** the Gitea specifics stay in the adapter.\n\n**Three existing behaviors I confirmed with throwaway tests** (deleted afterwards). The refactor keeps all three and pins them with tests; fixing them is left to a later issue:\n- **A failed merge check permanently blocks that merge.** If a check fails before anything is sent (for example, required checks still pending), the effect is marked unknown. Later calls only read, so the same head can't be merged even after the checks pass.\n- **A draft interrupted before it is created can never be created.** If the first search fails, or the owner stops between recording the intent and creating the draft, every later call returns `create_outcome_unknown` and never creates it.\n- **Retries of finished effects can report unknown.** A confirmed effect is re-read on retry; if that read fails, the caller gets `*_outcome_unknown` even though the stored record says confirmed.\n\n**Two gaps the plan also addresses:**\n- The coordinator tests build tables by hand without the real schema's allowed-state constraints. Writing `preflight` to the merge table would pass those tests and fail in production, so slice 0 switches them to the migrated schema.\n- Only the draft coordinator is used in production; ready and merge have no callers yet. Nothing scans for unresolved effects after a restart; they are only reconciled when retried.\n\n**Migration and rollback.** Six slices, each one commit with its test written first:\n0. tests that pin current behavior, including the three above;\n1. the runner and its tests;\n2. move ready onto it;\n3. split the merge helper and move merge onto it;\n4. move draft onto it;\n5. one doc sentence.\n\nRollback is a plain revert of any slice: there is no schema change, and records written before and after look the same. The later fixes (adding a `preflight` state to draft and merge) would need a table rebuild. Rolling that back needs a restored backup or a forward fix, because the store refuses a database written by a newer schema.\n\n**No-duplicate tests named in the plan.** Every one counts provider writes:\n- a lost response is sent only once;\n- after a restart, a recorded intent is only read, never re-sent;\n- the loser of a simultaneous first attempt never sends;\n- when two callers race at the preflight claim, only one sends;\n- a failed or invalid read keeps the effect unknown;\n- a conflicting intent never reaches the provider;\n- a test that closes and reopens the real store and checks no effect of any kind is re-sent.\n\n**Checks run** (after `npm ci`, which was needed because `node_modules` was missing):\n- `npx vitest run src/pr`: 54 passed, 1 skipped (the opt-in real-Gitea test).\n- The API pull-request tests (`-t 'pull-request|PR inspection'`): 2 passed.\n- Server typecheck: clean.\n- `src/docsStandards` tests: 51 passed.\n\n`npm` warned that Node v22.19.0 is older than some packages ask for, but nothing failed.\n\nNo ablation flag is needed, since this isn't an experimental mechanism. Documentation is limited to one sentence in the adapter doc once the runner exists.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 46,
+      "cache_creation_input_tokens": 82881,
+      "cache_read_input_tokens": 1200003,
+      "output_tokens": 20634,
+      "output_tokens_details": {
+        "thinking_tokens": 6502
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 82881,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1756,
+          "cache_read_input_tokens": 89130,
+          "cache_creation_input_tokens": 533,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 533
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 12.764857,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 254.579951,
+      "started_at": "2026-10-15T17:59:45.725041+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 23
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [
+      "docs/speculative/pull-request-effect-lifecycle-refactor.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

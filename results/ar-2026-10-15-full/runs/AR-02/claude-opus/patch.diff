@@ -1,0 +1,12 @@
+diff --git a/docs/authoritative/research-mcp.md b/docs/authoritative/research-mcp.md
+index 6b49653..5d7aa64 100644
+--- a/docs/authoritative/research-mcp.md
++++ b/docs/authoritative/research-mcp.md
+@@ -325,4 +325,6 @@ its diagnostics retained, the supervisor may remove only its exact trial directo
+ Production owner and durable trial integration is documented in
+ [owner-research-trials.md](owner-research-trials.md). Consumer harness migration,
+ live admission, and benchmark resource sizing are separate work owned outside this
+-package.
++package. Sidecar loss always ends the trial; a proposed hardening of that boundary
++and the conditions under which a restart could ever be safe are recorded as
++[speculative work](../speculative/research-mcp-sidecar-loss-recovery.md).

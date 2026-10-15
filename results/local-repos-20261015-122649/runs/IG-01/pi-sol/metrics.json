@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:38:40.508375+00:00",
+  "elapsed_seconds": 213.211555,
+  "answer": "**Scores are percentages, but they are scores for model–agent–evaluation setups, not model-only ratings.** “Terminal-Bench” below means **Terminal-Bench 2.1**, not 3.0 or 4.0; “DeepSWE” means **v1.1**. A setting marked *not disclosed* should not be inferred from another organization’s run.\n\n| Model | Terminal-Bench **2.1** | DeepSWE **v1.1** |\n|---|---|---|\n| **GPT-6 Luna** | **73.03%** — [Vals AI](https://www.vals.ai/models/openai_gpt-6-luna); its [2.1 methodology](https://www.vals.ai/benchmarks/terminal-bench-2-1) specifies **Terminus 2**, pass@1 on 89 tasks, tests run in remote Daytona environments under a time limit. Luna was run at **max reasoning effort**. | **66.6%** — [OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/), **max effort**; DeepSWE harness and further run settings **not disclosed there**. **64%** — [Artificial Analysis](https://artificialanalysis.ai/articles/gpt-6-sol-and-luna-push-the-cost-efficiency-frontier), **Codex**, max effort; its [methodology](https://artificialanalysis.ai/methodology/coding-agents-benchmarking) averages three attempts per task across the 113 v1.1 tasks, with internet access restricted during the agent phase. **These are separate runs, not a rounding difference.** |\n| **GPT-6 Sol** | **83.15%** — [Vals AI](https://www.vals.ai/models/openai_gpt-6-sol); **Terminus 2**, pass@1, 89-task 2.1 variant, Daytona/time-limit setup described [here](https://www.vals.ai/benchmarks/terminal-bench-2-1); **max effort**. | **68.8%** — [OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna), **max effort**; harness and further settings **not disclosed there**. **69%** — [Artificial Analysis](https://artificialanalysis.ai/agents/coding-agents/comparisons/codex-vs-opencode), **Codex**, max effort; three attempts per task under its [v1.1 methodology](https://artificialanalysis.ai/methodology/coding-agents-benchmarking). Do not assume OpenAI’s 68.8% used Codex merely because its model is available in Codex. |\n| **Qwen3.8-27B** | **73.0%** — [Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B), explicitly **Terminal Bench 2.1 (Terminus)**. The card does **not** specify a Terminus version or benchmark-run sampling/budget settings for this row; its general model default is xhigh reasoning, which is **not confirmation of the run setting**. | **42.2%** — [Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B), **DeepSWE 1.1**, **Claude Code**, temperature **1.0**, top-p **0.95**, **256K** context. The card does not explicitly give this run’s reasoning-effort level. |\n| **GLM-5.3** | **88.2%** — [Z.ai model card and footnotes](https://huggingface.co/zai-org/GLM-5.3/raw/main/README.md), **Terminal-Bench 2.1**, **Claude Code 2.1.207**, temperature **1.0**, top-p **1**, max-new-tokens **65,536**, **6-hour** timeout; the card says to retain its default **max** reasoning for benchmark reproduction. | **66.9%** — [Z.ai model card and footnotes](https://huggingface.co/zai-org/GLM-5.3/raw/main/README.md), **DeepSWE v1.1**, **mini-swe-agent**, temperature **0.95**, top-p **1.0**, **400K** context, **6-hour** timeout; default **max** reasoning for reproduction. **61%** — [Artificial Analysis](https://artificialanalysis.ai/agents/coding-agents/comparisons/claude-code-vs-opencode), **OpenCode**, under its separate [three-attempt v1.1 methodology](https://artificialanalysis.ai/methodology/coding-agents-benchmarking). |\n| **DeepSeek V4.1 Flash** | **90.6% pass@1** — [DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash), **Terminal-Bench 2.1**, **DeepSeek Harness Minimal**, reasoning-effort **100** (maximum), temperature **1.0**, top-p **0.95**, **1M** context. Its scaffold study specifies **three samples per task**, Linux containers, **500 maximum agent steps**, and **no network access** for 2.1. The *same DeepSeek study* also reports **88.0 Claude Code; 84.1 Codex; 85.0 OpenCode; 86.1 Pi; 90.3 mini-SWE; 85.8 DSH Standard; 85.8 DSH PTC**—alternative harness results, not additional Minimal scores. | **74.2% resolved** — [DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash), **DeepSWE v1.1**, **mini-SWE-agent**, reasoning-effort **100**, temperature **1.0**, top-p **0.95**, **1M** context. Its scaffold study specifies **eight samples per task**, Linux containers and **500 maximum agent steps**. That study separately reports **69.8 Claude Code; 65.6 Codex; 65.5 OpenCode; 66.2 Pi; 72.6 DSH Minimal; 70.5 DSH Standard; 67.6 DSH PTC**. |\n\n**What can actually be compared?** Vals AI’s **83.15% Sol versus 73.03% Luna** is a reasonably like-for-like Terminal-Bench 2.1 comparison within *Vals’* Terminus 2 setup. Artificial Analysis’s **69% Sol versus 64% Luna** is likewise a comparison within its **Codex/DeepSWE v1.1** setup. DeepSeek’s scaffold table supports **within-DeepSeek** comparisons of agent harnesses under its stated controls.\n\nThe other cross-row rankings are **reported outcomes under differing setups**, not controlled head-to-head model rankings. In particular, DeepSeek’s 90.6%, Z.ai’s 88.2%, Qwen’s 73.0%, and Vals’ GPT-6 figures use different terminal agents and sometimes different budgets or network rules; DeepSWE’s mini-SWE, Claude Code, OpenCode and Codex results should not be merged into one league table. Artificial Analysis also [replaced Terminal-Bench 2.1 with 4.0](https://artificialanalysis.ai/methodology/coding-agents-benchmarking) in its current Coding Agent Index: a 4.0 result is **not** a missing 2.1 score. No cell above needs to be marked unverified because each contains a source explicitly naming the requested benchmark variant; settings the source does not establish are identified as such.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 1657,
+      "cacheRead": 63278,
+      "cacheWrite": 3068,
+      "reasoning": 0,
+      "totalTokens": 68006,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.01657,
+        "cacheRead": 0.012655600000000001,
+        "cacheWrite": 0.00767,
+        "total": 0.03690160000000001
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 197.642322,
+  "first_substantive_seconds": 213.117388,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 213.211555,
+      "started_at": "2026-10-15T16:38:40.508375+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 19,
+    "fetch_calls": 16,
+    "other_tool_calls": 0
+  }
+}

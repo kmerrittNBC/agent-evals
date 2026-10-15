@@ -1,0 +1,58 @@
+{
+  "task_id": "AR-02",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:12:42.018307+00:00",
+  "elapsed_seconds": 66.539199,
+  "answer": "**Decision:** Fail closed when a standalone research MCP sidecar disappears during a trial. Stop its clients and bridges, retain the `started` marker and compact evidence, and mark the trial interrupted. Do not relaunch with a fresh volatile ledger under the old identity. Bridge reconnection is safe only while the *same* sidecar remains alive.\n\nI recorded the decision and staged implementation plan in `relayview/docs/speculative/research-mcp-sidecar-loss-boundary.md`. It compares that boundary with a deferred restart design requiring durable transactional accounting, process fencing, and generation-bound bridge admission. It also specifies credential and socket isolation, stale-client tests, verification gates, and rollback to a new authorized trial. No runtime code or authoritative behavior was changed.\n\n**Local checks:** `git diff --check` passed, and I checked the plan against the bridge, sidecar, service, ledger, and authoritative trial contracts. Dependencies are absent in this worktree, so I did not run Vitest or package verification; those remain implementation-stage gates.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 318,
+      "cacheRead": 43645,
+      "cacheWrite": 384,
+      "reasoning": 104,
+      "totalTokens": 44350,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00318,
+        "cacheRead": 0.008729,
+        "cacheWrite": 0.00096,
+        "total": 0.012875000000000001
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 63.805148,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 66.539199,
+      "started_at": "2026-10-15T18:12:42.018307+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 24
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [
+      "docs/speculative/research-mcp-sidecar-loss-boundary.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

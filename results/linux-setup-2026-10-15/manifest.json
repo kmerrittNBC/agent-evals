@@ -1,0 +1,98 @@
+{
+  "evaluation_id": "linux-setup-2026-10-15",
+  "created_at": "2026-10-15T15:52:30.351577+00:00",
+  "cutoff": "2026-10-15T12:00:00-04:00",
+  "config_hashes": {
+    "arms": "47f6a1b570cf2a1020a0359201735425ade2279d3ec7fdcdbc37e081169a69e4",
+    "tasks": "fe440b0854753522f534b49cce380f78b539db53d06e622a4293807a8356afcd",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {},
+  "angular_root": null,
+  "preflight": {
+    "pi-luna": {
+      "status": "unavailable",
+      "reason": "Live probe produced no final answer",
+      "version": "0.85.0",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_exit_code": 0,
+      "probe_timed_out": false,
+      "probe_result_status": null,
+      "probe_answer_present": false,
+      "probe_tool_names": []
+    },
+    "pi-sol": {
+      "status": "unavailable",
+      "reason": "Live probe produced no final answer",
+      "version": "0.85.0",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_exit_code": 0,
+      "probe_timed_out": false,
+      "probe_result_status": null,
+      "probe_answer_present": false,
+      "probe_tool_names": []
+    },
+    "claude-opus": {
+      "status": "unavailable",
+      "reason": "Harness exited 1 during live probe",
+      "version": "2.1.296 (Claude Code)",
+      "model": "claude-opus-5-5",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "probe_exit_code": 1,
+      "probe_timed_out": false,
+      "probe_result_status": null,
+      "probe_answer_present": true,
+      "probe_tool_names": []
+    }
+  },
+  "judge_preflight": {
+    "status": "ready",
+    "reason": null,
+    "version": "codex-cli 0.156.1"
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "ready",
+      "sha256": "d583fedfe31dd7db16a12174e8797541fb778f153a017977191c86befc36954c"
+    },
+    "IG-02": {
+      "status": "missing pinned repo financial-hq-ui",
+      "sha256": null
+    },
+    "IG-03": {
+      "status": "missing pinned repo financial-hq-ui",
+      "sha256": null
+    },
+    "IG-04": {
+      "status": "missing pinned repo financial-hq-ui",
+      "sha256": null
+    },
+    "IG-05": {
+      "status": "missing pinned repo financial-hq-ui",
+      "sha256": null
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 6067,
+  "untracked_paths": [
+    "adjudication-evidence/agent-edited-prepared-check/eval_delete_test.go"
+  ],
+  "setup_checks_intact": true,
+  "final_head": "052ce21307c02f772619e4878b44949bd72f5e1b",
+  "original_setup_checks_intact": false,
+  "adjudication_note": "Recovered agent edit to originally writable prepared check; replay validation used pristine original check."
+}

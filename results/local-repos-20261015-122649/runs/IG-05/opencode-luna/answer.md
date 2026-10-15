@@ -1,0 +1,13 @@
+**No.** The 35 outcomes establish completion of an **operational qualification**, not a seven-arm ranking or completion of comparative Stage A.
+
+At pinned commit `b0b31dda691620edae30db7127c1e1d8da907813`, the README reports **35 recorded outcomes: 31 passes, three verifier failures, and one timeout**. The final qualification evidence describes those as a seven-arm, five-Python-project operational gate—not a comparative result. It records **36 attempts** because an infrastructure-failed attempt was retained separately from its successor, and says the work spanned four execution revisions. The results can be described as observed qualification outcomes, but they are not a controlled comparison under one configuration.  
+Sources: `agent-harness-evals/README.md`; `agent-harness-evals/docs/evidence/current-qualification-180-final.md`.
+
+The contract describes a **different cohort**. The README still refers to a 25-task Stage A, but the **2026-10-03 amendment** in `docs/contracts/staged-multilang-benchmark-v5.md` sets the executable Stage A cohort at **23 reviewed archive tasks × 7 arms = 161 slots**. The two unresolved archive candidates are dropped without replacement. That is the amended target—not evidence that those 161 outcomes have been run.
+
+For a comparative result, the contract requires an exact, owner-approved freeze of the arms and admission/runtime identities, corpus and task inputs, environment and verifier, resources and budgets, schedule and slot plan, and outcome/retry/analysis policies. Then the scheduled cohort must run continuously under one admitted configuration; its slots must be reconciled, audited, and sealed before publishing a screening report and disposition. The contract is prospective: **it is not itself a numerical freeze or authorization to dispatch**.  
+Sources: `docs/contracts/staged-multilang-benchmark-v5.md`; `docs/releases/stage-a-prepared-23-v1.md`; `docs/runbooks/stage-a-continuous-cohort.md`.
+
+**Still unverified at this pinned state:** comparative Stage A outcomes, a completed and sealed 161-slot cohort, a numerical freeze and its authorization, arm ordering or paired comparative performance, and what the five-project qualification says about MultiLang parser or compiled-language performance. Even a completed Stage A is a screening exercise, not support for a precise seven-arm ranking.
+
+I did not modify or run anything. The pinned checkout itself was not exposed for direct file reads in this workspace; I relied on the read-only source excerpts captured in `evidence/IG-05/pack.json` for the README, final qualification evidence, and v5 contract, all attributed there to the commit above.

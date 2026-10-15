@@ -1,0 +1,13 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..62bd1ce 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -66,6 +66,8 @@ def validate_repos(repo_args: list[str]) -> dict[str, dict]:
+         name, value = item.split("=", 1)
+         if name not in required or not Path(value).is_absolute():
+             raise ValueError(f"Invalid repository assignment: {item}")
++        if name in repos:
++            raise ValueError(f"Duplicate --repo assignment for {name!r}")
+         path = Path(value).resolve()
+         if not path.is_dir():
+             raise ValueError(f"Repository not found: {path}")

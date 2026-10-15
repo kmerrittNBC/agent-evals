@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-03",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:48:29.867567+00:00",
+  "elapsed_seconds": 23.913077,
+  "answer": "| Repository | Declared local runtime requirements | Relevant pinned dependencies |\n|---|---|---|\n| **RelayView** | Node `>=22.19 <23 || >=24.11 <25` in [`package.json`](relayview/package.json). No repository-wide Python version or uv requirement is declared, though some scripts invoke Python. | Exact-pinned `@earendil-works/pi-tui` **0.85.0**; the README separately calls for an external Pi CLI **0.85.0**. Its browser-test dependency is declared as `@playwright/test` `^1.62.1`; [`package-lock.json`](relayview/package-lock.json) resolves `@playwright/test`, `playwright`, and `playwright-core` to **1.62.1**. |\n| **agent-harness-evals** | Node `>=22.19.0` in [`package.json`](agent-harness-evals/package.json); Python `>=3.12` and uv **`==0.12.9`** in [`pyproject.toml`](agent-harness-evals/pyproject.toml). [`.python-version`](agent-harness-evals/.python-version) selects `3.12`. | Exact npm pins, confirmed by [`package-lock.json`](agent-harness-evals/package-lock.json): Claude Code **2.1.270**, Pi coding agent **0.85.0**, stock Codex **0.144.0**, OpenCode CLI and plugin **1.18.28**, and vendored research MCP **1.1.0**. The separate Codex/Muse runtime is **0.144.0-muse.2** and has its own build/install procedure, not the stock npm binary. |\n\n**Common Node choice:** the intersection is `>=22.19 <23` or `>=24.11 <25`; the lowest qualifying release is **Node 22.19.0**. Node 23 is excluded by RelayView, despite satisfying the evals repository’s root engine.\n\nThe package metadata states supported ranges and requested dependencies; the npm lockfiles record resolved package versions, while the evals [`uv.lock`](agent-harness-evals/uv.lock) records its Python resolution. None of these proves that platform-specific native packages install, Playwright’s browser binaries are available, the separate Muse runtime is installed, or the programs and tests work on a particular machine. That needs a real install and appropriate test runs; neither repository was edited.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 608,
+      "cacheRead": 18738,
+      "cacheWrite": 2711,
+      "reasoning": 85,
+      "totalTokens": 22060,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00608,
+        "cacheRead": 0.0037476000000000002,
+        "cacheWrite": 0.0067775,
+        "total": 0.0166111
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 19.984881,
+  "first_substantive_seconds": 23.898389,
+  "snapshot_digest_before": "52f81fdd3474301c86588384a5f7e5fdecdbe2a3da5b680971af31d459b52573",
+  "snapshot_digest_after": "52f81fdd3474301c86588384a5f7e5fdecdbe2a3da5b680971af31d459b52573",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 23.913077,
+      "started_at": "2026-10-15T16:48:29.867567+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 21
+  }
+}

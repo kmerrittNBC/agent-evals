@@ -1,0 +1,176 @@
+{
+  "task_id": "DU-05",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:31:09.497834+00:00",
+  "elapsed_seconds": 43.755806,
+  "answer": "`pack_status` now returns a clear not-ready reason for malformed `repo_facts` instead of raising `KeyError` or `TypeError`. All 17 runner tests pass, including the new one.\n\n**Change in `src/agent_eval/core.py`:** a new check runs after the grading-guidance check and before the pinned-commit comparison. It returns `(False, \"judge evidence pack has a malformed repo fact (needs repo name and 40-character commit)\")` when:\n- `repo_facts` is not a list, or\n- an entry is not an object, or\n- an entry's `repo` is missing, not a string, or blank, or\n- an entry's `commit` is not exactly 40 hex characters (new `COMMIT_HASH` regex).\n\nTwo decisions you may want to revisit:\n- **It runs even without a manifest.** The check is structural, so it doesn't depend on a manifest. All five current evidence packs already pass it (IG-01's list is empty; the others have well-formed 40-hex pins).\n- **Commits must be hex, not just 40 characters long.** A 40-character non-hex string is rejected. If you only want a length check, the regex is the one line to change.\n\nWell-formed packs go through the same pinned-commit comparison as before.\n\n**New test in `tests/test_runner.py`:** `test_malformed_repo_facts_are_not_ready` covers each malformed shape (missing, blank or wrong-type repo or commit; short or non-hex commit; a non-object fact; a non-list `repo_facts`), both with and without a manifest. It also checks that a well-formed pack is still `ready` and a wrong pin still gives `\"repo pin differs for relayview\"`.\n\n**Checks:** pytest isn't installed, so I ran `python3 -m unittest tests.test_runner tests.test_eval_du05`. The worktree already had an untracked `tests/test_eval_du05.py` that tests this behaviour; I didn't change it, and it passes too.\n\nThere's no AGENTS.md in the repo. Nothing is committed.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 16726,
+      "cache_read_input_tokens": 152961,
+      "output_tokens": 4169,
+      "output_tokens_details": {
+        "thinking_tokens": 346
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 16726,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 697,
+          "cache_read_input_tokens": 22220,
+          "cache_creation_input_tokens": 1288,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1288
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 19.616226,
+  "first_substantive_seconds": 43.514227,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 43.755806,
+      "started_at": "2026-10-15T17:31:09.497834+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 14
+  },
+  "changes": {
+    "tracked_patch_bytes": 4521,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57"
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-s86l_9b8/workspace",
+        "/tmp/agent-eval-s86l_9b8/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-05/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-05/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-s86l_9b8/workspace",
+        "/tmp/agent-eval-s86l_9b8/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-05/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-05/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".................\n----------------------------------------------------------------------\nRan 17 tests in 0.017s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

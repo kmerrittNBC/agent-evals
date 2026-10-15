@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The central claims match the dated evidence pack: admission precedes dispatch, retries do not resend, and confirmation requires a matching merged observation. No decision-changing contradiction is apparent."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "The answer covers the requested flow, states, conflicts, concurrency, and test limits, but the transcript does not show inspection of the pinned RelayView source."
+    },
+    "source_quality": {
+      "score": 2,
+      "reason": "The transcript shows the candidate reading the judge-only evidence pack and another run’s answer, while failing to locate or read the pinned source files it claims to describe."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "It correctly limits the no-second-dispatch conclusion to the same candidate and shared durable store, and separates coordinator behavior from provider-side outcomes."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "It preserves uncertainty after a timeout and does not infer provider execution, immediate read consistency, or exactly-once semantics from the tests."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "The direct answer and state-by-state explanation make the operational conclusion and its limits clear."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "partial",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "At pinned RelayView commit `f7c03941cf32b8e25720b5eb1aa91364a236b005`",
+      "evidence": "The transcript shows unsuccessful searches for `mergeCoordinator.ts`, followed by reads of `evidence/IG-02/pack.json` and another run’s `answer.md`; it shows no read of the pinned RelayView source.",
+      "reason": "The prompt explicitly required read-only inspection of the pinned source, which the recorded work did not complete."
+    },
+    {
+      "dimension": "source_quality",
+      "answer_passage": "`src/pr/mergeCoordinator.ts` calls the owner-supplied `verifyAuthority` ... Migration 077 adds uniqueness ...",
+      "evidence": "The candidate read the judge-only evidence pack at event 8 and another candidate answer at event 19, but no RelayView source or tests. The pack supports the core behavior; it does not independently verify every added implementation detail.",
+      "reason": "The answer presents source-specific detail without a demonstrated direct source check. Those extra details are unverified here, rather than established false."
+    }
+  ],
+  "first_substantive_event_index": 22
+}

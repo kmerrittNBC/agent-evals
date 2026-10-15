@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-02",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:43:19.904025+00:00",
+  "elapsed_seconds": 33.820069,
+  "answer": "**For the same admitted candidate, the coordinator does not issue a second provider merge after a timeout.** It records an intent first, and a later call with that candidate takes a read-only reconciliation path rather than calling `mergeFastForward` again (`src/pr/mergeCoordinator.ts:32–51`). That is a guarantee about this coordinator’s dispatch decisions, not proof that the provider performed exactly one merge.\n\n- **Durable record and states.** The SQLite `pr_merge_effect` row pins the binding and revision, repository and PR identity, head SHA, base ref and revision, Human decision and actor, and effect ID. Its states are `pending` on admission, `unknown` when the outcome cannot be established, and `confirmed` after a matching observation. A uniqueness constraint covers `(binding_id, native_pr_id, head_revision)` (`src/pr/mergeStore.ts:28–75`; `src/storage/migrations.ts:3029–3047`). The coordinator requires a caller-supplied `verifyAuthority` check before admission; this module does not itself prove the Human decision is current.\n\n- **Dispatch and confirmation.** On first admission, `requestExactMerge` reads the PR and checks its exact head and base, open/non-draft status, fast-forward strategy, mergeability, required checks, and current attributed Human approvals. It then asks the adapter for a fast-forward merge of the exact head. Even if that call throws, it reads again. Success requires a provider observation for the expected repository/PR reporting `merged`, with both the PR head and `mergedRevision` equal to the approved head SHA (`src/pr/contract.ts:63–113`; `src/pr/mergeCoordinator.ts:50–62`). The Gitea request supplies `head_commit_id`, disables force and queued merge, and leaves the branch intact (`src/pr/gitea.ts:172–178`). A timeout followed by an open, absent, or unreadable observation is **unknown**, not failure or success.\n\n- **Retry and competing admission.** An existing row makes a retry read the PR only: a matching merged observation confirms it; otherwise the coordinator reports `merge_outcome_unknown` without dispatch. Admission with the same candidate key but different pinned authority or base data throws `pr_merge_identity_conflict`. If another admission wins between the coordinator’s lookup and insert, the returned effect ID differs from its proposed ID, so this caller likewise reconciles by read rather than dispatching (`src/pr/mergeStore.ts:28–44`; `src/pr/mergeCoordinator.ts:34–49`). This protection is scoped to that candidate key and retained SQLite record; it is not a claim about arbitrary other candidates or provider-side behavior.\n\n- **What is established.** In-memory SQLite tests show `pending` exists before the mock provider write; a mock timeout leaves `unknown`; retries make no additional mock merge call; a subsequently mocked matching merged read confirms. A second test injects a competing admission and observes zero merge calls from the losing coordinator. Store tests cover idempotent admission, conflicts, and revision-mismatched confirmation. Contract and Gitea tests cover denial checks and the request payload (`src/pr/mergeCoordinator.test.ts`, `src/pr/mergeStore.test.ts`, `src/pr/contract.test.ts`, `src/pr/gitea.test.ts`). They do **not** establish actual concurrent-process behavior, provider atomicity, or what a real timeout means at Gitea. The repository search shows the coordinator instantiated in tests, not wired to a production merge caller; `src/storage/store.ts` constructs the store, but the caller’s authority verification and end-to-end task completion are not proved by these tests.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 849,
+      "cacheRead": 28286,
+      "cacheWrite": 784,
+      "reasoning": 90,
+      "totalTokens": 29922,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.008490000000000001,
+        "cacheRead": 0.0056572,
+        "cacheWrite": 0.00196,
+        "total": 0.0161132
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 25.262685,
+  "first_substantive_seconds": 33.796905,
+  "snapshot_digest_before": "9579d5d68b66901a73d64c1c9a7868bf83d963450cc0f9b3e50101a8397087cd",
+  "snapshot_digest_after": "9579d5d68b66901a73d64c1c9a7868bf83d963450cc0f9b3e50101a8397087cd",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 33.820069,
+      "started_at": "2026-10-15T16:43:19.904025+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 19
+  }
+}

@@ -1,0 +1,150 @@
+diff --git a/README.md b/README.md
+index 8a92319..761db84 100644
+--- a/README.md
++++ b/README.md
+@@ -4,7 +4,7 @@ A deliberately small full-stack project for evaluating coding agents. The app us
+ 
+ ## Current behavior
+ 
+-- View all todos.
++- View all todos, or filter the API list by completion status.
+ - Add a todo.
+ - Edit a todo's title.
+ - Mark a todo complete or incomplete.
+@@ -26,7 +26,7 @@ The API currently exposes:
+ 
+ | Method | Path | Behavior |
+ | --- | --- | --- |
+-| `GET` | `/api/todos` | List todos |
++| `GET` | `/api/todos` | List all todos in ascending ID order; optionally use `?completed=true` or `?completed=false` to list only matching todos in the same order. Other `completed` values (including empty or repeated values) return HTTP 400 with a JSON error. |
+ | `GET` | `/api/todos/{id}` | View one todo |
+ | `POST` | `/api/todos` | Create a todo |
+ | `PUT` | `/api/todos/{id}` | Replace a todo's editable fields |
+@@ -63,4 +63,4 @@ Open <http://localhost:8080>.
+ make test
+ ```
+ 
+-The Go suite covers the API lifecycle, validation, missing records, SQLite persistence across restarts, and the intentional absence of DELETE. The frontend suite covers rendering and editing through the Lit component.
++The Go suite covers the API lifecycle, completion filtering, validation, missing records, SQLite persistence across restarts, and the intentional absence of DELETE. The frontend suite covers rendering and editing through the Lit component.
+diff --git a/main.go b/main.go
+index 59fc240..b7fb3a6 100644
+--- a/main.go
++++ b/main.go
+@@ -68,7 +68,15 @@ func (s *Store) Close() error {
+ }
+ 
+ func (s *Store) List() ([]Todo, error) {
+-	rows, err := s.db.Query(`SELECT id, title, completed, created_at, updated_at FROM todos ORDER BY id`)
++	return s.list(`SELECT id, title, completed, created_at, updated_at FROM todos ORDER BY id`)
++}
++
++func (s *Store) ListByCompleted(completed bool) ([]Todo, error) {
++	return s.list(`SELECT id, title, completed, created_at, updated_at FROM todos WHERE completed = ? ORDER BY id`, completed)
++}
++
++func (s *Store) list(query string, args ...any) ([]Todo, error) {
++	rows, err := s.db.Query(query, args...)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("list todos: %w", err)
+ 	}
+@@ -182,8 +190,19 @@ func scanTodo(row rowScanner) (Todo, error) {
+ 
+ func newAPIHandler(store *Store) http.Handler {
+ 	mux := http.NewServeMux()
+-	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, _ *http.Request) {
+-		todos, err := store.List()
++	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, r *http.Request) {
++		values, present := r.URL.Query()["completed"]
++		if present && (len(values) != 1 || (values[0] != "true" && values[0] != "false")) {
++			writeError(w, http.StatusBadRequest, "completed must be true or false")
++			return
++		}
++		var todos []Todo
++		var err error
++		if present {
++			todos, err = store.ListByCompleted(values[0] == "true")
++		} else {
++			todos, err = store.List()
++		}
+ 		if err != nil {
+ 			writeError(w, http.StatusInternalServerError, "could not list todos")
+ 			return
+diff --git a/main_test.go b/main_test.go
+index e038855..e049a64 100644
+--- a/main_test.go
++++ b/main_test.go
+@@ -6,6 +6,7 @@ import (
+ 	"net/http"
+ 	"net/http/httptest"
+ 	"path/filepath"
++	"reflect"
+ 	"testing"
+ )
+ 
+@@ -36,6 +37,66 @@ func TestTodoLifecycleWithoutDelete(t *testing.T) {
+ 	}
+ }
+ 
++func TestListTodosCompletedFilter(t *testing.T) {
++	store := newTestStore(t)
++	handler := newAPIHandler(store)
++	for _, value := range []string{"true", "false"} {
++		empty := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos?completed="+value, "", http.StatusOK)
++		if empty == nil || len(empty) != 0 {
++			t.Fatalf("empty filtered list = %+v, want []", empty)
++		}
++	}
++	for _, body := range []string{
++		`{"title":"open one"}`,
++		`{"title":"done one","completed":true}`,
++		`{"title":"open two"}`,
++		`{"title":"done two","completed":true}`,
++	} {
++		performRequest[Todo](t, handler, http.MethodPost, "/api/todos", body, http.StatusCreated)
++	}
++
++	for _, test := range []struct {
++		path string
++		ids  []int64
++	}{
++		{"/api/todos", []int64{1, 2, 3, 4}},
++		{"/api/todos?completed=true", []int64{2, 4}},
++		{"/api/todos?completed=false", []int64{1, 3}},
++	} {
++		t.Run(test.path, func(t *testing.T) {
++			listed := performRequest[[]Todo](t, handler, http.MethodGet, test.path, "", http.StatusOK)
++			ids := make([]int64, 0, len(listed))
++			for _, todo := range listed {
++				ids = append(ids, todo.ID)
++			}
++			if !reflect.DeepEqual(ids, test.ids) {
++				t.Fatalf("listed IDs = %v, want %v", ids, test.ids)
++			}
++		})
++	}
++
++	for _, path := range []string{
++		"/api/todos?completed=", "/api/todos?completed=maybe",
++		"/api/todos?completed=TRUE", "/api/todos?completed=1",
++		"/api/todos?completed=true&completed=false",
++	} {
++		t.Run(path, func(t *testing.T) {
++			result := performRequest[map[string]string](t, handler, http.MethodGet, path, "", http.StatusBadRequest)
++			if result["error"] == "" {
++				t.Fatal("expected JSON error message")
++			}
++		})
++	}
++
++	// Filtering, including rejected filters, must not modify stored records.
++	listed := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos", "", http.StatusOK)
++	for i, todo := range listed {
++		if todo.ID != int64(i+1) || todo.Completed != (i%2 == 1) {
++			t.Fatalf("todo changed after filtering: %+v", listed)
++		}
++	}
++}
++
+ func TestTodoValidationAndMissingItems(t *testing.T) {
+ 	handler := newAPIHandler(newTestStore(t))
+ 

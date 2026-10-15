@@ -1,0 +1,168 @@
+diff --git a/README.md b/README.md
+index 8a92319..1bf5291 100644
+--- a/README.md
++++ b/README.md
+@@ -26,7 +26,7 @@ The API currently exposes:
+ 
+ | Method | Path | Behavior |
+ | --- | --- | --- |
+-| `GET` | `/api/todos` | List todos |
++| `GET` | `/api/todos` | List todos in ID order; optional `?completed=true` or `?completed=false` filters by completion state. Other `completed` values are rejected with `400 Bad Request`. |
+ | `GET` | `/api/todos/{id}` | View one todo |
+ | `POST` | `/api/todos` | Create a todo |
+ | `PUT` | `/api/todos/{id}` | Replace a todo's editable fields |
+diff --git a/main.go b/main.go
+index 59fc240..350c09b 100644
+--- a/main.go
++++ b/main.go
+@@ -8,6 +8,7 @@ import (
+ 	"fmt"
+ 	"log"
+ 	"net/http"
++	"net/url"
+ 	"os"
+ 	"path/filepath"
+ 	"strconv"
+@@ -68,7 +69,18 @@ func (s *Store) Close() error {
+ }
+ 
+ func (s *Store) List() ([]Todo, error) {
+-	rows, err := s.db.Query(`SELECT id, title, completed, created_at, updated_at FROM todos ORDER BY id`)
++	return s.ListFiltered(nil)
++}
++
++func (s *Store) ListFiltered(completed *bool) ([]Todo, error) {
++	query := `SELECT id, title, completed, created_at, updated_at FROM todos`
++	var rows *sql.Rows
++	var err error
++	if completed == nil {
++		rows, err = s.db.Query(query + ` ORDER BY id`)
++	} else {
++		rows, err = s.db.Query(query+` WHERE completed = ? ORDER BY id`, *completed)
++	}
+ 	if err != nil {
+ 		return nil, fmt.Errorf("list todos: %w", err)
+ 	}
+@@ -182,8 +194,13 @@ func scanTodo(row rowScanner) (Todo, error) {
+ 
+ func newAPIHandler(store *Store) http.Handler {
+ 	mux := http.NewServeMux()
+-	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, _ *http.Request) {
+-		todos, err := store.List()
++	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, r *http.Request) {
++		completed, valid := readCompletedFilter(r)
++		if !valid {
++			writeError(w, http.StatusBadRequest, "completed must be true or false")
++			return
++		}
++		todos, err := store.ListFiltered(completed)
+ 		if err != nil {
+ 			writeError(w, http.StatusInternalServerError, "could not list todos")
+ 			return
+@@ -268,6 +285,31 @@ func readID(w http.ResponseWriter, r *http.Request) (int64, bool) {
+ 	return id, true
+ }
+ 
++func readCompletedFilter(r *http.Request) (*bool, bool) {
++	query, err := url.ParseQuery(r.URL.RawQuery)
++	if err != nil {
++		return nil, false
++	}
++	values, present := query["completed"]
++	if !present {
++		return nil, true
++	}
++	if len(values) != 1 {
++		return nil, false
++	}
++
++	var completed bool
++	switch values[0] {
++	case "true":
++		completed = true
++	case "false":
++		completed = false
++	default:
++		return nil, false
++	}
++	return &completed, true
++}
++
+ func readJSON(w http.ResponseWriter, r *http.Request, destination any) bool {
+ 	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20))
+ 	decoder.DisallowUnknownFields()
+diff --git a/main_test.go b/main_test.go
+index e038855..29c6ce0 100644
+--- a/main_test.go
++++ b/main_test.go
+@@ -45,6 +45,70 @@ func TestTodoValidationAndMissingItems(t *testing.T) {
+ 	performRequest[map[string]string](t, handler, http.MethodPost, "/api/todos", `{"title":"Valid","extra":true}`, http.StatusBadRequest)
+ }
+ 
++func TestTodoListCompletionFilterPreservesUnfilteredOrder(t *testing.T) {
++	handler := newAPIHandler(newTestStore(t))
++	created := []Todo{
++		performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"First open"}`, http.StatusCreated),
++		performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"First done","completed":true}`, http.StatusCreated),
++		performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Second open"}`, http.StatusCreated),
++		performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Second done","completed":true}`, http.StatusCreated),
++	}
++
++	all := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos", "", http.StatusOK)
++	open := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos?completed=false", "", http.StatusOK)
++	done := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos?completed=true", "", http.StatusOK)
++	assertTodoIDs(t, all, created[0].ID, created[1].ID, created[2].ID, created[3].ID)
++	assertTodoIDs(t, open, created[0].ID, created[2].ID)
++	assertTodoIDs(t, done, created[1].ID, created[3].ID)
++	for i, todo := range all {
++		if todo.Completed != (i%2 == 1) {
++			t.Errorf("todo %d completed = %t, want %t", todo.ID, todo.Completed, i%2 == 1)
++		}
++	}
++
++	// Listing with a filter is read-only; the unfiltered list still contains all todos.
++	all = performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos", "", http.StatusOK)
++	assertTodoIDs(t, all, created[0].ID, created[1].ID, created[2].ID, created[3].ID)
++	for i, todo := range all {
++		if todo.Completed != (i%2 == 1) {
++			t.Errorf("todo %d completed after filtering = %t, want %t", todo.ID, todo.Completed, i%2 == 1)
++		}
++	}
++}
++
++func TestTodoListRejectsInvalidCompletionFilters(t *testing.T) {
++	handler := newAPIHandler(newTestStore(t))
++	for _, query := range []string{
++		"completed=",
++		"completed=maybe",
++		"completed=TRUE",
++		"completed=1",
++		"completed=true&completed=false",
++	} {
++		performRequest[map[string]string](t, handler, http.MethodGet, "/api/todos?"+query, "", http.StatusBadRequest)
++	}
++
++	request := httptest.NewRequest(http.MethodGet, "/api/todos", nil)
++	request.URL.RawQuery = "completed=%ZZ"
++	response := httptest.NewRecorder()
++	handler.ServeHTTP(response, request)
++	if response.Code != http.StatusBadRequest {
++		t.Fatalf("malformed completion filter status = %d, want %d", response.Code, http.StatusBadRequest)
++	}
++}
++
++func assertTodoIDs(t *testing.T, todos []Todo, expected ...int64) {
++	t.Helper()
++	if len(todos) != len(expected) {
++		t.Fatalf("todo count = %d, want %d; todos: %+v", len(todos), len(expected), todos)
++	}
++	for i, todo := range todos {
++		if todo.ID != expected[i] {
++			t.Fatalf("todo ID at index %d = %d, want %d; todos: %+v", i, todo.ID, expected[i], todos)
++		}
++	}
++}
++
+ func TestTodosPersistWhenStoreReopens(t *testing.T) {
+ 	databasePath := filepath.Join(t.TempDir(), "todos.db")
+ 	store, err := NewStore(databasePath)

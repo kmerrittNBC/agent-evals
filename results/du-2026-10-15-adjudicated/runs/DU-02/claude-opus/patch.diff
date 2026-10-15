@@ -1,0 +1,213 @@
+diff --git a/README.md b/README.md
+index 8a92319..de0b988 100644
+--- a/README.md
++++ b/README.md
+@@ -5,6 +5,7 @@ A deliberately small full-stack project for evaluating coding agents. The app us
+ ## Current behavior
+ 
+ - View all todos.
++- Filter the API todo list by completion status.
+ - Add a todo.
+ - Edit a todo's title.
+ - Mark a todo complete or incomplete.
+@@ -26,11 +27,18 @@ The API currently exposes:
+ 
+ | Method | Path | Behavior |
+ | --- | --- | --- |
+-| `GET` | `/api/todos` | List todos |
++| `GET` | `/api/todos` | List todos ordered by id; optional `completed` filter |
+ | `GET` | `/api/todos/{id}` | View one todo |
+ | `POST` | `/api/todos` | Create a todo |
+ | `PUT` | `/api/todos/{id}` | Replace a todo's editable fields |
+ 
++`GET /api/todos` accepts an optional `completed` query parameter:
++
++- No `completed` parameter returns every todo ordered by id.
++- `?completed=true` returns only completed todos, ordered by id.
++- `?completed=false` returns only incomplete todos, ordered by id.
++- Any other value (including an empty value, `1`, `TRUE`, or a repeated parameter) returns `400 Bad Request` with `{"error": "completed must be \"true\" or \"false\""}`.
++
+ ## Run in development
+ 
+ Requirements: Go 1.26+ and Node.js 22+.
+@@ -63,4 +71,4 @@ Open <http://localhost:8080>.
+ make test
+ ```
+ 
+-The Go suite covers the API lifecycle, validation, missing records, SQLite persistence across restarts, and the intentional absence of DELETE. The frontend suite covers rendering and editing through the Lit component.
++The Go suite covers the API lifecycle, validation, completion filtering, missing records, SQLite persistence across restarts, and the intentional absence of DELETE. The frontend suite covers rendering and editing through the Lit component.
+diff --git a/main.go b/main.go
+index 59fc240..ceaf1d8 100644
+--- a/main.go
++++ b/main.go
+@@ -20,6 +20,7 @@ import (
+ var (
+ 	errTodoNotFound  = errors.New("todo not found")
+ 	errTitleRequired = errors.New("title is required")
++	errInvalidFilter = errors.New(`completed must be "true" or "false"`)
+ )
+ 
+ type Todo struct {
+@@ -67,8 +68,15 @@ func (s *Store) Close() error {
+ 	return s.db.Close()
+ }
+ 
+-func (s *Store) List() ([]Todo, error) {
+-	rows, err := s.db.Query(`SELECT id, title, completed, created_at, updated_at FROM todos ORDER BY id`)
++// List returns todos ordered by id. A nil completed filter returns every todo.
++func (s *Store) List(completed *bool) ([]Todo, error) {
++	query := `SELECT id, title, completed, created_at, updated_at FROM todos`
++	var args []any
++	if completed != nil {
++		query += ` WHERE completed = ?`
++		args = append(args, *completed)
++	}
++	rows, err := s.db.Query(query+` ORDER BY id`, args...)
+ 	if err != nil {
+ 		return nil, fmt.Errorf("list todos: %w", err)
+ 	}
+@@ -182,8 +190,13 @@ func scanTodo(row rowScanner) (Todo, error) {
+ 
+ func newAPIHandler(store *Store) http.Handler {
+ 	mux := http.NewServeMux()
+-	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, _ *http.Request) {
+-		todos, err := store.List()
++	mux.HandleFunc("GET /api/todos", func(w http.ResponseWriter, r *http.Request) {
++		completed, err := readCompletedFilter(r)
++		if err != nil {
++			writeError(w, http.StatusBadRequest, err.Error())
++			return
++		}
++		todos, err := store.List(completed)
+ 		if err != nil {
+ 			writeError(w, http.StatusInternalServerError, "could not list todos")
+ 			return
+@@ -268,6 +281,29 @@ func readID(w http.ResponseWriter, r *http.Request) (int64, bool) {
+ 	return id, true
+ }
+ 
++// readCompletedFilter parses the optional completed query parameter. It returns
++// nil when the parameter is absent and rejects anything other than a single
++// "true" or "false" value.
++func readCompletedFilter(r *http.Request) (*bool, error) {
++	values, present := r.URL.Query()["completed"]
++	if !present {
++		return nil, nil
++	}
++	if len(values) != 1 {
++		return nil, errInvalidFilter
++	}
++	var completed bool
++	switch values[0] {
++	case "true":
++		completed = true
++	case "false":
++		completed = false
++	default:
++		return nil, errInvalidFilter
++	}
++	return &completed, nil
++}
++
+ func readJSON(w http.ResponseWriter, r *http.Request, destination any) bool {
+ 	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, 1<<20))
+ 	decoder.DisallowUnknownFields()
+diff --git a/main_test.go b/main_test.go
+index e038855..1615e47 100644
+--- a/main_test.go
++++ b/main_test.go
+@@ -6,6 +6,8 @@ import (
+ 	"net/http"
+ 	"net/http/httptest"
+ 	"path/filepath"
++	"slices"
++	"strings"
+ 	"testing"
+ )
+ 
+@@ -45,6 +47,70 @@ func TestTodoValidationAndMissingItems(t *testing.T) {
+ 	performRequest[map[string]string](t, handler, http.MethodPost, "/api/todos", `{"title":"Valid","extra":true}`, http.StatusBadRequest)
+ }
+ 
++func TestListTodosFiltersByCompleted(t *testing.T) {
++	handler := newAPIHandler(newTestStore(t))
++
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"First open"}`, http.StatusCreated)
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"First done","completed":true}`, http.StatusCreated)
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Second open"}`, http.StatusCreated)
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Second done","completed":true}`, http.StatusCreated)
++
++	tests := []struct {
++		path string
++		want []string
++	}{
++		{"/api/todos", []string{"First open", "First done", "Second open", "Second done"}},
++		{"/api/todos?completed=true", []string{"First done", "Second done"}},
++		{"/api/todos?completed=false", []string{"First open", "Second open"}},
++	}
++	for _, test := range tests {
++		listed := performRequest[[]Todo](t, handler, http.MethodGet, test.path, "", http.StatusOK)
++		if got := todoTitles(listed); !slices.Equal(got, test.want) {
++			t.Errorf("GET %s titles = %q, want %q", test.path, got, test.want)
++		}
++	}
++}
++
++func TestListTodosFilterReturnsEmptyArray(t *testing.T) {
++	handler := newAPIHandler(newTestStore(t))
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Open"}`, http.StatusCreated)
++
++	request := httptest.NewRequest(http.MethodGet, "/api/todos?completed=true", nil)
++	response := httptest.NewRecorder()
++	handler.ServeHTTP(response, request)
++	if response.Code != http.StatusOK || strings.TrimSpace(response.Body.String()) != "[]" {
++		t.Fatalf("status = %d, body = %q; want 200 and []", response.Code, response.Body.String())
++	}
++}
++
++func TestListTodosRejectsInvalidCompletedFilter(t *testing.T) {
++	store := newTestStore(t)
++	handler := newAPIHandler(store)
++	performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Keep me"}`, http.StatusCreated)
++
++	for _, query := range []string{
++		"completed=",
++		"completed=maybe",
++		"completed=TRUE",
++		"completed=1",
++		"completed=0",
++		"completed=true&completed=false",
++	} {
++		body := performRequest[map[string]string](t, handler, http.MethodGet, "/api/todos?"+query, "", http.StatusBadRequest)
++		if body["error"] == "" {
++			t.Errorf("GET /api/todos?%s returned no error message", query)
++		}
++	}
++
++	stored, err := store.List(nil)
++	if err != nil {
++		t.Fatal(err)
++	}
++	if got := todoTitles(stored); !slices.Equal(got, []string{"Keep me"}) {
++		t.Fatalf("stored todos changed after rejected filters: %q", got)
++	}
++}
++
+ func TestTodosPersistWhenStoreReopens(t *testing.T) {
+ 	databasePath := filepath.Join(t.TempDir(), "todos.db")
+ 	store, err := NewStore(databasePath)
+@@ -73,6 +139,14 @@ func TestTodosPersistWhenStoreReopens(t *testing.T) {
+ 	}
+ }
+ 
++func todoTitles(todos []Todo) []string {
++	titles := make([]string, 0, len(todos))
++	for _, todo := range todos {
++		titles = append(titles, todo.Title)
++	}
++	return titles
++}
++
+ func newTestStore(t *testing.T) *Store {
+ 	t.Helper()
+ 	store, err := NewStore(filepath.Join(t.TempDir(), "todos.db"))

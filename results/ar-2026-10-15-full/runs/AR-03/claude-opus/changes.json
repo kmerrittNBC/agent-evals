@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 0,
+  "untracked_paths": [
+    "docs/speculative/stage-a-host-interruption-recovery-plan.md"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "b0b31dda691620edae30db7127c1e1d8da907813",
+  "validation_checks_intact": true
+}

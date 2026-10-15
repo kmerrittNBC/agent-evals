@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The Node ranges, minimum shared version, Python and uv requirements, and dependency versions match the evidence pack. The answer correctly limits its claims to declared compatibility."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "It answers the runtime comparison and explains what needs testing, but one native CLI package name is redacted."
+    },
+    "source_quality": {
+      "score": 2,
+      "reason": "The transcript shows reliance on a secondary evidence pack rather than inspection of the pinned manifests and lockfiles. The final link points to that pack instead of the repository files."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "It computes the correct intersection and separates version declarations from installation and runtime results."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "It identifies the harness's lack of a Node upper bound and qualifies host, native binary, browser, and test compatibility."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "The table and minimum Node choice are clear. Direct pinned-file citations and the unredacted CLI name would make the result easier to verify."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "partial",
+  "follow_up_classification": "useful_but_avoidable",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "source_quality",
+      "answer_passage": "The pinned source references and excerpts are recorded in `evidence/IG-03/pack.json`",
+      "evidence": "The transcript shows the assistant reading that evidence pack; it does not show a successful read of either pinned repository's manifests or lockfiles.",
+      "reason": "The cited pack summarizes primary files but does not demonstrate direct verification of them."
+    },
+    {
+      "dimension": "task_completion",
+      "answer_passage": "`[redacted harness]-ai` **1.18.28**",
+      "evidence": "The evidence pack identifies the relevant package as `opencode-ai` at version 1.18.28.",
+      "reason": "The version is correct, but the redaction obscures which native CLI dependency it belongs to."
+    }
+  ],
+  "first_substantive_event_index": 15
+}

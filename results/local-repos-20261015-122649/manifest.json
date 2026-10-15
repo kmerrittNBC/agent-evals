@@ -1,0 +1,154 @@
+{
+  "evaluation_id": "local-repos-20261015-122649",
+  "created_at": "2026-10-15T16:26:49.896568+00:00",
+  "cutoff": "2026-10-15T00:00:00-04:00",
+  "config_hashes": {
+    "arms": "b62f0efe30db4fbf1881c36d020f7630fdf2ff0093e3220f00354b3b646cb033",
+    "tasks": "f05d1988429a3c59f52164356fe03342da5fe8754bde5945ed439faa0b75f243",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {
+    "relayview": {
+      "path": "/home/anodyine/Projects/relayview",
+      "commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "working_tree_dirty": false
+    },
+    "agent-harness-evals": {
+      "path": "/home/anodyine/Projects/agent-harness-evals",
+      "commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "working_tree_dirty": false
+    }
+  },
+  "preflight": {
+    "pi-luna": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.2.0",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "pi-sol": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.2.0",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /home/anodyine/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "opencode-luna": {
+      "status": "ready",
+      "reason": null,
+      "version": "opencode v2.0.26",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": "tinyfish",
+      "usage_fields": [
+        "cost",
+        "tokens"
+      ],
+      "probe_tool_names": [
+        "websearch",
+        "webfetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "claude-opus": {
+      "status": "ready",
+      "reason": null,
+      "version": "2.1.296 (Claude Code)",
+      "model": "claude-opus-5-5",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cache_creation",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "fallback_credit",
+        "inference_geo",
+        "input_tokens",
+        "iterations",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "speed"
+      ],
+      "probe_tool_names": [
+        "WebSearch",
+        "WebFetch"
+      ],
+      "usage_classification": "measured"
+    }
+  },
+  "judge_preflight": {
+    "status": "ready",
+    "reason": null,
+    "version": "codex-cli 0.156.1"
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "ready",
+      "sha256": "d583fedfe31dd7db16a12174e8797541fb778f153a017977191c86befc36954c"
+    },
+    "IG-02": {
+      "status": "ready",
+      "sha256": "db634d74894cf36b45b99914a0c673d9b83dca93673fe516303bee5acf5e2ccc"
+    },
+    "IG-03": {
+      "status": "ready",
+      "sha256": "223c934123201f4d52cafe3cc614c3fe64ede0e93c65f935a60ab1b2be905b01"
+    },
+    "IG-04": {
+      "status": "ready",
+      "sha256": "0b80ff4ec8f48b9b7797f694177155dbeeed3714f77cb9d2f24f3877bae3a811"
+    },
+    "IG-05": {
+      "status": "ready",
+      "sha256": "c880ed11b52edc4d4dfa6a941f9a3aa31d4c04905cdf8b9539b339c651fc7d15"
+    }
+  }
+}

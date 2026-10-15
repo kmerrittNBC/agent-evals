@@ -1,0 +1,5 @@
+**Decision:** Fail closed when a standalone research MCP sidecar disappears during a trial. Stop its clients and bridges, retain the `started` marker and compact evidence, and mark the trial interrupted. Do not relaunch with a fresh volatile ledger under the old identity. Bridge reconnection is safe only while the *same* sidecar remains alive.
+
+I recorded the decision and staged implementation plan in `relayview/docs/speculative/research-mcp-sidecar-loss-boundary.md`. It compares that boundary with a deferred restart design requiring durable transactional accounting, process fencing, and generation-bound bridge admission. It also specifies credential and socket isolation, stale-client tests, verification gates, and rollback to a new authorized trial. No runtime code or authoritative behavior was changed.
+
+**Local checks:** `git diff --check` passed, and I checked the plan against the bridge, sidecar, service, ledger, and authoritative trial contracts. Dependencies are absent in this worktree, so I did not run Vitest or package verification; those remain implementation-stage gates.

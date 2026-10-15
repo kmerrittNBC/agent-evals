@@ -1,0 +1,53 @@
+{
+  "task_id": "AR-02",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:13:48.885071+00:00",
+  "elapsed_seconds": 94.262729,
+  "answer": "## Decision\n\n**Fail closed and mark the standalone MCP trial interrupted if its supervised sidecar disappears. Do not restart it under the same trial identity, replenish its allowance, or count the trial as a successful continuation.**\n\nThis matches the current contract in `docs/authoritative/research-mcp.md`: the standalone host uses a volatile ledger, writes a durable `started` marker before listening, and refuses to start again when that marker exists. The supervisor should retain that marker and the compact evidence, stop the affected client/trial, and preserve the task and its other artifacts for inspection. An interrupted research trial should not be reported as a completed benchmark trial.\n\nA safe restart is possible in principle, but **the current standalone MCP path does not have the required durable accounting or reconnect identity contracts**. The owner-managed research-trial implementation has a stronger basis for a future recovery path; it is not a reason to bypass the standalone marker.\n\n## Why the contracts lead to fail-closed\n\n- **Accounting is volatile in the standalone sidecar.** `src/research/mcp/main.ts` constructs a `VolatileWorkLedger`; `src/research/core/work.ts` explicitly says a new ledger starts a new allowance. The service reserves work before effects and retains uncertain maximum charges within that process, but a process death loses that in-memory ledger. A remote request may have completed even when its result or reconciliation was lost.\n- **The MCP call ID is not a recovery token.** `src/research/mcp/protocol.ts` generates it from a connection UUID and request count. A new bridge connection cannot reliably replay the old logical call. Reissuing the request as a new call could repeat a paid effect.\n- **Bridge behavior is already fail-closed on disconnect.** `src/research/mcp/bridge.ts` connects once, pipes stdio, and resolves when the socket closes; it does not reconnect or retry tool calls. `src/research/mcp/protocol.ts` aborts pending work on connection closure. That is the right failure behavior for the current volatile service.\n- **The socket is a capability, not a session-authentication handshake.** The bridge checks that the path is an absolute, same-UID Unix socket with restrictive permissions, then forwards MCP bytes. It does not verify a trial/session generation. The supervisor’s private directory, per-client socket visibility, and no-path-reuse discipline therefore matter; Unix permissions alone do not contain unrestricted same-UID processes.\n- **Credentials are outside the bridge, but restart must preserve that boundary.** The supervisor supplies setup on fd 3 and the Brave credential on fd 4; the sidecar closes those descriptors after bootstrap. The bridge receives neither. Any restart must get credentials again through the trusted supervisor/systemd delivery path—not through argv, environment variables, socket protocol, logs, or agent-visible state.\n- **The owner-managed trial ledger shows what a stronger accounting boundary looks like.** `src/storage/research-trials.ts` reserves and reconciles work in immediate SQLite transactions, charges unresolved reservations at their maximum, rejects duplicate effect reservations, and exports uncertain work separately. `docs/authoritative/owner-research-trials.md` binds the trial to the task, frozen policy and artifact, and states that a replacement session gets no fresh allowance. That supports recovery of *future work under the same durable allowance*; it does not imply that an uncertain in-flight effect should be replayed.\n- **Handles and cached call results are transient.** A restarted service cannot restore continuation handles or in-memory call results. Recovery must invalidate handles and require a refetch with the prior `expectedDocumentDigest` where source identity matters (`docs/authoritative/reusable-research-core.md`).\n\n## Staged implementation plan\n\n1. **Keep the current boundary and make interruption explicit.** On sidecar exit, close the client path, retain the `started` marker and compact evidence, and record the trial as interrupted in the supervisor’s own durable run record. Do not delete the trial directory or silently substitute a fresh one. Preserve the task/worktree for operator review, but do not count it as a completed trial.\n2. **Make socket identity non-reusable in the supervisor.** Allocate a private directory and socket path per trial generation. Never bind a replacement process to a prior generation’s path, even after graceful shutdown unlinks its socket. Keep old bridge/client configurations pinned to the old path so they fail rather than attach to a different session. Expose only the assigned path to each client; do not treat same-UID socket mode bits as sufficient isolation.\n3. **If restart is pursued, first move the trial onto a durable host ledger.** Persist immutable trial/session/capability/policy/artifact identity, logical calls, unique effect reservations, acknowledged actual work, terminal evidence, and uncertain reservations. Reserve before effects; conservatively retain maximum charges for work whose outcome is uncertain. Never reset quota from process memory or readiness data. Use a new call ID for an operator/model-authorized retry, charge it as new work, and do not automatically repeat the uncertain effect.\n4. **Add generation-scoped restart admission.** A replacement may serve *new* authorized calls only after the supervisor verifies the same frozen trial identity, exact admitted artifact and policy, unchanged credential binding, and the durable ledger’s current usage. Rotate the socket path and require a newly launched bridge/client configuration for that generation. Do not transparently reconnect an old bridge or reuse transient continuation handles.\n5. **Enable automatic recovery only after the crash cases are proven.** Until durable reconciliation, fresh-generation socket isolation, credential redelivery, and truthful interrupted-call reporting all pass deterministic tests, retain fail-closed termination as the production behavior. The standalone MCP package should not gain a “restart” option that merely bypasses its marker.\n\n## Verification and rollback\n\nVerification should cover process death during an active provider call, death after an effect but before reconciliation/evidence acknowledgement, marker retention, refusal to relaunch under the same standalone identity, and rejection of stale bridges when a later generation is active. For a durable implementation, also verify that usage and uncertain maxima survive database reopen, that no effect is replayed on recovery, that a new explicit call consumes remaining quota correctly, that handles are unavailable after restart, and that setup/credential values never appear in bridge environment, argv, logs, evidence, or model-visible output. Owner-trial coverage should include its existing restart and ledger paths.\n\n**Rollback:** disable recovery and return to the current fail-closed behavior. Keep the interrupted trial and its accounting/evidence; do not restore an older database to reclaim quota or clear the marker to reuse the same trial. A new trial requires a fresh authorized identity and allowance. If a recovery release is rolled back, use the whole previously admitted MCP/core artifact, not a mix of wrapper and core files.\n\n## Changes and checks\n\nI made **no code or documentation changes**; this is the requested decision and staged plan. I inspected the contracts and source under `./relayview`. I could not run local checks or confirm Git status because the available tool interface provides file inspection and patching but no shell/command-execution tool. The focused checks to run when execution is available are `npx vitest run src/research/mcp`, `npx vitest run src/research/ownerTrial.test.ts src/api/research-trials.test.ts`, and `npm run verify:research-mcp`; the owner-trial fixture smoke is documented as `node test/research-trial-smoke.mjs --fixture` after building.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 12961,
+        "output": 258,
+        "reasoning": 516,
+        "cache": {
+          "read": 74799,
+          "write": 0
+        }
+      },
+      "cost": 0.0024310900000000003
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 2.877639,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 94.262729,
+      "started_at": "2026-10-15T18:13:48.885071+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 39
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

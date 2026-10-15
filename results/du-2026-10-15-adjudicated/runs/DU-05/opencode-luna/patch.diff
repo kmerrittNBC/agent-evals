@@ -1,0 +1,28 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..6601d97 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -101,6 +101,14 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+         return False, "judge evidence pack is incomplete"
+     if "REPLACE" in json.dumps(pack) or not pack["reference_answer"] or not pack["sources"]:
+         return False, "judge evidence pack contains placeholders or no sources"
++    repo_facts = pack["repo_facts"]
++    if not isinstance(repo_facts, list) or any(
++            not isinstance(item, dict) or
++            not isinstance(item.get("repo"), str) or not item["repo"].strip() or
++            not isinstance(item.get("commit"), str) or len(item["commit"]) != 40 or
++            any(character not in "0123456789abcdefABCDEF" for character in item["commit"])
++            for item in repo_facts):
++        return False, "judge evidence pack has a malformed repo fact (expected a nonempty repo name and 40-character commit hash)"
+     if not isinstance(pack["sources"], list) or any(
+            not isinstance(source, dict) or
+            not all(source.get(key) for key in ("title", "url", "retrieved_at", "snapshot_or_excerpt"))
+@@ -116,7 +124,7 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+         selected = task_repo_names(task, manifest)
+         if task["repos"] and not selected:
+             return False, "task has no pinned repositories"
+-        facts = {item["repo"]: item["commit"] for item in pack["repo_facts"]}
++        facts = {item["repo"]: item["commit"] for item in repo_facts}
+         for name in selected:
+             info = manifest["repos"].get(name)
+             if info is None:

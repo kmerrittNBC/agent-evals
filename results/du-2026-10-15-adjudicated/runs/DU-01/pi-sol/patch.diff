@@ -1,0 +1,179 @@
+diff --git a/README.md b/README.md
+index 8a92319..002bccb 100644
+--- a/README.md
++++ b/README.md
+@@ -8,11 +8,10 @@ A deliberately small full-stack project for evaluating coding agents. The app us
+ - Add a todo.
+ - Edit a todo's title.
+ - Mark a todo complete or incomplete.
++- Delete a todo through the API (no delete control in the UI).
+ - Validate empty titles and show API errors.
+ - Keep todos across backend restarts in `data/todos.db`.
+ 
+-Deleting todos is intentionally not implemented. The repository's open Gitea issue defines that follow-up task.
+-
+ ## Architecture
+ 
+ ```text
+@@ -22,7 +21,7 @@ main.go                   SQLite store, REST handlers, and static file server
+ main_test.go              API behavior and regression tests
+ ```
+ 
+-The API currently exposes:
++The API exposes:
+ 
+ | Method | Path | Behavior |
+ | --- | --- | --- |
+@@ -30,6 +29,7 @@ The API currently exposes:
+ | `GET` | `/api/todos/{id}` | View one todo |
+ | `POST` | `/api/todos` | Create a todo |
+ | `PUT` | `/api/todos/{id}` | Replace a todo's editable fields |
++| `DELETE` | `/api/todos/{id}` | Delete a todo; returns `204 No Content` with no body, or `404` if absent |
+ 
+ ## Run in development
+ 
+@@ -63,4 +63,4 @@ Open <http://localhost:8080>.
+ make test
+ ```
+ 
+-The Go suite covers the API lifecycle, validation, missing records, SQLite persistence across restarts, and the intentional absence of DELETE. The frontend suite covers rendering and editing through the Lit component.
++The Go suite covers the API lifecycle, validation, missing records, deletion, and SQLite persistence across restarts. The frontend suite covers rendering and editing through the Lit component.
+diff --git a/main.go b/main.go
+index 59fc240..b34d18b 100644
+--- a/main.go
++++ b/main.go
+@@ -154,6 +154,21 @@ func (s *Store) Update(id int64, input todoInput) (Todo, error) {
+ 	return s.Get(id)
+ }
+ 
++func (s *Store) Delete(id int64) error {
++	result, err := s.db.Exec(`DELETE FROM todos WHERE id = ?`, id)
++	if err != nil {
++		return fmt.Errorf("delete todo: %w", err)
++	}
++	affected, err := result.RowsAffected()
++	if err != nil {
++		return fmt.Errorf("read deleted row count: %w", err)
++	}
++	if affected == 0 {
++		return errTodoNotFound
++	}
++	return nil
++}
++
+ type rowScanner interface {
+ 	Scan(dest ...any) error
+ }
+@@ -234,6 +249,21 @@ func newAPIHandler(store *Store) http.Handler {
+ 		}
+ 		writeJSON(w, http.StatusOK, todo)
+ 	})
++	mux.HandleFunc("DELETE /api/todos/{id}", func(w http.ResponseWriter, r *http.Request) {
++		id, ok := readID(w, r)
++		if !ok {
++			return
++		}
++		if err := store.Delete(id); err != nil {
++			if errors.Is(err, errTodoNotFound) {
++				writeError(w, http.StatusNotFound, err.Error())
++			} else {
++				writeError(w, http.StatusInternalServerError, "could not delete todo")
++			}
++			return
++		}
++		w.WriteHeader(http.StatusNoContent)
++	})
+ 	return mux
+ }
+ 
+diff --git a/main_test.go b/main_test.go
+index e038855..42ff34d 100644
+--- a/main_test.go
++++ b/main_test.go
+@@ -3,13 +3,15 @@ package main
+ import (
+ 	"bytes"
+ 	"encoding/json"
++	"errors"
+ 	"net/http"
+ 	"net/http/httptest"
+ 	"path/filepath"
++	"strconv"
+ 	"testing"
+ )
+ 
+-func TestTodoLifecycleWithoutDelete(t *testing.T) {
++func TestTodoLifecycle(t *testing.T) {
+ 	store := newTestStore(t)
+ 	handler := newAPIHandler(store)
+ 
+@@ -28,11 +30,9 @@ func TestTodoLifecycleWithoutDelete(t *testing.T) {
+ 		t.Fatalf("unexpected updated todo: %+v", updated)
+ 	}
+ 
+-	request := httptest.NewRequest(http.MethodDelete, "/api/todos/1", nil)
+-	response := httptest.NewRecorder()
+-	handler.ServeHTTP(response, request)
+-	if response.Code != http.StatusMethodNotAllowed {
+-		t.Fatalf("DELETE status = %d, want %d", response.Code, http.StatusMethodNotAllowed)
++	got := performRequest[Todo](t, handler, http.MethodGet, "/api/todos/1", "", http.StatusOK)
++	if got.ID != updated.ID || got.Title != updated.Title || !got.Completed {
++		t.Fatalf("unexpected fetched todo: %+v", got)
+ 	}
+ }
+ 
+@@ -43,6 +43,54 @@ func TestTodoValidationAndMissingItems(t *testing.T) {
+ 	performRequest[map[string]string](t, handler, http.MethodGet, "/api/todos/99", "", http.StatusNotFound)
+ 	performRequest[map[string]string](t, handler, http.MethodPut, "/api/todos/99", `{"title":"Missing"}`, http.StatusNotFound)
+ 	performRequest[map[string]string](t, handler, http.MethodPost, "/api/todos", `{"title":"Valid","extra":true}`, http.StatusBadRequest)
++	performRequest[map[string]string](t, handler, http.MethodDelete, "/api/todos/99", "", http.StatusNotFound)
++	for _, path := range []string{"/api/todos/0", "/api/todos/not-an-id"} {
++		performRequest[map[string]string](t, handler, http.MethodDelete, path, "", http.StatusBadRequest)
++	}
++}
++
++func TestDeleteTodoPersistsWhenStoreReopens(t *testing.T) {
++	databasePath := filepath.Join(t.TempDir(), "todos.db")
++	store, err := NewStore(databasePath)
++	if err != nil {
++		t.Fatal(err)
++	}
++	handler := newAPIHandler(store)
++	removed := performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Remove me"}`, http.StatusCreated)
++	kept := performRequest[Todo](t, handler, http.MethodPost, "/api/todos", `{"title":"Keep me"}`, http.StatusCreated)
++	path := "/api/todos/" + strconv.FormatInt(removed.ID, 10)
++
++	request := httptest.NewRequest(http.MethodDelete, path, nil)
++	response := httptest.NewRecorder()
++	handler.ServeHTTP(response, request)
++	if response.Code != http.StatusNoContent || response.Body.Len() != 0 {
++		t.Fatalf("DELETE status = %d, body = %q; want 204 and empty body", response.Code, response.Body.String())
++	}
++	performRequest[map[string]string](t, handler, http.MethodGet, path, "", http.StatusNotFound)
++	performRequest[map[string]string](t, handler, http.MethodDelete, path, "", http.StatusNotFound)
++	listed := performRequest[[]Todo](t, handler, http.MethodGet, "/api/todos", "", http.StatusOK)
++	if len(listed) != 1 || listed[0].ID != kept.ID {
++		t.Fatalf("list after delete = %+v, want only %+v", listed, kept)
++	}
++	if err := store.Close(); err != nil {
++		t.Fatal(err)
++	}
++
++	reopened, err := NewStore(databasePath)
++	if err != nil {
++		t.Fatal(err)
++	}
++	defer reopened.Close()
++	if _, err := reopened.Get(removed.ID); !errors.Is(err, errTodoNotFound) {
++		t.Fatalf("deleted todo after reopening: %v, want not found", err)
++	}
++	listed, err = reopened.List()
++	if err != nil {
++		t.Fatal(err)
++	}
++	if len(listed) != 1 || listed[0].ID != kept.ID {
++		t.Fatalf("list after reopening = %+v, want only %+v", listed, kept)
++	}
+ }
+ 
+ func TestTodosPersistWhenStoreReopens(t *testing.T) {

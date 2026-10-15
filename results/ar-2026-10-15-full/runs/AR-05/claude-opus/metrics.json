@@ -1,0 +1,126 @@
+{
+  "task_id": "AR-05",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:59:16.451447+00:00",
+  "elapsed_seconds": 102.727562,
+  "answer": "I split `run_one` into three parts: workspace creation and cleanup, harness conversation capture, and status classification. The event, answer, usage and continuation contracts are unchanged. All 20 tests pass (`python3 -m unittest tests.test_runner`): the 15 that were there before and 5 new ones. `python3 -m agent_eval --help` still works. I didn't commit anything, and the IG prompts, arms, configs and schemas are untouched.\n\n**How I checked the behaviour didn't change:** before editing the runner, I wrote tests for `run_one` and ran them against the original code, where they passed. They still pass after the refactor. They fix:\n- the continuation flow: the first prompt asks a clarifying question, so the continuation runs and reuses the same session;\n- how the two phases are merged in `events.jsonl`: indexes, phase numbers and time offsets;\n- the per-phase files `phase-N.jsonl`;\n- the contents of `answer.md` and `metrics.json`, including usage, the time to first visible output, and the before/after snapshot digests;\n- that a modified snapshot makes the run fail even when there is an answer;\n- that a non-zero exit stops the run without a continuation;\n- that the temporary workspace is deleted afterwards.\n\n## The new seam (`src/agent_eval/core.py`)\n\n- **`SnapshotWorkspace`** wraps the existing `prepare_workspace` and `tree_digest`. It has a small interface:\n  - Entering it creates the read-only export and records the starting digest. If the export fails, it cleans up the temporary directory.\n  - `path` is the only thing the harness sees.\n  - `verify()` runs after the conversation and returns a failure reason or `None`. Here it returns \"Repository snapshot was modified\" if the digest changed.\n  - `record()` returns the fields this workspace adds to the metrics. Here that's `snapshot_digest_before` and `snapshot_digest_after`, in the same position in the output as before.\n  - Exiting it removes the directory.\n- **`converse(...)`** contains only the harness conversation: running the phases, merging events, picking the final answer, detecting a clarifying question, and the per-harness session handling (Copilot UUID, Pi session file). It knows nothing about snapshots or digests; it just gets a directory and an environment.\n- **`run_status(conversation, workspace_failure)`** applies the same status rules in the same order as before, with the workspace failure checked first.\n- **`run_one(..., workspace_factory=snapshot_workspace)`** puts these together. The default keeps the current read-only behaviour, so `__main__` didn't need changing.\n\n## How a future writable-worktree workspace would use it\n\nA `WorktreeWorkspace(task, manifest)` would implement the same five pieces:\n- **On enter:** run `git worktree add --detach <tmp> <pinned commit>` for each repo, instead of exporting a read-only copy.\n- **`verify()`:** save `git diff <commit>` and the list of untracked files into the run directory as the result to be judged. Editing files would no longer count as a failure. It would only return a reason for real violations, such as a changed `HEAD`, new commits, or files written outside the worktree.\n- **`record()`:** return its own fields, such as the diff path, diff stats or the final commit, instead of the snapshot digests.\n- **On exit:** run `git worktree remove --force` and `git worktree prune`.\n\nThe conversation and status code would not change. The new test `test_workspace_factory_owns_integrity_policy_and_record` shows this with a writable workspace: the agent writes a file, the run completes, the workspace's own fields appear in the metrics, and enter → verify → exit happen in that order.\n\nTwo things a real worktree arm would still need, which I left out of this change:\n- The adapters currently grant read-only tools (for example OpenCode's deny-by-default rules and Pi's `--tools`), so writing would need a tool profile chosen per workspace.\n- The new metrics fields aren't required by `schemas/agent-run.schema.json`, so they fit without changing the schema. The report and judge would still need to learn to read the diff artifact.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 22,
+      "cache_creation_input_tokens": 33732,
+      "cache_read_input_tokens": 268983,
+      "output_tokens": 11590,
+      "output_tokens_details": {
+        "thinking_tokens": 2274
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 33732,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1489,
+          "cache_read_input_tokens": 39114,
+          "cache_creation_input_tokens": 1400,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1400
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 19.598138,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 102.727562,
+      "started_at": "2026-10-15T18:59:16.451447+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 10
+  },
+  "changes": {
+    "tracked_patch_bytes": 19321,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-zww9f7yg/validation",
+        "/tmp/agent-eval-zww9f7yg/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "....................\n----------------------------------------------------------------------\nRan 20 tests in 0.017s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

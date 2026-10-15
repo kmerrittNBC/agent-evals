@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The counts, operational qualification, four revisions, amended 23-task cohort, 161 slots, and limits on ranking agree with the evidence pack. No contradicted claim is apparent."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "It answers the substantive questions, but did not directly inspect the pinned repository as requested."
+    },
+    "source_quality": {
+      "score": 2,
+      "reason": "The cited repository files were not successfully opened. The answer relies on excerpts in an evaluator evidence pack and gives file paths without direct citations or locations."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "It correctly separates an operational gate from a controlled comparative cohort and explains why recorded outcomes cannot establish a ranking or Stage A completion."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "It resolves the README's 25-task wording against the later 23-task amendment and distinguishes a prospective contract from an approved freeze."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "The conclusion and remaining verification needs are clear, though source locations are too imprecise for easy checking."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "partial",
+  "follow_up_classification": "necessary",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "The pinned checkout itself was not exposed for direct file reads in this workspace; I relied on the read-only source excerpts captured in `evidence/IG-05/pack.json`",
+      "evidence": "Transcript events 14–16 show empty results for attempted reads of the pinned README, final qualification evidence, and v5 contract; event 10 shows the evidence pack was read.",
+      "reason": "The prompt explicitly required read-only inspection of the pinned repository, which the answer did not complete."
+    },
+    {
+      "dimension": "source_quality",
+      "answer_passage": "Sources: `agent-harness-evals/README.md`; `agent-harness-evals/docs/evidence/current-qualification-180-final.md`.",
+      "evidence": "The transcript shows no successful read of either cited file. The pack provides excerpts attributed to those files, but not their full contents.",
+      "reason": "The attribution names relevant primary files, yet the candidate verified its claims through a secondary evidence pack rather than the cited files themselves."
+    }
+  ],
+  "first_substantive_event_index": 26
+}

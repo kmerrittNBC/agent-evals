@@ -1,0 +1,171 @@
+{
+  "task_id": "DU-01",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:16:44.231766+00:00",
+  "elapsed_seconds": 58.736729,
+  "answer": "`DELETE /api/todos/{id}` now works. A successful delete returns 204 with an empty body, and a missing ID returns 404. `make test` (Go and frontend tests) and `make build` both pass, and `go vet` is clean.\n\n**`main.go`**\n- **Store:** a new `Store.Delete(id)` runs a SQL delete and returns the existing \"todo not found\" error when no row was removed. The schema is unchanged.\n- **Route:** the new route checks the ID the same way GET and PUT do, so a non-numeric or zero ID gets 400. A database failure returns 500.\n- Create, read, update and validation code is unchanged.\n\n**`main_test.go`**\n- The old lifecycle test checked that DELETE returned 405. I renamed it `TestTodoLifecycle`; it now deletes the todo, then confirms the list is empty and GET returns 404.\n- Added tests that:\n  - deleting one todo leaves the others in the list;\n  - deleting the same todo twice returns 404 the second time;\n  - DELETE returns 404 for a missing ID and 400 for `abc` and `0`;\n  - a deleted todo is still absent after the SQLite store is closed and reopened, while the remaining todo is still there.\n- A small `performDelete` helper also checks that 204 responses have no body.\n\n**`README.md`**\n- Added the DELETE row to the API table, replaced the \"deleting is intentionally not implemented\" note with a line saying delete is API-only, and updated the description of what the tests cover.\n\n**Not changed**\n- **Frontend:** no delete UI and no change to `api.js`. The existing frontend test that checks there is no \"Delete\" control still passes.\n- **`eval_delete_test.go`:** this untracked file was already in the worktree before I started. I left it alone; it runs and passes as part of the Go tests. `gofmt` reports it as unformatted (it uses spaces instead of tabs), but that's the only formatting issue.\n\nThe changes are not committed.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 14,
+      "cache_creation_input_tokens": 15288,
+      "cache_read_input_tokens": 97682,
+      "output_tokens": 5081,
+      "output_tokens_details": {
+        "thinking_tokens": 239
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 15288,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 700,
+          "cache_read_input_tokens": 21003,
+          "cache_creation_input_tokens": 1067,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1067
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 14.411631,
+  "first_substantive_seconds": 14.411631,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 58.736729,
+      "started_at": "2026-10-15T17:16:44.231766+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 6
+  },
+  "changes": {
+    "tracked_patch_bytes": 7725,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "final_head": "052ce21307c02f772619e4878b44949bd72f5e1b"
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-fgxfamz5/workspace",
+        "/tmp/agent-eval-fgxfamz5/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-01/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-01/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.004s\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-fgxfamz5/workspace",
+        "/tmp/agent-eval-fgxfamz5/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-01/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-01/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./..."
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t(cached)\n",
+      "stderr": "",
+      "timed_out": false
+    }
+  ]
+}

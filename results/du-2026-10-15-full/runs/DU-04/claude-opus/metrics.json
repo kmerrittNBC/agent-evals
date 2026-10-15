@@ -1,0 +1,176 @@
+{
+  "task_id": "DU-04",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:28:45.417019+00:00",
+  "elapsed_seconds": 32.248492,
+  "answer": "`tree_digest` now includes each symlink's target text, so pointing a link somewhere else changes the workspace digest. That holds for broken links too. The runner tests pass (17 run, OK).\n\n**Change** (`src/agent_eval/core.py`, in `tree_digest`): when a path is a symlink, the link's target text is added to the hash with a `\\0symlink\\0` prefix, so it can't be mistaken for file content. The existing checks are unchanged: every relative path is still hashed, and file contents are still hashed whenever `is_file()` is true. That means a link to a file still adds the file's contents, as it did before.\n\n**Test** (`tests/test_runner.py`): `test_digest_tracks_symlink_targets_including_broken_links` checks three things:\n- Switching a working link between two files with identical contents changes the digest. Only the link text differs, so this tests the new behaviour directly.\n- Switching a broken link from `missing-a` to `missing-b` changes the digest.\n- Pointing it back at `missing-a` gives the original digest again, so the result is repeatable.\n\n**Run:** `python -m unittest tests.test_runner tests.test_eval_du04` (17 run, OK). I didn't run the new test against the old code. I expect it would fail there, because the old code hashed only the path for a broken link.\n\nThe worktree already had an untracked `tests/test_eval_du04.py` that wasn't mine. It tests the same broken-link case and passes with this change; I left it as it was. Nothing is committed.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 12,
+      "cache_creation_input_tokens": 7319,
+      "cache_read_input_tokens": 60222,
+      "output_tokens": 2584,
+      "output_tokens_details": {
+        "thinking_tokens": 587
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 7319,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 567,
+          "cache_read_input_tokens": 13816,
+          "cache_creation_input_tokens": 285,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 285
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 31.97976,
+  "first_substantive_seconds": 31.97976,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 32.248492,
+      "started_at": "2026-10-15T17:28:45.417019+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 7
+  },
+  "changes": {
+    "tracked_patch_bytes": 2120,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57"
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-wu85oamu/workspace",
+        "/tmp/agent-eval-wu85oamu/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-04/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-04/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-wu85oamu/workspace",
+        "/tmp/agent-eval-wu85oamu/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-04/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-04/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".................\n----------------------------------------------------------------------\nRan 17 tests in 0.016s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

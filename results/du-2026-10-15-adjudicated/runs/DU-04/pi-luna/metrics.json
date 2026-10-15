@@ -1,0 +1,88 @@
+{
+  "task_id": "DU-04",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:28:00.830625+00:00",
+  "elapsed_seconds": 44.420659,
+  "answer": "Updated `src/agent_eval/core.py` so `tree_digest` includes each symlink’s target text, including broken links. Existing relative-path and file-content hashing remains unchanged.\n\nAdded focused coverage in `tests/test_eval_du04.py` for retargeting both broken links and live links whose targets have identical contents.\n\n**Checks:** `python3 -m unittest discover -s tests -v` — all 17 tests passed, including the runner tests. No `AGENTS.md` was present.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 311,
+      "cacheRead": 9998,
+      "cacheWrite": 709,
+      "reasoning": 204,
+      "totalTokens": 11021,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.00015549999999999999,
+        "cacheRead": 9.998e-05,
+        "cacheWrite": 8.8625e-05,
+        "total": 0.000344405
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 43.633988,
+  "first_substantive_seconds": 44.40754,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 44.420659,
+      "started_at": "2026-10-15T17:28:00.830625+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 25
+  },
+  "changes": {
+    "tracked_patch_bytes": 533,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57"
+  },
+  "validation": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.015s\n\nOK\n",
+      "timed_out": false
+    }
+  ],
+  "original_status": "failed",
+  "original_reason": "Prepared check was modified or removed",
+  "adjudication_method": "pristine-check replay"
+}

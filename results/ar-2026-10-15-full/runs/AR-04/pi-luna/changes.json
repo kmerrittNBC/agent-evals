@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 0,
+  "untracked_paths": [
+    "docs/speculative/plans/2026-08-21-durable-question-clarification-runs.md"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "f3f81aba0567f08ad4af681345d603496e80b679",
+  "validation_checks_intact": true
+}

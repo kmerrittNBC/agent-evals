@@ -1,0 +1,46 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..c60feee 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -234,6 +234,9 @@ def tree_digest(root: Path) -> str:
+     digest = hashlib.sha256()
+     for path in sorted(root.rglob("*")):
+         digest.update(str(path.relative_to(root)).encode())
++        if path.is_symlink():
++            # Hash the link text itself so retargeting (even a dangling link) is detected.
++            digest.update(b"\0symlink\0" + os.fsencode(os.readlink(path)))
+         if path.is_file():
+             digest.update(path.read_bytes())
+     return digest.hexdigest()
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..cee1372 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -35,6 +35,27 @@ class RunnerContractTests(unittest.TestCase):
+             (workspace / "relayview/package.json").write_text("changed")
+             self.assertNotEqual(before, tree_digest(workspace))
+ 
++    def test_digest_tracks_symlink_targets_including_broken_links(self):
++        with tempfile.TemporaryDirectory() as temp:
++            root = Path(temp)
++            (root / "a.txt").write_text("same")
++            (root / "b.txt").write_text("same")
++            link = root / "link"
++            link.symlink_to("a.txt")
++            live = tree_digest(root)
++            link.unlink()
++            link.symlink_to("b.txt")
++            self.assertNotEqual(live, tree_digest(root))
++            link.unlink()
++            link.symlink_to("missing-a")
++            broken = tree_digest(root)
++            link.unlink()
++            link.symlink_to("missing-b")
++            self.assertNotEqual(broken, tree_digest(root))
++            link.unlink()
++            link.symlink_to("missing-a")
++            self.assertEqual(broken, tree_digest(root))
++
+     def test_no_usage_is_not_zero_credits(self):
+         self.assertEqual(_credit({"classification": "unavailable", "raw": None}), (None, "unavailable"))
+         self.assertEqual(_credit({"classification": "measured", "raw": {"totalNanoAiu": 100}}), (1e-07, "estimated"))

@@ -1,0 +1,82 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..484a04c 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -6,6 +6,7 @@ import json
+ import os
+ import queue
+ import random
++import re
+ import shutil
+ import subprocess
+ import tarfile
+@@ -19,6 +20,7 @@ from . import adapters
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ RESULTS = ROOT / "results"
++COMMIT_HASH = re.compile(r"[0-9a-fA-F]{40}")
+ 
+ 
+ def read_config(name: str) -> dict:
+@@ -111,6 +113,12 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+                                              not all(isinstance(item, str) and item for item in guidance[key])
+                                              for key in ("must_check", "acceptable_alternatives", "do_not_penalize")):
+         return False, "judge evidence pack has incomplete grading guidance"
++    if not isinstance(pack["repo_facts"], list) or any(
++           not isinstance(item, dict) or
++           not isinstance(item.get("repo"), str) or not item["repo"].strip() or
++           not isinstance(item.get("commit"), str) or not COMMIT_HASH.fullmatch(item["commit"])
++           for item in pack["repo_facts"]):
++        return False, "judge evidence pack has a malformed repo fact (needs repo name and 40-character commit)"
+     if manifest is not None:
+         task = next(task for task in read_config("tasks")["tasks"] if task["id"] == task_id)
+         selected = task_repo_names(task, manifest)
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..0ba333e 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -121,6 +121,44 @@ class RunnerContractTests(unittest.TestCase):
+         self.assertEqual(tasks[2]["repos"], ["relayview", "agent-harness-evals"])
+         self.assertEqual(tasks[4]["repos"], ["agent-harness-evals"])
+ 
++    def test_malformed_repo_facts_are_not_ready(self):
++        pin = "a" * 40
++        manifest = {"repos": {"relayview": {"path": "/tmp/relayview", "commit": pin}}}
++        base = {"reference_answer": "Answer",
++                "sources": [{"title": "t", "url": "repo://relayview/pin/file",
++                             "retrieved_at": "2026-10-15", "snapshot_or_excerpt": "e"}],
++                "ambiguities": [], "decision_changing_errors": [],
++                "grading_guidance": {"must_check": [], "acceptable_alternatives": [],
++                                     "do_not_penalize": []}}
++        malformed = {"missing commit": [{"repo": "relayview"}],
++                     "missing repo": [{"commit": pin}],
++                     "empty repo": [{"repo": " ", "commit": pin}],
++                     "non-string repo": [{"repo": 7, "commit": pin}],
++                     "short commit": [{"repo": "relayview", "commit": "abc123"}],
++                     "non-hex commit": [{"repo": "relayview", "commit": "z" * 40}],
++                     "non-string commit": [{"repo": "relayview", "commit": None}],
++                     "non-object fact": ["relayview"],
++                     "non-list facts": {"relayview": pin}}
++        cases = [(name, facts, False) for name, facts in malformed.items()]
++        cases += [("well-formed", [{"repo": "relayview", "commit": pin}], True),
++                  ("wrong pin", [{"repo": "relayview", "commit": "b" * 40}], False)]
++        with tempfile.TemporaryDirectory() as temp:
++            path = Path(temp) / "pack.json"
++            for name, facts, ready in cases:
++                with self.subTest(case=name), patch("src.agent_eval.core.pack_path", return_value=path):
++                    path.write_text(json.dumps({**base, "repo_facts": facts}))
++                    for current in (manifest, None):
++                        okay, reason = pack_status("IG-02", current)
++                        if ready:
++                            self.assertEqual((okay, reason), (True, "ready"))
++                        elif name == "wrong pin":
++                            expected = ((False, "judge evidence pack repo pin differs for relayview")
++                                        if current else (True, "ready"))
++                            self.assertEqual((okay, reason), expected)
++                        else:
++                            self.assertFalse(okay)
++                            self.assertIn("malformed repo fact", reason)
++
+     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
+         arms = read_config("arms")["arms"]
+         self.assertEqual(len(arms), 4)

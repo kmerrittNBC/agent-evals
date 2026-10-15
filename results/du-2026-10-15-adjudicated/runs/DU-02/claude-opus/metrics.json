@@ -1,0 +1,171 @@
+{
+  "task_id": "DU-02",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T17:24:20.861033+00:00",
+  "elapsed_seconds": 48.054988,
+  "answer": "`GET /api/todos` now accepts an optional `completed=true` or `completed=false` filter, and any other value gets a 400. `make test` and `make build` both pass, and `go vet` is clean.\n\n**Behaviour**\n- **No `completed` parameter:** returns every todo ordered by id, exactly as before.\n- **`completed=true` / `completed=false`:** returns only the matching todos, still ordered by id. If nothing matches you get `[]`, not `null`.\n- **Anything else:** returns 400 with `{\"error\":\"completed must be \\\"true\\\" or \\\"false\\\"\"}`. This includes an empty value (`completed=`), different case (`TRUE`), `1` or `0`, and the parameter appearing twice. I chose this strict rule on purpose rather than Go's lenient boolean parsing, since the task says to reject any other value.\n\n**Changes**\n- **`main.go`:** `Store.List` now takes an optional filter. When it's empty, the database query is the same as before. A new `readCompletedFilter` function checks the query parameter, and the GET handler uses it. There's no schema change, and the other endpoints are untouched.\n- **`main_test.go`:** three new tests:\n  - Unfiltered, completed and incomplete results, with the order checked using interleaved completed and incomplete todos.\n  - A filter with no matches returns `[]`.\n  - Each invalid value above returns 400 with an error message, and the stored todos are unchanged afterwards.\n- **`README.md`:** documents the `completed` parameter in the API section and updates the \"Current behavior\" and \"Verify\" sections, as AGENTS.md requires.\n- **Frontend:** no changes. The UI still loads the unfiltered list, so the existing frontend tests (2 passing) cover it.\n\n**Things to know**\n- The worktree already had an untracked `eval_filter_test.go` that I didn't write. I left it alone and it passes. It isn't gofmt-formatted (it uses spaces for indentation).\n- AGENTS.md mentions a Gitea issue; I didn't look it up, since you said this prompt is the task record.\n- Running the checks needed `make install` (`npm ci`), because the frontend dependencies weren't installed. npm reported some audit warnings, which I didn't investigate.\n- Nothing is committed.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 15294,
+      "cache_read_input_tokens": 139206,
+      "output_tokens": 4670,
+      "output_tokens_details": {
+        "thinking_tokens": 466
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 15294,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 789,
+          "cache_read_input_tokens": 21966,
+          "cache_creation_input_tokens": 110,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 110
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 11.054022,
+  "first_substantive_seconds": 11.054022,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 48.054988,
+      "started_at": "2026-10-15T17:24:20.861033+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 7
+  },
+  "changes": {
+    "tracked_patch_bytes": 7828,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "final_head": "052ce21307c02f772619e4878b44949bd72f5e1b"
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-s6b9biiv/workspace",
+        "/tmp/agent-eval-s6b9biiv/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-02/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-02/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.004s\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-s6b9biiv/workspace",
+        "/tmp/agent-eval-s6b9biiv/workspace",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-02/claude-opus",
+        "/home/anodyine/Projects/agent-evals/results/du-2026-10-15-full/runs/DU-02/claude-opus",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./..."
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t(cached)\n",
+      "stderr": "",
+      "timed_out": false
+    }
+  ]
+}

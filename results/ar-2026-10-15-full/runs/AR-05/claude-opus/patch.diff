@@ -1,0 +1,367 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..cc9e61a 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -287,8 +287,110 @@ def capture(command: list[str], cwd: Path, env: dict[str, str], timeout: int,
+             "elapsed_seconds": round(time.monotonic() - start, 6), "started_at": started_at}
+ 
+ 
++class SnapshotWorkspace:
++    """Read-only export of the task's pinned commits in a temporary directory.
++
++    A workspace owns creation, the post-run integrity check, and cleanup; the
++    harness conversation only sees ``path``. ``verify`` returns a failure
++    reason or None, and ``record`` returns the fields it adds to metrics.
++    """
++
++    def __init__(self, repos: dict[str, dict], repo_names: list[str]):
++        self.repos = repos
++        self.repo_names = repo_names
++        self._temporary: tempfile.TemporaryDirectory | None = None
++        self.path = Path()
++        self.before: str | None = None
++        self.after: str | None = None
++
++    def __enter__(self) -> SnapshotWorkspace:
++        self._temporary = tempfile.TemporaryDirectory(prefix="agent-eval-")
++        try:
++            self.path = Path(self._temporary.name) / "workspace"
++            prepare_workspace(self.repos, {"repos": self.repo_names}, self.path)
++            self.before = tree_digest(self.path)
++        except BaseException:
++            self._temporary.cleanup()
++            raise
++        return self
++
++    def __exit__(self, *exc_info: Any) -> None:
++        if self._temporary is not None:
++            self._temporary.cleanup()
++
++    def verify(self) -> str | None:
++        self.after = tree_digest(self.path)
++        return None if self.after == self.before else "Repository snapshot was modified"
++
++    def record(self) -> dict:
++        return {"snapshot_digest_before": self.before, "snapshot_digest_after": self.after}
++
++
++def snapshot_workspace(task: dict, manifest: dict) -> SnapshotWorkspace:
++    return SnapshotWorkspace(manifest["repos"], task_repo_names(task, manifest))
++
++
++def converse(arm: dict, prompts: list[str], workspace: Path, run_dir: Path,
++             env: dict[str, str], timeout: int) -> dict:
++    """Run the prompt and, only after a clarifying question, the continuation.
++
++    Writes per-phase transcripts to run_dir and returns merged events, phase
++    results, the final answer, and the session used for continuation.
++    """
++    session = None
++    all_events: list[dict] = []
++    phase_results: list[dict] = []
++    asked = False
++    answer = ""
++    for phase, prompt in enumerate(prompts):
++        if phase and not asked:
++            break
++        event_path = run_dir / f"phase-{phase}.jsonl"
++        cmd = adapters.command(arm, prompt, workspace, run_dir, session)
++        if arm["harness"] == "copilot" and phase == 0:
++            import uuid
++            cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
++        result = capture(cmd, workspace, env, timeout, event_path)
++        phase_results.append({key: value for key, value in result.items() if key != "events"})
++        offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
++        for entry in result["events"]:
++            entry["index"] = len(all_events)
++            entry["elapsed_seconds"] += offset
++            entry["phase"] = phase
++            all_events.append(entry)
++        answer = adapters.final_answer(arm["harness"], result["events"])
++        if phase == 0:
++            asked = adapters.asked_question(result["events"], answer)
++            session = adapters.session_id(arm["harness"], result["events"])
++            if arm["harness"] == "copilot":
++                session = cmd[cmd.index("--session-id") + 1]
++            if arm["harness"] == "pi":
++                session = str(run_dir / "pi-session.jsonl")
++        if result["exit_code"] != 0 or result["timed_out"]:
++            break
++        if phase == 0 and asked and not session:
++            break
++    return {"events": all_events, "phases": phase_results, "answer": answer,
++            "asked": asked, "session": session}
++
++
++def run_status(conversation: dict, workspace_failure: str | None) -> tuple[str, str | None]:
++    last = conversation["phases"][-1]
++    if workspace_failure:
++        return "failed", workspace_failure
++    if last["timed_out"]:
++        return "timeout", "Harness exceeded timeout"
++    if last["exit_code"] != 0:
++        return "failed", f"Harness exited {last['exit_code']}"
++    if conversation["asked"] and not conversation["session"]:
++        return "failed", "Clarification asked but session continuation was unavailable"
++    if not conversation["answer"]:
++        return "failed", "No final answer parsed from events"
++    return "completed", None
++
++
+ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+-            timeout: int | None = None) -> dict:
++            timeout: int | None = None, workspace_factory=snapshot_workspace) -> dict:
+     run_dir = RESULTS / evaluation_id / "runs" / task["id"] / arm["id"]
+     if run_dir.exists():
+         raise ValueError(f"Run already exists: {run_dir}; use a new evaluation ID")
+@@ -306,78 +408,32 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+         return metrics
+     if status != "ready":
+         raise ValueError(f"Arm {arm['id']} has not passed live preflight")
+-    with tempfile.TemporaryDirectory(prefix="agent-eval-") as temporary:
+-        workspace = Path(temporary) / "workspace"
+-        prepare_workspace(manifest["repos"], {"repos": task_repo_names(task, manifest)}, workspace)
+-        before = tree_digest(workspace)
+-        env = adapters.environment(arm, workspace)
+-        session = None
+-        all_events: list[dict] = []
+-        phase_results: list[dict] = []
+-        asked = False
+-        answer = ""
+-        policy = read_config("run-policy")
+-        prompts = [task["prompt"], policy["continuation_response"]]
+-        for phase, prompt in enumerate(prompts):
+-            if phase and not asked:
+-                break
+-            event_path = run_dir / f"phase-{phase}.jsonl"
+-            cmd = adapters.command(arm, prompt, workspace, run_dir, session)
+-            if arm["harness"] == "copilot" and phase == 0:
+-                import uuid
+-                cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
+-            result = capture(cmd, workspace, env, timeout or policy["timeout_seconds"], event_path)
+-            phase_results.append({key: value for key, value in result.items() if key != "events"})
+-            offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
+-            for entry in result["events"]:
+-                entry["index"] = len(all_events)
+-                entry["elapsed_seconds"] += offset
+-                entry["phase"] = phase
+-                all_events.append(entry)
+-            answer = adapters.final_answer(arm["harness"], result["events"])
+-            if phase == 0:
+-                asked = adapters.asked_question(result["events"], answer)
+-                session = adapters.session_id(arm["harness"], result["events"])
+-                if arm["harness"] == "copilot":
+-                    session = cmd[cmd.index("--session-id") + 1]
+-                if arm["harness"] == "pi":
+-                    session = str(run_dir / "pi-session.jsonl")
+-            if result["exit_code"] != 0 or result["timed_out"]:
+-                break
+-            if phase == 0 and asked and not session:
+-                break
++    policy = read_config("run-policy")
++    with workspace_factory(task, manifest) as workspace:
++        env = adapters.environment(arm, workspace.path)
++        conversation = converse(arm, [task["prompt"], policy["continuation_response"]],
++                                workspace.path, run_dir, env, timeout or policy["timeout_seconds"])
+         with (run_dir / "events.jsonl").open("w") as f:
+-            for entry in all_events:
++            for entry in conversation["events"]:
+                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+-        after = tree_digest(workspace)
+-        if before != after:
+-            status = "failed"
+-            reason = "Repository snapshot was modified"
+-        elif phase_results[-1]["timed_out"]:
+-            status, reason = "timeout", "Harness exceeded timeout"
+-        elif phase_results[-1]["exit_code"] != 0:
+-            status, reason = "failed", f"Harness exited {phase_results[-1]['exit_code']}"
+-        elif asked and not session:
+-            status, reason = "failed", "Clarification asked but session continuation was unavailable"
+-        elif not answer:
+-            status, reason = "failed", "No final answer parsed from events"
+-        else:
+-            status, reason = "completed", None
+-        first_visible = next((entry["elapsed_seconds"] for entry in all_events
+-                              if entry["channel"] == "stdout" and
+-                              adapters.event_text(arm["harness"], entry["data"])), None)
+-        usage = adapters.usage(arm["harness"], all_events, run_dir)
+-        (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
+-        metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
+-                   "reason": reason, "started_at": phase_results[0]["started_at"],
+-                   "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
+-                   "answer": answer, "usage": usage, "asked_clarification": asked,
+-                   "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
+-                   "first_substantive_seconds": None, "snapshot_digest_before": before,
+-                   "snapshot_digest_after": after, "phases": phase_results,
+-                   "tool_activity": adapters.tool_activity(all_events)}
+-        atomic_json(run_dir / "metrics.json", metrics)
+-        return metrics
++        workspace_failure = workspace.verify()
++        workspace_record = workspace.record()
++    status, reason = run_status(conversation, workspace_failure)
++    all_events, phase_results, answer = conversation["events"], conversation["phases"], conversation["answer"]
++    first_visible = next((entry["elapsed_seconds"] for entry in all_events
++                          if entry["channel"] == "stdout" and
++                          adapters.event_text(arm["harness"], entry["data"])), None)
++    usage = adapters.usage(arm["harness"], all_events, run_dir)
++    (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
++    metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
++               "reason": reason, "started_at": phase_results[0]["started_at"],
++               "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
++               "answer": answer, "usage": usage, "asked_clarification": conversation["asked"],
++               "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
++               "first_substantive_seconds": None, **workspace_record, "phases": phase_results,
++               "tool_activity": adapters.tool_activity(all_events)}
++    atomic_json(run_dir / "metrics.json", metrics)
++    return metrics
+ 
+ 
+ def randomized_slots(tasks: list[dict], arms: list[dict], seed: int) -> list[tuple[dict, dict]]:
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..e8fda41 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -5,8 +5,8 @@ import unittest
+ from pathlib import Path
+ from unittest.mock import patch
+ 
+-from src.agent_eval import adapters
+-from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
++from src.agent_eval import adapters, core
++from src.agent_eval.core import (pack_status, prepare_workspace, read_config, run_one,
+                                  static_arm_check, tree_digest, validate_cutoff)
+ from src.agent_eval.judge import anonymized_transcript, validate_judgment
+ from src.agent_eval.preflight import live_arm_probe
+@@ -194,5 +194,132 @@ class RunnerContractTests(unittest.TestCase):
+             validate_judgment(judgment)
+ 
+ 
++OPENCODE_ARM = {"id": "opencode-luna", "harness": "opencode", "binary": "opencode",
++                "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
++                "search_provider": "tinyfish"}
++
++
++def _phase(events: list[dict], elapsed: float, exit_code: int = 0) -> dict:
++    return {"events": [{"index": i, "elapsed_seconds": float(i), "channel": "stdout", "data": data}
++                       for i, data in enumerate(events)],
++            "exit_code": exit_code, "timed_out": False, "elapsed_seconds": elapsed,
++            "started_at": "2026-10-15T00:00:00+00:00"}
++
++
++class RunOneContractTests(unittest.TestCase):
++    def setUp(self):
++        temp = tempfile.TemporaryDirectory()
++        self.addCleanup(temp.cleanup)
++        self.results = Path(temp.name)
++        patcher = patch.object(core, "RESULTS", self.results)
++        patcher.start()
++        self.addCleanup(patcher.stop)
++        self.task = {"id": "IG-T", "prompt": "Which release is current?", "repos": []}
++        self.manifest = {"preflight": {"opencode-luna": {"status": "ready"}}, "repos": {}}
++
++    def test_clarification_continues_session_and_merges_phases(self):
++        calls = []
++
++        def fake_capture(cmd, cwd, env, timeout, events_path):
++            calls.append({"cmd": cmd, "cwd": cwd, "events_path": events_path})
++            if len(calls) == 1:
++                return _phase([{"type": "step_start", "sessionID": "sess-1", "part": {}},
++                               {"type": "text", "sessionID": "sess-1", "part": {"text": "Which platform?"}}], 2.5)
++            return _phase([{"type": "text", "sessionID": "sess-1", "part": {"text": "Release 2 is current."}},
++                           {"type": "step_finish", "sessionID": "sess-1",
++                            "part": {"tokens": {"input": 3, "output": 4}}}], 1.5)
++
++        with patch.object(core, "capture", side_effect=fake_capture):
++            metrics = run_one(OPENCODE_ARM, self.task, self.manifest, "eval")
++        run_dir = self.results / "eval/runs/IG-T/opencode-luna"
++        self.assertEqual(len(calls), 2)
++        self.assertEqual(calls[0]["cmd"][-1], "Which release is current?")
++        self.assertEqual(calls[1]["cmd"][-1], read_config("run-policy")["continuation_response"])
++        self.assertEqual(calls[1]["cmd"][calls[1]["cmd"].index("--session") + 1], "sess-1")
++        self.assertEqual([c["events_path"].name for c in calls], ["phase-0.jsonl", "phase-1.jsonl"])
++        self.assertEqual(calls[0]["cwd"], calls[1]["cwd"])
++        self.assertFalse(calls[0]["cwd"].exists(), "workspace must be removed after the run")
++        self.assertEqual((metrics["status"], metrics["reason"]), ("completed", None))
++        self.assertTrue(metrics["asked_clarification"])
++        self.assertEqual(metrics["continuations"], 1)
++        self.assertEqual(metrics["elapsed_seconds"], 4.0)
++        self.assertEqual(metrics["answer"], "Release 2 is current.")
++        self.assertEqual(metrics["first_visible_seconds"], 1.0)
++        self.assertEqual(metrics["usage"]["raw"], {"tokens": {"input": 3, "output": 4}})
++        self.assertEqual(metrics["snapshot_digest_before"], metrics["snapshot_digest_after"])
++        self.assertEqual([p["elapsed_seconds"] for p in metrics["phases"]], [2.5, 1.5])
++        self.assertTrue(all("events" not in p for p in metrics["phases"]))
++        events = [json.loads(line) for line in (run_dir / "events.jsonl").read_text().splitlines()]
++        self.assertEqual([e["index"] for e in events], [0, 1, 2, 3])
++        self.assertEqual([e["phase"] for e in events], [0, 0, 1, 1])
++        self.assertEqual([e["elapsed_seconds"] for e in events], [0.0, 1.0, 2.5, 3.5])
++        self.assertEqual((run_dir / "answer.md").read_text(), "Release 2 is current.\n")
++        self.assertEqual(json.loads((run_dir / "metrics.json").read_text()), metrics)
++
++    def test_modified_snapshot_fails_even_with_an_answer(self):
++        def fake_capture(cmd, cwd, env, timeout, events_path):
++            cwd.chmod(0o755)
++            (cwd / "notes.txt").write_text("scratch")
++            return _phase([{"type": "text", "part": {"text": "Release 2 is current."}}], 1.0)
++
++        with patch.object(core, "capture", side_effect=fake_capture):
++            metrics = run_one(OPENCODE_ARM, self.task, self.manifest, "eval")
++        self.assertEqual((metrics["status"], metrics["reason"]),
++                         ("failed", "Repository snapshot was modified"))
++        self.assertNotEqual(metrics["snapshot_digest_before"], metrics["snapshot_digest_after"])
++        self.assertEqual(metrics["continuations"], 0)
++
++    def test_failed_first_phase_does_not_continue(self):
++        with patch.object(core, "capture", return_value=_phase(
++                [{"type": "text", "sessionID": "s", "part": {"text": "Which platform?"}}], 1.0, exit_code=2)) as fake:
++            metrics = run_one(OPENCODE_ARM, self.task, self.manifest, "eval")
++        self.assertEqual(fake.call_count, 1)
++        self.assertEqual((metrics["status"], metrics["reason"]), ("failed", "Harness exited 2"))
++
++    def test_workspace_factory_owns_integrity_policy_and_record(self):
++        events = []
++
++        class WritableWorkspace:
++            def __init__(self, task, manifest):
++                self.temporary = tempfile.TemporaryDirectory()
++                self.path = Path(self.temporary.name)
++
++            def __enter__(self):
++                events.append("enter")
++                return self
++
++            def __exit__(self, *exc_info):
++                events.append("exit")
++                self.temporary.cleanup()
++
++            def verify(self):
++                events.append("verify")
++                return None
++
++            def record(self):
++                return {"workspace_changes": sorted(p.name for p in self.path.iterdir())}
++
++        def fake_capture(cmd, cwd, env, timeout, events_path):
++            self.assertEqual(env["AGENT_EVAL_WORKSPACE"], str(cwd))
++            (cwd / "fix.py").write_text("pass")
++            return _phase([{"type": "text", "part": {"text": "Changed fix.py."}}], 1.0)
++
++        with patch.object(core, "capture", side_effect=fake_capture):
++            metrics = run_one(OPENCODE_ARM, self.task, self.manifest, "eval",
++                              workspace_factory=WritableWorkspace)
++        self.assertEqual(events, ["enter", "verify", "exit"])
++        self.assertEqual(metrics["status"], "completed")
++        self.assertEqual(metrics["workspace_changes"], ["fix.py"])
++        self.assertNotIn("snapshot_digest_before", metrics)
++
++    def test_snapshot_workspace_cleans_up_when_export_fails(self):
++        workspace = core.SnapshotWorkspace({"relayview": {"path": "/nonexistent", "commit": "0" * 40}},
++                                           ["relayview"])
++        with patch.object(core, "prepare_workspace", side_effect=RuntimeError("git archive failed")):
++            with self.assertRaises(RuntimeError):
++                workspace.__enter__()
++        self.assertFalse(workspace.path.parent.exists())
++
++
+ if __name__ == "__main__":
+     unittest.main()

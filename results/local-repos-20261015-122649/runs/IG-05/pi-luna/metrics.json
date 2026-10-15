@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-05",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:54:01.823546+00:00",
+  "elapsed_seconds": 53.469554,
+  "answer": "## Bottom line\n\n**No.** The 35 outcomes are evidence that the seven adapters completed an **operational qualification** on five Python projects. They do not support ranking the seven arms, and they do not establish that comparative Stage A is complete.\n\nThe README itself draws that distinction: it says the qualification had 35 recorded outcomes and 31 passes, but calls them operational evidence across repair revisions—not a comparative ranking—and says a complete comparative Stage A has not been published ([`README.md`](agent-harness-evals/README.md); [`current-qualification-180-final.md`](agent-harness-evals/docs/evidence/current-qualification-180-final.md)).\n\n## What the qualification establishes\n\nIssue #180’s final evidence records **35/35 slots, 31 passes, three verifier failures, one eligible deadline timeout, and zero unresolved slots**. There were 36 task attempts because the original OpenCode/Sol infrastructure failure is retained separately from its completed successor. The five projects were Astropy, Matplotlib, Requests, Xarray, and Pylint.\n\nThis establishes completion of that operational gate and supports specific execution, capture, verification, recovery, and accounting claims under the recorded revisions. It does not make the failure counts a comparative capability result:\n\n- Execution spans four revisions; the final revision supplies only four Claude outcomes, while earlier revisions supply the others.\n- The three Matplotlib failures were unsuccessful patches on the same hidden test, not evaluation-infrastructure failures. The GLM Pylint timeout is a terminal zero, not a missing result.\n- The qualification runbook explicitly says the five Python projects do **not** qualify the MultiLang parser or compiled-language resource requirements ([`current-qualification-180-final.md`](agent-harness-evals/docs/evidence/current-qualification-180-final.md), including its revision table and investigation dispositions; [`current-qualification.md`](agent-harness-evals/docs/runbooks/current-qualification.md)).\n\nSo the outcome table can describe this qualification’s observed results; it cannot be treated as a controlled seven-arm Stage A ranking.\n\n## What the comparative cohort and freeze require\n\nThere are two different task counts in the repo. The v3 MultiLang selection contains **25** tasks, but the current executable Stage A target is the reviewed archive release of **23** tasks: two unresolved archive candidates are dropped without replacement. The current contract amendment specifies one continuous cohort of **23 tasks × 7 arms = 161 slots**. The prepared release record also says `dispatch_authorized: false` ([`staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md), amendment and Stage A sections; [`stage-a-prepared-23-v1.md`](agent-harness-evals/docs/releases/stage-a-prepared-23-v1.md)). Thus the README’s opening “25-task” description refers to the selected corpus framing, not the current 161-slot executable archive cohort.\n\nA comparative result requires more than having seven arms and recorded outcomes. The v5 freeze must bind the exact arm/runtime/provider and admission identities, corpus and task inputs, environment and verifier, resources, budgets, schedule and slot plan, retry/analysis policy, owner approval, and outcome contract. The Stage A run must then execute all scheduled blocks under one admitted configuration; after completion, it must be audited and sealed before a screening report and capability disposition can be published. A schema-valid manifest alone is not launch authorization ([`staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md); [`stage-a-continuous-cohort.md`](agent-harness-evals/docs/runbooks/stage-a-continuous-cohort.md)).\n\nThe README explicitly says comparative Stage A has **not** been published. The qualification report likewise says its gate is separate from the comparative admission/freeze gates. The tracked prepared-23 release is not dispatch authorization. These sources do not establish a completed, sealed comparative Stage A.\n\n## Claims that remain unverified\n\nAt this pinned repository state, the qualification does **not** verify:\n\n- comparative Stage A outcome rates, arm ordering, paired wins/losses, or a numerical freeze;\n- completion and sealing of the current 161-slot cohort, or its survivor/futility disposition;\n- MultiLang parser and compiled-language execution behavior from the five-project qualification;\n- that historical approvals or admissions authorize a new current freeze or dispatch;\n- Stage B outcomes, which require a separate post-Stage-A freeze and cohort.\n\nEven a completed 23-task screen would be a directional near-total-failure screen, not a precise ranking: each task is 1/23 of an arm’s denominator, and the contract cautions against treating close ordering as a reliable ranking or generalizing language-level performance from this purposive sample ([`staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md), reporting and disposition sections).\n\nI inspected the pinned checkout read-only; no files were changed.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 2506,
+      "cacheRead": 35563,
+      "cacheWrite": 10092,
+      "reasoning": 1464,
+      "totalTokens": 48164,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.001253,
+        "cacheRead": 0.00035563,
+        "cacheWrite": 0.0012615,
+        "total": 0.00287043
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 43.77023,
+  "first_substantive_seconds": 43.779666,
+  "snapshot_digest_before": "fbb4aa6f085e0829871cc0051735b64db5d91749bbfa8d3b180604cb58ce4860",
+  "snapshot_digest_after": "fbb4aa6f085e0829871cc0051735b64db5d91749bbfa8d3b180604cb58ce4860",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 53.469554,
+      "started_at": "2026-10-15T16:54:01.823546+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 16
+  }
+}

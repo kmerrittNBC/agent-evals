@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 1762,
+  "untracked_paths": [
+    "adjudication-evidence/agent-edited-prepared-check/test_eval_du05.py"
+  ],
+  "setup_checks_intact": true,
+  "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+  "original_setup_checks_intact": false,
+  "adjudication_note": "Recovered agent edit to originally writable prepared check; replay validation used pristine original check."
+}

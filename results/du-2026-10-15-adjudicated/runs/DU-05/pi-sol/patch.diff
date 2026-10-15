@@ -1,0 +1,81 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..7a4c647 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -106,6 +106,14 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+            not all(source.get(key) for key in ("title", "url", "retrieved_at", "snapshot_or_excerpt"))
+            for source in pack["sources"]):
+         return False, "judge evidence pack has an incomplete source"
++    repo_facts = pack["repo_facts"]
++    if not isinstance(repo_facts, list) or any(
++            not isinstance(item, dict) or
++            not isinstance(item.get("repo"), str) or not item["repo"].strip() or
++            not isinstance(item.get("commit"), str) or len(item["commit"]) != 40 or
++            any(char not in "0123456789abcdefABCDEF" for char in item["commit"])
++            for item in repo_facts):
++        return False, "judge evidence pack has an invalid repo fact (repo name and 40-character commit hash required)"
+     guidance = pack["grading_guidance"]
+     if not isinstance(guidance, dict) or any(not isinstance(guidance.get(key), list) or
+                                              not all(isinstance(item, str) and item for item in guidance[key])
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..4f9f9c4 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -121,6 +121,57 @@ class RunnerContractTests(unittest.TestCase):
+         self.assertEqual(tasks[2]["repos"], ["relayview", "agent-harness-evals"])
+         self.assertEqual(tasks[4]["repos"], ["agent-harness-evals"])
+ 
++    def test_pack_status_rejects_malformed_repo_facts(self):
++        base = {
++            "reference_answer": "Answer", "sources": [{
++                "title": "Source", "url": "https://example.test", "retrieved_at": "2026-10-15",
++                "snapshot_or_excerpt": "Excerpt"}],
++            "ambiguities": [], "grading_guidance": {
++                "must_check": [], "acceptable_alternatives": [], "do_not_penalize": []},
++            "decision_changing_errors": [],
++        }
++        malformed = [None, {}, "facts", [None], ["fact"], [{}],
++                     [{"repo": "relayview"}], [{"commit": "a" * 40}],
++                     [{"repo": "", "commit": "a" * 40}],
++                     [{"repo": "   ", "commit": "a" * 40}],
++                     [{"repo": 1, "commit": "a" * 40}],
++                     [{"repo": "relayview", "commit": None}],
++                     [{"repo": "relayview", "commit": "a" * 39}],
++                     [{"repo": "relayview", "commit": "g" * 40}],
++                     [{"repo": "relayview", "commit": 123}],
++                     [{"repo": "relayview", "commit": "a" * 40}, {}]]
++        manifest = {"repos": {"relayview": {"path": "/tmp/relayview", "commit": "a" * 40}}}
++        with tempfile.TemporaryDirectory() as temp:
++            path = Path(temp) / "pack.json"
++            with patch("src.agent_eval.core.pack_path", return_value=path):
++                for facts in malformed:
++                    path.write_text(json.dumps({**base, "repo_facts": facts}))
++                    for pinned in (None, manifest):
++                        with self.subTest(facts=facts, pinned=pinned is not None):
++                            okay, reason = pack_status("IG-02", pinned)
++                            self.assertFalse(okay)
++                            self.assertIn("repo fact", reason)
++
++    def test_pack_status_compares_well_formed_repo_pins(self):
++        with tempfile.TemporaryDirectory() as temp:
++            path = Path(temp) / "pack.json"
++            pack = {
++                "reference_answer": "Answer", "sources": [{
++                    "title": "Source", "url": "https://example.test", "retrieved_at": "2026-10-15",
++                    "snapshot_or_excerpt": "Excerpt"}],
++                "repo_facts": [{"repo": "relayview", "commit": "a" * 40}],
++                "ambiguities": [], "grading_guidance": {
++                    "must_check": [], "acceptable_alternatives": [], "do_not_penalize": []},
++                "decision_changing_errors": [],
++            }
++            path.write_text(json.dumps(pack))
++            manifest = {"repos": {"relayview": {"path": "/tmp/relayview", "commit": "a" * 40}}}
++            with patch("src.agent_eval.core.pack_path", return_value=path):
++                self.assertEqual(pack_status("IG-02", manifest), (True, "ready"))
++                manifest["repos"]["relayview"]["commit"] = "b" * 40
++                self.assertEqual(pack_status("IG-02", manifest),
++                                 (False, "judge evidence pack repo pin differs for relayview"))
++
+     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
+         arms = read_config("arms")["arms"]
+         self.assertEqual(len(arms), 4)

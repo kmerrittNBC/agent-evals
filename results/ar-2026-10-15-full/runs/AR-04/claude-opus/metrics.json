@@ -1,0 +1,77 @@
+{
+  "task_id": "AR-04",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:46:09.241661+00:00",
+  "elapsed_seconds": 278.722791,
+  "answer": "I've written the plan at `docs/speculative/plans/2026-10-15-durable-question-clarification-runs.md` and added it to the plans index in `README.md`. Only docs changed, and nothing is committed.\n\n## Why a restart loses the run today\n- **Rust shell:** in the default desktop setup, the shell kills the backend process it started when the window closes (`backend_sidecar.rs`). That ends any model call in progress.\n- **Backend:** `InMemoryRunStore` keeps runs only in memory, so they're gone when the process stops.\n- **Desktop:** the current run lives only in the UI's in-memory state (`insight-specialist-app.ts`), so the app forgets which run it had open. The file name is never sent to the backend, so it can't be restored either.\n\nOther problems that block a safe reconnect:\n- **Clarification is marked finished too early.** It's marked `succeeded` even when it's waiting for the user's answers. Submitting answers then flips it back to `running`, so a reconnecting client can't tell \"waiting for you\" from \"done\".\n- **Double submissions start duplicate work.** Nothing stops answers being submitted twice. A retry after a restart would start a second interpretation.\n- **Answer submission isn't atomic.** It's four separate writes, so a crash partway through leaves the run half-updated.\n\n## Options compared\n- **A (recommended): the backend owns the runs.** It saves them in SQLite in the app data folder; the desktop saves only a small pointer to the run it had open. This matches the repo's existing decisions to use SQLite and to keep run state in the backend, and it reuses the current reconnect support in the event stream.\n- **B: the desktop keeps a copy of each run.** Rejected: there would be two copies that can disagree, and it can't continue a run after the backend restarts.\n- **C: keep the backend running after the desktop closes.** This only survives until the backend crashes or the machine reboots, and it leaves stray processes. I've left it as an open question to add on top of A later.\n\n## What the plan specifies\n- **IDs:**\n  - run IDs stay as they are;\n  - a new database ID lets the desktop detect a wiped or different database instead of hitting confusing \"not found\" errors;\n  - the desktop sends a key with each create and answer request so a retry can't create a duplicate;\n  - each stage execution gets an attempt counter.\n- **Statuses:** new `awaiting_input` and `interrupted` statuses, a full table of allowed changes with the event each one emits, and a \"conflict\" error for anything else.\n- **Startup recovery:** when the backend starts, runs whose work died with the old process are marked `interrupted`, and a Resume action restarts them. Only one backend may own the database at a time, so a second backend can't wrongly interrupt the first one's live runs.\n- **Error handling:** a table covering about a dozen failure cases. If the database can't be opened, the backend keeps working in memory and the desktop shows a \"runs won't survive a restart\" warning. It can't fail silently, because the backend's error output is currently discarded.\n- **Migration:** no existing data to move; schema changes only go forward, with a backup first. The status change must ship in one change across backend, frontend and both mock backends.\n- **Tests:** at each layer, including a restart test that kills the real backend process mid-call against a local fake model server, so no live LLM is needed. There's also a manual test plan.\n- **Rollback:** setting `INSIGHT_SPECIALIST_RUN_STORE=memory` restores today's behavior without a code change. The restore feature only turns on when the backend reports support for it.\n- **Rust:** no changes needed.\n\n## Checks\n- **Run:** the existing backend unit tests (28) passed using the system Python 3.14.7, since there is no backend virtual environment in this worktree. They confirm the current run-store behavior the plan describes.\n- **Couldn't run:**\n  - `test_main` fails because `fastapi` isn't installed.\n  - The frontend tests (`pnpm test`, `test:ui`, `test:desktop`) and `cargo test` weren't run: there are no `node_modules`, `pnpm` isn't installed, and no code changed.\n\nAlso checked: all links in the plan to other docs resolve.\n\n**Decision for you:** the plan defaults to a manual Resume, so restarting the desktop never triggers a model call by itself. An automatic option would better match the product's \"don't make the user come back to a stalled run\" goal. It's listed as open question 1.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 36,
+      "cache_creation_input_tokens": 97097,
+      "cache_read_input_tokens": 1033706,
+      "output_tokens": 27412,
+      "output_tokens_details": {
+        "thinking_tokens": 8529
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 97097,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1509,
+          "cache_read_input_tokens": 103385,
+          "cache_creation_input_tokens": 494,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 494
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 1.636003,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 278.722791,
+      "started_at": "2026-10-15T18:46:09.241661+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 27
+  },
+  "changes": {
+    "tracked_patch_bytes": 1160,
+    "untracked_paths": [
+      "docs/speculative/plans/2026-10-15-durable-question-clarification-runs.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f3f81aba0567f08ad4af681345d603496e80b679",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

@@ -1,0 +1,35 @@
+{
+  "method": "Pinned commit + saved source patch + pristine prepared check; commands executed directly in isolated Git worktree. Last command for DU-04/claude-opus is an additional collision probe.",
+  "results": [
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du03.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.012s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "................\n----------------------------------------------------------------------\nRan 16 tests in 0.028s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

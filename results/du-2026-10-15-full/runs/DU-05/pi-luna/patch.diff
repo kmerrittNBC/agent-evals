@@ -1,0 +1,19 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..cbc14a1 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -106,6 +106,14 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+            not all(source.get(key) for key in ("title", "url", "retrieved_at", "snapshot_or_excerpt"))
+            for source in pack["sources"]):
+         return False, "judge evidence pack has an incomplete source"
++    repo_facts = pack["repo_facts"]
++    if not isinstance(repo_facts, list) or any(
++            not isinstance(fact, dict) or
++            not isinstance(fact.get("repo"), str) or not fact["repo"].strip() or
++            not isinstance(fact.get("commit"), str) or len(fact["commit"]) != 40 or
++            any(char not in "0123456789abcdefABCDEF" for char in fact["commit"])
++            for fact in repo_facts):
++        return False, "judge evidence pack has a malformed repo fact (expected repo name and 40-character commit hash)"
+     guidance = pack["grading_guidance"]
+     if not isinstance(guidance, dict) or any(not isinstance(guidance.get(key), list) or
+                                              not all(isinstance(item, str) and item for item in guidance[key])

@@ -1,0 +1,58 @@
+{
+  "task_id": "AR-03",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:35:47.852278+00:00",
+  "elapsed_seconds": 239.151335,
+  "answer": "Added an implementation plan at `agent-harness-evals/docs/speculative/stage-a-interruption-recovery-plan.md`; no scheduler code or live runbook was changed.\n\nThe plan traces freeze publication, reservation, completion, progress, audit, seal and existing recovery boundaries. It rejects native replay and partial-process continuation. For an interrupted reservation, it proposes either finishing the **same lease** from an already valid completion or, with owner authorization and proven cleanup, recording a terminal infrastructure failure without inventing a score. It specifies trust checks, test seams and rollback while retaining the 23-task, seven-arm, 161-slot freeze.\n\nChecks: 75 focused scheduler, launcher and cohort-audit tests passed. The plan file passed the whitespace check.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 175,
+      "cacheRead": 53508,
+      "cacheWrite": 133,
+      "reasoning": 20,
+      "totalTokens": 53819,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00175,
+        "cacheRead": 0.0107016,
+        "cacheWrite": 0.0003325,
+        "total": 0.0127901
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 237.155516,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 239.151335,
+      "started_at": "2026-10-15T18:35:47.852278+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 32
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [
+      "docs/speculative/stage-a-interruption-recovery-plan.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "b0b31dda691620edae30db7127c1e1d8da907813",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 16117,
+  "untracked_paths": [
+    "src/agent_eval/workspaces.py"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+  "validation_checks_intact": true
+}

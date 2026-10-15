@@ -1,0 +1,77 @@
+{
+  "task_id": "AR-03",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:26:52.644094+00:00",
+  "elapsed_seconds": 534.813459,
+  "answer": "I've written the plan to `docs/speculative/stage-a-host-interruption-recovery-plan.md`, marked as proposed and not implemented. I changed no code and made no commit. Along the way I found and reproduced a real defect in the existing seal.\n\n**Where an interruption lands today.** If the host goes down while any slot is reserved, the next run stops at `stage_a_launcher.py:270` (\"unreconciled active attempt\"). It stops the same way whether the agent never started or had worked for 40 minutes. The only remedy in the runbook is to retire the attempt and approve a new freeze. That throws away the whole ledger and re-runs the interrupted slot in a new cohort, which in practice is the replay the rules forbid.\n\n**The plan's core idea.** The code already writes durable files at the point where an attempt first contacts the model provider: `native/ownership.json` is written to disk before any container is created, and it records the host's boot ID. So after a reboot, each interrupted attempt can be sorted into one of four cases:\n\n| Case | Situation | Recommended handling |\n|---|---|---|\n| C0 | Slot reserved, not launched | Resume under the same reservation |\n| C1 | Launched, but stopped before contacting the provider | Resume under the same reservation |\n| C2 | Past provider contact, not finished | Record as an infrastructure failure (`host_interrupted`); never re-run |\n| C3 | Finished, but the result was never recorded in the ledger | Record the saved result without re-running |\n\nAnything that doesn't fit these cases keeps today's stop.\n\n**What stays fixed:**\n- The freeze, the 161-slot schedule (23 tasks × 7 arms), one attempt per slot and the ledger format.\n- No refunds, no second attempts, no slot marked unstarted.\n- The futility rule is unchanged; a C2 slot counts as \"capability unknown\".\n\n**Also in the plan:**\n- A full trace from freeze to seal, with file and line references.\n- Replay, resume and terminal failure compared case by case.\n- The state transitions and nine trust checks (same inputs, different boot ID, ledger and progress chain, evidence snapshot, containers, research accounting, image store, credentials and window, owner confirmation).\n- Ten test-first slices with the tests named, plus rollout and rollback.\n\n**Gaps the work has to close:**\n- **The seal rejects a recovered slot (current defect).** It doesn't pass `execution_commit` (`stage_a_seal.py:220`) and looks for results in the wrong directory (`:251`). Running the seal on the repo's own recovered-slot test fixture fails with `prelaunch recovery differs from the frozen execution`. Any resume design depends on fixing this, so it is slice 0 and can merge alone.\n- **Research usage can't be traced to an attempt after a reboot.** The research trial ID and scope are only saved at the end of a run or on tmpfs.\n- **A verifier interrupted mid-run leaves partial input files that fail the audit,** and the runbook forbids moving them by hand. The plan adds a reviewed way to record them.\n- **The new attempt directory isn't flushed to disk,** so a power loss could lose it.\n\n**Rollout:** this only helps cohorts admitted at a commit that includes it, because every dispatch checks the admitted commit. A cohort already running keeps today's stop-and-retire behaviour.\n\n**Decisions for you:**\n- **Accepting the new ADR.** Resuming a reserved slot needs an ADR amending ADR-0016, which says an active attempt is never replayed. The plan argues a pre-contact resume isn't a replay, but that's your decision before slice 6 merges.\n- **Owner sign-off per resume.** Should each resume need its own recorded owner confirmation (proposed), or count as a routine operator recovery like enrollment renewal?\n- **Timing of interrupted slots.** Should their end time be reported as the reboot time, an upper bound?\n- **Regrading.** Should a run that finished but wasn't graded be regraded after the interruption (its own ADR), or stay a failure?\n\n**Checks:** the focused scheduler, launcher, audit, seal, enrollment and scheduler-preflight tests pass at `b0b31dd` (216 passed). I had to run them with uv 0.12.9 and a writable uv cache under `/tmp`, because the default cache is read-only here. The seal reproduction is a throwaway test kept outside the worktree at `/tmp/agent-eval-tpj52mqh/probe/`.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 84,
+      "cache_creation_input_tokens": 187048,
+      "cache_read_input_tokens": 5084881,
+      "output_tokens": 39997,
+      "output_tokens_details": {
+        "thinking_tokens": 17999
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 187048,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1618,
+          "cache_read_input_tokens": 193461,
+          "cache_creation_input_tokens": 369,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 369
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 2.137646,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 534.813459,
+      "started_at": "2026-10-15T18:26:52.644094+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 58
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [
+      "docs/speculative/stage-a-host-interruption-recovery-plan.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "b0b31dda691620edae30db7127c1e1d8da907813",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

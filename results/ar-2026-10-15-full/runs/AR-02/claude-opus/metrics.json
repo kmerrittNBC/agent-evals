@@ -1,0 +1,77 @@
+{
+  "task_id": "AR-02",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T18:15:23.573535+00:00",
+  "elapsed_seconds": 234.227055,
+  "answer": "**Decision: if the research MCP sidecar dies mid-trial, the trial ends (fail-closed), and no restart should be built now.** A restart would only be safe with changes that don't exist yet, chiefly moving the quota ledger out of the sidecar. That work belongs to the separate `agent-harness-evals` repository and needs your approval. I wrote this up as a proposal doc; no code changed.\n\n**Why a restart isn't safe with the current design:**\n- **Quota reset:** usage is tracked only in the sidecar's memory (`VolatileWorkLedger`). When the process dies, all usage is lost. Only finished calls leave evidence, so up to 16 in-flight calls and their costs leave no record. Rebuilding usage from logs would undercount. Call IDs include a random per-connection value, so nothing can be replayed after a restart either.\n- **Stale client:** the bridge only checks the socket's path, mode and owner. It carries no session identity. The native clients' config points at one fixed socket path, so a relaunched bridge would attach to whatever new sidecar is listening there. Today two things prevent that: the `started` marker blocks a relaunch in the same directory, and the supervisor must never point a running client at a different directory.\n- **Credential exposure (a real gap, confirmed by running it):** the sidecar reads the setup and the Brave API key *before* checking the marker. A relaunch that will be refused has already received the key. The error message also can't tell \"already started\" apart from other socket failures.\n\n**Comparison:** fail-closed costs little and makes quota reset impossible. A safe restart would need all of the following. Even then it only saves the trial's remaining quota, because the client has to be torn down anyway so it can't reach the new session:\n- a durable ledger outside the sidecar;\n- a new setup version with a generation number;\n- a fresh directory per generation;\n- the bridge checking it is attached to the expected session;\n- the supervisor checking the old process is dead before handing over the key;\n- a fixed restart limit (default 0, at most 1) set before the trial starts.\n\nIt may be cheaper to run restart-sensitive work through the owner's trial path, which already keeps durable accounting.\n\n**Staged plan:**\n- **Prerequisite:** fix the transport check so it passes again (see below).\n- **Stage 1 (this repo):** check the marker before reading the key, add a distinct \"already started\" error, and add a test that kills the sidecar mid-call. Each starts with a failing test.\n- **Stage 2:** the sidecar logs each reservation as it is made, so a crash leaves a conservative usage record. The supervisor then stops the client, records the trial as interrupted, and never relaunches.\n- **Stage 3 (needs your approval):** the restart design above.\n\nThe doc also covers the checks for each stage. Rollback always selects the whole previous release for a new trial, and never rolls back or edits the ledger.\n\n**What I changed (not committed):**\n- Added `docs/speculative/research-mcp-sidecar-loss-recovery.md` with the decision, comparison, plan, verification and rollback.\n- Added one sentence to the Limitations section of `docs/authoritative/research-mcp.md` linking to it.\n\n**Checks:**\n- **Passed:** MCP and core service tests (41/41), documentation checks (51/51, `docs:references` exit 0) and `git diff --check`.\n- **Failed:** `npm run verify:research-mcp` fails on the unmodified code. The smoke test (`smoke.js:72`) expects 2 tools, but there are now 3 since `youtube_transcript` was added. The package README is also out of date (version 1.1.0, two tools), and the packaging steps name a 1.2.0 file. I left this alone; it's the prerequisite card above.\n- **Not run:** the full suite, the native-client checks and the live (paid) smoke.\n\nI installed dependencies in the worktree and removed the two temporary directories my test runs created.\n\n**Process records:** ablation decision `not_required` (this is safety behavior, not a quality feature). Whether any cohort may allow a restart is a separate decision for you. Documentation disposition: `not_required`, since no behavior changed and the proposal stays speculative.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 48,
+      "cache_creation_input_tokens": 87229,
+      "cache_read_input_tokens": 1422534,
+      "output_tokens": 20577,
+      "output_tokens_details": {
+        "thinking_tokens": 9437
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 87229,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1432,
+          "cache_read_input_tokens": 93846,
+          "cache_creation_input_tokens": 165,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 165
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 2.001912,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 234.227055,
+      "started_at": "2026-10-15T18:15:23.573535+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 27
+  },
+  "changes": {
+    "tracked_patch_bytes": 776,
+    "untracked_paths": [
+      "docs/speculative/research-mcp-sidecar-loss-recovery.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

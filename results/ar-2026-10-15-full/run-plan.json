@@ -1,0 +1,85 @@
+{
+  "seed": 20261014,
+  "slots": [
+    {
+      "task_id": "AR-01",
+      "arm_id": "claude-opus"
+    },
+    {
+      "task_id": "AR-01",
+      "arm_id": "pi-luna"
+    },
+    {
+      "task_id": "AR-01",
+      "arm_id": "opencode-luna"
+    },
+    {
+      "task_id": "AR-01",
+      "arm_id": "pi-sol"
+    },
+    {
+      "task_id": "AR-02",
+      "arm_id": "pi-luna"
+    },
+    {
+      "task_id": "AR-02",
+      "arm_id": "pi-sol"
+    },
+    {
+      "task_id": "AR-02",
+      "arm_id": "opencode-luna"
+    },
+    {
+      "task_id": "AR-02",
+      "arm_id": "claude-opus"
+    },
+    {
+      "task_id": "AR-03",
+      "arm_id": "pi-luna"
+    },
+    {
+      "task_id": "AR-03",
+      "arm_id": "claude-opus"
+    },
+    {
+      "task_id": "AR-03",
+      "arm_id": "pi-sol"
+    },
+    {
+      "task_id": "AR-03",
+      "arm_id": "opencode-luna"
+    },
+    {
+      "task_id": "AR-04",
+      "arm_id": "pi-luna"
+    },
+    {
+      "task_id": "AR-04",
+      "arm_id": "claude-opus"
+    },
+    {
+      "task_id": "AR-04",
+      "arm_id": "opencode-luna"
+    },
+    {
+      "task_id": "AR-04",
+      "arm_id": "pi-sol"
+    },
+    {
+      "task_id": "AR-05",
+      "arm_id": "pi-luna"
+    },
+    {
+      "task_id": "AR-05",
+      "arm_id": "claude-opus"
+    },
+    {
+      "task_id": "AR-05",
+      "arm_id": "pi-sol"
+    },
+    {
+      "task_id": "AR-05",
+      "arm_id": "opencode-luna"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-05",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:56:21.694646+00:00",
+  "elapsed_seconds": 32.19153,
+  "answer": "**No.** The 35 outcomes are a completed *operational qualification*, not the comparative Stage A cohort. The README says both that the live gate recorded 31 passes, three verifier failures and one timeout, and that a complete comparative Stage A has **not** been published ([`README.md`](agent-harness-evals/README.md), “Current execution”).\n\nThe final qualification record establishes that all **35 seven-arm × five-task slots** were recorded and audited, with zero unresolved slots. It also records **36 attempts** because an original OpenCode/Sol infrastructure failure was retained before an authorized successor attempt. The three Matplotlib failures were valid unsuccessful patches; the GLM deadline was an eligible terminal score of zero, not missing data. Results span **four documented execution revisions** and five Python SWE-bench projects. Thus they support the live execution, capture, verification, recovery and accounting gate—not a uniform-revision capability comparison or a MultiLang ranking ([`docs/evidence/current-qualification-180-final.md`](agent-harness-evals/docs/evidence/current-qualification-180-final.md), “Complete task matrix,” “Investigation dispositions,” and “Final implementation validation”; [`docs/runbooks/current-qualification.md`](agent-harness-evals/docs/runbooks/current-qualification.md), “Verification and limits”).\n\n**The current Stage A contract is a different experiment.** The selected 25-task MultiLang corpus remains a pinned historical input, but the amended executable screen uses **23 reviewed archive tasks**, seven standard arms, one repetition and **161 scheduled slots**. Two validator-unresolved tasks were dropped without replacement; the prepared-environment release retains the 23 tasks, validators and order. The README’s opening “25-task” shorthand—and older 25-task/175-slot planning passages—should not be read as overriding that amendment ([`docs/contracts/staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md), “Stage A — screening cohort”; [`docs/authoritative/adr/0016-screen-stage-a-on-23-reviewed-tasks.md`](agent-harness-evals/docs/authoritative/adr/0016-screen-stage-a-on-23-reviewed-tasks.md); [`docs/releases/stage-a-prepared-23-v1.md`](agent-harness-evals/docs/releases/stage-a-prepared-23-v1.md)).\n\nA comparative run requires its **own** exact, owner-approved numerical freeze: archive/corpus and verifier identities, all seven freshly admitted arm/runtime/research identities, policy, finite window, resources and reservations, seeded complete schedule and outcome-slot plan. The continuous cohort must use one ledger and admitted configuration, reconcile every slot, then receive a full offline audit, Stage A seal and separate published report/disposition. Earlier Glaze blocks and stopped cohort attempts are not a prefix to substitute for that cohort ([`docs/contracts/staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md), “Executable freeze boundary,” “Stage A,” and “Screening report”; [`docs/runbooks/stage-a-continuous-cohort.md`](agent-harness-evals/docs/runbooks/stage-a-continuous-cohort.md), “What the harness enforces”; [`docs/authoritative/adr/0016-screen-stage-a-on-23-reviewed-tasks.md`](agent-harness-evals/docs/authoritative/adr/0016-screen-stage-a-on-23-reviewed-tasks.md)).\n\n**Still unverified by the qualification:** a sealed, published 161-slot comparative screen; a precise ordering of seven arms; run-to-run reliability from a one-repetition screen; or a Stage B/RelayView comparison. Stage A’s prospective futility test is applied per arm only after its 23 slots reconcile: `resolved + capability_unknown + unstarted <= 1` is an absolute near-total-failure stop, **not** a ranking or proof of general inferiority. Stage B needs the authenticated Stage A seal and disposition, then a separately frozen disjoint corpus and surviving arms **plus both RelayView arms and standard Pi**, with its own admission, seal and report; the stages cannot be pooled ([`docs/contracts/staged-multilang-benchmark-v5.md`](agent-harness-evals/docs/contracts/staged-multilang-benchmark-v5.md), “Screening report and futility disposition,” “Stage B,” and “Reporting, generalization and resource limits”).",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 948,
+      "cacheRead": 48839,
+      "cacheWrite": 462,
+      "reasoning": 24,
+      "totalTokens": 50252,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00948,
+        "cacheRead": 0.0097678,
+        "cacheWrite": 0.001155,
+        "total": 0.0204088
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 22.897419,
+  "first_substantive_seconds": 22.897507,
+  "snapshot_digest_before": "fbb4aa6f085e0829871cc0051735b64db5d91749bbfa8d3b180604cb58ce4860",
+  "snapshot_digest_after": "fbb4aa6f085e0829871cc0051735b64db5d91749bbfa8d3b180604cb58ce4860",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 32.19153,
+      "started_at": "2026-10-15T16:56:21.694646+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 22
+  }
+}

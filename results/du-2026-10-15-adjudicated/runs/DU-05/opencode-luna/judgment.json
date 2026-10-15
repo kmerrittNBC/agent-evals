@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The diff validates repo_facts before indexing and preserves the existing pinned-commit comparison. The stated behavior matches the code."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "The code change and focused coverage address the requested cases, and supplied validation reports 16 passing tests. The candidate did not run the requested runner tests."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "The candidate inspected the relevant implementation, prepared regression test, existing runner tests, and evidence-pack examples."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "Validation occurs before manifest comparison; the existing comparison remains intact. Requiring hexadecimal characters is a reasonable interpretation of commit hash."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "The change handles malformed collection types, fact entries, repo names, and commits, both with and without a manifest."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "The final answer clearly describes the change and identifies the test command, but leaves test execution to the user."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "partial",
+  "follow_up_classification": "necessary",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "I couldn’t run the runner tests because this session has no shell or command-execution tool.",
+      "evidence": "The transcript contains no test execution by the candidate. The supplied validation results report a passing focused check and a passing full unittest run, but those results do not establish that the candidate ran them.",
+      "reason": "The prompt explicitly required running the runner tests."
+    },
+    {
+      "dimension": "task_completion",
+      "answer_passage": "Added focused coverage in `agent-evals/tests/test_eval_du05.py`",
+      "evidence": "The supplied test content covers malformed facts and matching and differing pins, but the test file appears only as an untracked artifact, outside the tracked code diff.",
+      "reason": "The coverage is present in the supplied artifact, but its inclusion in the deliverable is less certain than the tracked core.py change."
+    }
+  ],
+  "first_substantive_event_index": 24
+}

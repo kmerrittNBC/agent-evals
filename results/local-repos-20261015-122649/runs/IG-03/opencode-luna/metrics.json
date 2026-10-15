@@ -1,0 +1,44 @@
+{
+  "task_id": "IG-03",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T16:48:54.380284+00:00",
+  "elapsed_seconds": 25.823283,
+  "answer": "## Declared runtime overlap\n\n| Repository | Node requirement | Other runtime requirements | Relevant locked dependencies |\n|---|---|---|---|\n| **RelayView** (`f7c03941cf32…`) | `>=22.19 <23 || >=24.11 <25` | No Python or uv requirement is recorded in the cited runtime metadata. | `@playwright/test` and `playwright` **1.62.1**; TypeScript **5.9.3**. |\n| **agent-harness-evals** (`b0b31dda6916…`) | `>=22.19.0`, with no declared upper bound | Python **>=3.12**; uv **==0.12.9**. Its Python metadata also pins `inspect-ai==0.3.261` and `inspect-evals[swe-bench]==0.16.0`. | Native CLI packages: `@anthropic-ai/claude-code` **2.1.270**, `@openai/codex` **0.144.0**, `opencode-ai` **1.18.28**, and `@earendil-works/pi-coding-agent` **0.85.0**. |\n\n**The lowest shared Node choice is Node 22.19.0.** The declared overlap is Node `>=22.19.0 <23.0.0` or `>=24.11.0 <25.0.0`. Node 23 is excluded by RelayView’s range.\n\n## What the metadata establishes—and what it doesn’t\n\nThe `package.json` files declare Node engine ranges and dependency requirements; the npm lockfiles record resolved package versions. The harness’s `pyproject.toml` declares its Python floor, exact Python dependency pins, and required uv version. These are declarations and version selections—not proof that installation succeeds, native CLI binaries work on a particular OS or architecture, Playwright’s browser can launch, or tests pass.\n\nThose outcomes require a real install and test run in the target environment. In particular, browser binaries and system libraries, native package installation, and the Python/uv environment need to be exercised.\n\nThe pinned source references and excerpts are recorded in [`evidence/IG-03/pack.json`](evidence/IG-03/pack.json): RelayView’s `package.json` and `package-lock.json` at `f7c03941cf32b8e25720b5eb1aa91364a236b005`, and agent-harness-evals’ `package.json`, `package-lock.json`, and `pyproject.toml` at `b0b31dda691620edae30db7127c1e1d8da907813`.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 2723,
+        "output": 185,
+        "reasoning": 30,
+        "cache": {
+          "read": 1664,
+          "write": 0
+        }
+      },
+      "cost": 0.00039644
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.658467,
+  "first_substantive_seconds": 25.661711,
+  "snapshot_digest_before": "52f81fdd3474301c86588384a5f7e5fdecdbe2a3da5b680971af31d459b52573",
+  "snapshot_digest_after": "52f81fdd3474301c86588384a5f7e5fdecdbe2a3da5b680971af31d459b52573",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 25.823283,
+      "started_at": "2026-10-15T16:48:54.380284+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 9
+  }
+}
