@@ -13,7 +13,7 @@ from .core import (RESULTS, ROOT, atomic_json, capture, load_manifest,
 def _scrub_text(value: str) -> str:
     # Preserve model names in the task and answer: IG-01 explicitly asks about
     # those models. Hide only first-person harness labels.
-    for identity in ("Copilot CLI", "Claude Code", "Antigravity CLI"):
+    for identity in ("Copilot CLI", "Claude Code", "Antigravity CLI", "OpenCode"):
         value = re.sub(re.escape(identity), "[redacted harness]", value, flags=re.I)
     return value
 
@@ -29,7 +29,7 @@ def anonymized_transcript(events: list[dict], arms: list[dict]) -> list[dict]:
             continue
         kind = str(obj.get("type", obj.get("event", "")))
         visible = adapters.event_text("pi", obj) or adapters.event_text("copilot", obj) or \
-                  adapters.event_text("claude", obj) or \
+                  adapters.event_text("opencode", obj) or adapters.event_text("claude", obj) or \
                   adapters.event_text("antigravity", obj)
         detail = None
         if "tool" in kind.lower() or "function" in kind.lower():
@@ -62,11 +62,15 @@ def anonymized_transcript(events: list[dict], arms: list[dict]) -> list[dict]:
                               "result": ""}
                     break
         part = obj.get("part")
-        if kind == "tool" and isinstance(part, dict):
+        if kind in ("tool", "tool_use") and isinstance(part, dict):
             state = part.get("state", {})
+            output = state.get("output", "") if isinstance(state, dict) else ""
+            if not output:
+                # OpenCode v2 reports tool output as a content block list.
+                output = adapters._content_text(part.get("content"))
             detail = {"name": str(part.get("tool", "")),
                       "arguments": str(state.get("input", ""))[:3000] if isinstance(state, dict) else "",
-                      "result": str(state.get("output", ""))[:6000] if isinstance(state, dict) else ""}
+                      "result": str(output)[:6000]}
         if not visible and not detail:
             continue
         if detail:

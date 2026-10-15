@@ -4,7 +4,7 @@ Task-selection criteria for the two later matrix categories are in
 [`docs/repo-task-design.md`](docs/repo-task-design.md). They do not define
 prompts until suitable repositories are available.
 
-This repository runs the five prompts in `config/tasks.yaml` through three pinned
+This repository runs the five prompts in `config/tasks.yaml` through four pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
 judgment, and a traceable report for every attempted run. The first full run is
 in [`results/ig-2026-10-14-five-arm-v2/report.md`](results/ig-2026-10-14-five-arm-v2/report.md)
@@ -53,16 +53,24 @@ pages locally, then can use the configured Copilot model to process their
 contents. The standalone Copilot CLI arm was removed after its headless probe
 could not use web search. Pi still uses the Copilot-backed Luna and Sol models.
 
+The OpenCode arm was readmitted (ADR 0002) after OpenCode v2 shipped a keyless
+`tinyfish` search provider: OpenCode's own hosted endpoint, requiring no
+account, key, or billing. The adapter pins that provider through a per-process
+`OPENCODE_CONFIG_CONTENT` config (deny-by-default permissions allowing only
+read, glob, grep, websearch, webfetch, and question) and runs every invocation
+with `--standalone` so a private server inherits that config instead of
+attaching to a background service.
+
 `preflight --live` spends a small amount of model usage to verify the exact
 model, search, and page fetch in each headless harness, plus a schema-conforming
 Codex judgment. The runner refuses `run` until all provisioned arms have
 passed those probes. An unavailable arm is recorded as unavailable; its model
 is never replaced. `run` also refuses missing repository commits or judge
 packs. Use `--arm` and `--task` on `run` for a pilot. The full run has a separate
-`--full` flag and requires all 15 slots to be preflighted. A failed or timed-out
+`--full` flag and requires all 20 slots to be preflighted. A failed or timed-out
 run remains in the record; rerunning it requires a new evaluation ID.
 The stopped four-arm evaluation has a recorded run plan; start a new evaluation
-ID for the current three-arm configuration.
+ID for the current four-arm configuration.
 
 If a GitHub billing record can be attributed to one isolated run, attach it
 with `python3 -m agent_eval reconcile-credits --evaluation-id pilot --task IG-01
@@ -104,5 +112,6 @@ flags or event structure, update and re-probe the adapter before a full run.
 
 The source plan is the user-provided pasted document. CLI behavior was checked
 against installed Pi/Copilot/Codex help and the official
-[Claude Code](https://code.claude.com/docs/en/cli-usage), and
+[Claude Code](https://code.claude.com/docs/en/cli-usage),
+[OpenCode](https://opencode.ai/v2/docs/websearch), and
 [Antigravity CLI](https://www.antigravity.google/docs/cli/headless/) references.

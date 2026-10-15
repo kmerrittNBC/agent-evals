@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0002-readmit-opencode-arm
 ---
 
 # Drop the OpenCode evaluation arm

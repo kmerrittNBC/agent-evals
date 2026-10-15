@@ -206,6 +206,12 @@ def static_arm_check(arm: dict) -> dict:
                 details.update(status="unavailable", reason="Pi web search/fetch extensions are missing")
         except (OSError, subprocess.SubprocessError):
             details.update(status="unavailable", reason="Could not list Pi models")
+    if arm["harness"] == "opencode" and arm.get("search_provider") != "tinyfish":
+        # Only the keyless vendor-hosted provider is permitted: it needs no
+        # account, key, or billing (ADR 0002). A keyed provider would reintroduce
+        # the organizational dependency the OpenCode arm must not have.
+        details.update(status="unavailable",
+                       reason="OpenCode arm must pin the keyless tinyfish search provider")
     return details
 
 

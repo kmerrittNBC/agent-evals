@@ -6,7 +6,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 from src.agent_eval import adapters
-from src.agent_eval.core import pack_status, prepare_workspace, read_config, tree_digest, validate_cutoff
+from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
+                                 static_arm_check, tree_digest, validate_cutoff)
 from src.agent_eval.judge import anonymized_transcript, validate_judgment
 from src.agent_eval.preflight import live_arm_probe
 from src.agent_eval.report import _credit
@@ -122,9 +123,64 @@ class RunnerContractTests(unittest.TestCase):
 
     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
         arms = read_config("arms")["arms"]
-        self.assertEqual(len(arms), 3)
+        self.assertEqual(len(arms), 4)
         self.assertEqual({arm["id"] for arm in arms},
-                         {"pi-luna", "pi-sol", "claude-opus"})
+                         {"pi-luna", "pi-sol", "opencode-luna", "claude-opus"})
+        opencode = next(arm for arm in arms if arm["harness"] == "opencode")
+        self.assertEqual(opencode["search_provider"], "tinyfish")
+
+    def test_opencode_run_is_hermetic_and_pins_keyless_search(self):
+        arm = {"id": "opencode-luna", "harness": "opencode", "binary": "opencode",
+               "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
+               "search_provider": "tinyfish"}
+        cmd = adapters.command(arm, "probe prompt", Path("/w"), Path("/r"), "sess-1")
+        self.assertIn("--standalone", cmd)
+        self.assertEqual(cmd[cmd.index("--model") + 1], "github-copilot/gpt-6-luna#medium")
+        self.assertEqual(cmd[cmd.index("--session") + 1], "sess-1")
+        self.assertEqual(cmd[-1], "probe prompt")
+        config = json.loads(adapters.environment(arm, Path("/w"))["OPENCODE_CONFIG_CONTENT"])
+        self.assertEqual(config["websearch"], {"provider": "tinyfish"})
+        rules = config["permissions"]
+        self.assertEqual(rules[0], {"action": "*", "resource": "*", "effect": "deny"})
+        allowed = {rule["action"] for rule in rules[1:]}
+        self.assertEqual(allowed, {"read", "glob", "grep", "websearch", "webfetch", "question"})
+        self.assertTrue(all(rule["effect"] == "allow" for rule in rules[1:]))
+
+    def test_opencode_events_decode_answer_tools_session_and_usage(self):
+        events = [
+            {"data": {"type": "step_start", "sessionID": "sess-9", "part": {}}},
+            {"data": {"type": "tool_use", "sessionID": "sess-9",
+                      "part": {"tool": "websearch", "state": {"status": "completed", "input": {"query": "pathlib"}},
+                               "content": [{"type": "text", "text": "docs.python.org"}]}}},
+            {"data": {"type": "tool_use", "sessionID": "sess-9",
+                      "part": {"tool": "webfetch", "state": {"status": "completed", "input": {"url": "https://docs.python.org"}},
+                               "content": [{"type": "text", "text": "pathlib docs"}]}}},
+            {"data": {"type": "text", "sessionID": "sess-9", "part": {"text": "The page is the pathlib documentation."}}},
+            {"data": {"type": "step_finish", "sessionID": "sess-9",
+                      "part": {"cost": {"total": 0.01}, "tokens": {"input": 10, "output": 5}}}},
+        ]
+        self.assertEqual(adapters.final_answer("opencode", events),
+                         "The page is the pathlib documentation.")
+        self.assertEqual(adapters.tool_names(events), ["websearch", "webfetch"])
+        self.assertEqual(adapters.tool_activity(events),
+                         {"search_calls": 1, "fetch_calls": 1, "other_tool_calls": 0})
+        self.assertEqual(adapters.session_id("opencode", events), "sess-9")
+        self.assertEqual(adapters.usage("opencode", events, Path("/r"))["raw"],
+                         {"tokens": {"input": 10, "output": 5}, "cost": {"total": 0.01}})
+        transcript = json.dumps(anonymized_transcript(
+            [{"index": 1, "channel": "stdout", "elapsed_seconds": 1.0, "data": events[1]["data"]}],
+            read_config("arms")["arms"]))
+        self.assertIn("websearch", transcript)
+        self.assertIn("docs.python.org", transcript)
+
+    def test_opencode_arm_without_keyless_provider_is_unavailable(self):
+        arm = {"id": "opencode-luna", "harness": "opencode", "binary": "opencode",
+               "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
+               "search_provider": "tavily"}
+        with patch("src.agent_eval.core._version", return_value="opencode 2.0"):
+            details = static_arm_check(arm)
+        self.assertEqual(details["status"], "unavailable")
+        self.assertIn("tinyfish", details["reason"])
 
     def test_judgment_rejects_missing_evidence(self):
         names = ["factual_accuracy", "task_completion", "source_quality", "synthesis_and_judgment",
