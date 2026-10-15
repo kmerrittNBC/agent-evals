@@ -27,12 +27,12 @@ class RunnerContractTests(unittest.TestCase):
             commit = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
             (repo / "package.json").write_text('{"version":"2"}')
             workspace = Path(temp) / "export"
-            prepare_workspace({"financial-hq-ui": {"path": str(repo), "commit": commit}},
-                              {"repos": ["financial-hq-ui"]}, workspace)
-            self.assertEqual((workspace / "financial-hq-ui/package.json").read_text(), '{"version":"1"}')
+            prepare_workspace({"relayview": {"path": str(repo), "commit": commit}},
+                              {"repos": ["relayview"]}, workspace)
+            self.assertEqual((workspace / "relayview/package.json").read_text(), '{"version":"1"}')
             before = tree_digest(workspace)
-            (workspace / "financial-hq-ui/package.json").chmod(0o644)
-            (workspace / "financial-hq-ui/package.json").write_text("changed")
+            (workspace / "relayview/package.json").chmod(0o644)
+            (workspace / "relayview/package.json").write_text("changed")
             self.assertNotEqual(before, tree_digest(workspace))
 
     def test_no_usage_is_not_zero_credits(self):
@@ -118,8 +118,8 @@ class RunnerContractTests(unittest.TestCase):
         for task in tasks:
             with self.subTest(task=task["id"]):
                 self.assertEqual(pack_status(task["id"]), (True, "ready"))
-        self.assertEqual(tasks[2]["repos"], ["financial-hq-ui", "people-and-orgs-ui-library"])
-        self.assertEqual(tasks[4]["repos"], ["financial-hq-ui"])
+        self.assertEqual(tasks[2]["repos"], ["relayview", "agent-harness-evals"])
+        self.assertEqual(tasks[4]["repos"], ["agent-harness-evals"])
 
     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
         arms = read_config("arms")["arms"]

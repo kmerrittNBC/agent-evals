@@ -20,7 +20,7 @@ results remain available if it is added back later.
 
 - Python 3.11 or newer; no Python packages are required.
 - The CLIs in `config/arms.yaml`, authenticated for the exact models.
-- A pinned Git checkout of each relevant Angular repository for IG-02 through
+- Pinned Git checkouts of RelayView and agent-harness-evals for IG-02 through
   IG-05. The runner exports the commits into temporary read-only directories.
 - Completed judge-only packs in `evidence/IG-*/pack.json`. See the template and
   `evidence/README.md`. These are intentionally absent from agent workspaces.
@@ -29,9 +29,9 @@ results remain available if it is added back later.
 Run `python3 -m agent_eval --help` for commands. A typical sequence is:
 
 ```sh
-python3 -m agent_eval preflight --evaluation-id pilot --cutoff 2026-10-14T17:00:00-04:00 \
-  --repo financial-hq-ui=/absolute/path/to/se-financial-hq-ui \
-  --repo people-and-orgs-ui-library=/absolute/path/to/people-and-orgs-ui-library
+python3 -m agent_eval preflight --evaluation-id pilot --cutoff 2026-10-15T00:00:00-04:00 \
+  --repo relayview=/home/anodyine/Projects/relayview \
+  --repo agent-harness-evals=/home/anodyine/Projects/agent-harness-evals
 python3 -m agent_eval preflight --evaluation-id pilot --live
 python3 -m agent_eval run --evaluation-id pilot --full
 python3 -m agent_eval judge --evaluation-id pilot
@@ -80,8 +80,6 @@ judge packs, and results stay outside those workspaces. The runner verifies
 their contents did not change after each run. The tool allowlists further limit
 file editing. This is an integrity check, not an OS-level security boundary;
 run untrusted agents in a separate sandbox if that guarantee is required.
-The current IG-05 asks about financial HQ UI only. `--angular-root` remains
-available for a future fleet task but is not needed for these five prompts.
 Uncommitted work is never exported; the manifest records whether each source
 checkout was dirty.
 

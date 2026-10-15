@@ -20,7 +20,6 @@ def main() -> int:
         if name == "preflight":
             part.add_argument("--cutoff")
             part.add_argument("--repo", action="append", default=[])
-            part.add_argument("--angular-root")
             part.add_argument("--live", action="store_true")
         elif name in ("run", "judge"):
             part.add_argument("--arm", action="append")
@@ -35,7 +34,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "preflight":
-            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.angular_root, args.live)
+            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.live)
             print(json.dumps({"manifest": str(RESULTS / args.evaluation_id / "manifest.json"),
                               "arms": {key: value["status"] for key, value in result["preflight"].items()},
                               "judge": result["judge_preflight"]["status"],

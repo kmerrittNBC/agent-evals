@@ -1,16 +1,58 @@
 {
-  "reference_answer": "For the pinned financial HQ UI versions, the documented intersection includes Node 22.22.3+, Node 24.15.0+, and Node 26.x, subject to each major's own semver range. Angular's public compatibility table labels its row 22.0.x rather than 22.1.x, so applying it to 22.1.7 should be called an inference or checked against version-specific release notes. That row requires TypeScript >=6.0.0 <6.1.0. Nx 23.x supports Node 26.x, 24.x and ^22.12.0, TypeScript >=5.8.0 <7.1.0; the Nx/Angular matrix explicitly supports Angular ~22.1.0 with Nx >=23.2.0. Thus declared Angular 22.1.7, Nx 23.2.1 and TypeScript 6.0.3 fit the published ranges. Current Playwright installation docs list Node 22/24/26, but they are not clearly versioned for Playwright 1.60; its published package engines field is only >=18, which is a weaker statement than tested browser support. The repo pins Node 24.16.0 in .nvmrc and its GitHub Actions use that file. Recommend keeping Node 24 LTS at >=24.15.0, using the same pinned patch locally and in CI, with build/e2e validation. Node 26 is a plausible pilot, but it was still Current rather than LTS on October 14, 2026; Node 22 at >=22.22.3 is also documented but less aligned with the existing pin.",
+  "reference_answer": "No comparative ranking follows from the qualification. README and final evidence record 35/35 outcome slots: 31 passes, three verifier failures and one eligible timeout, with 36 attempts including an infrastructure failure. This is a seven-arm by five-Python-project operational gate assembled across four documented execution revisions, not the comparative MultiLang Stage A. The current v5 contract and 2026-10-03 amendment specify 23 reviewed archive tasks in 23 repositories (161 Stage A slots), continuously run under one admitted configuration, with exact arm, corpus, environment, outcome and schedule identities plus approval and trusted freeze/seal evidence. The README still says 25 tasks, reflecting the earlier candidate allocation; the amended executable cohort is 23. The contract itself says it is prospective, not a numerical freeze or authorization to run. Qualification confirms recorded operations and audit, not comparative performance, completed Stage A, or a seven-arm ranking.",
   "sources": [
-    {"title":"Angular version compatibility", "url":"https://angular.dev/reference/versions", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"The supported table has a 22.0.x row (no separate 22.1.x row): Node ^22.22.3 || ^24.15.0 || ^26.0.0, TypeScript >=6.0.0 <6.1.0. Applicability to 22.1.7 is inferred from the 22 major line, not explicitly stated by the row label."},
-    {"title":"Nx Node support matrix", "url":"https://nx.dev/docs/technologies/node/introduction", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Nx 23.x: Node 26.x, 24.x or ^22.12.0. Nx states this matrix is authoritative even though nx package.json intentionally omits an engines field."},
-    {"title":"Nx TypeScript support matrix", "url":"https://nx.dev/docs/technologies/typescript/introduction", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Nx 23.x: TypeScript >=5.8.0 <7.1.0. The declared 6.0.3 fits."},
-    {"title":"Nx and Angular compatibility matrix", "url":"https://nx.dev/docs/kb/angular-nx-version-matrix", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Angular ~22.1.0 supports Nx >=23.2.0; Nx 23.2.1 fits. The matrix is distinct from the Nx Node and TypeScript matrices."},
-    {"title":"Playwright installation requirements", "url":"https://playwright.dev/docs/intro#system-requirements", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Current online installation docs list latest Node 22.x, 24.x or 26.x. The page is not pinned to Playwright 1.60 and should not be treated as proof of a 1.60-specific tested-runtime statement."},
-    {"title":"@playwright/test 1.60.0 npm package metadata", "url":"https://registry.npmjs.org/@playwright/test/1.60.0", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Version-specific package metadata declares engines.node >=18. This installation constraint is broader than the current documentation's recommended runtime set and does not alone establish browser-binary support on every newer Node major."},
-    {"title":"Node.js release status", "url":"https://nodejs.org/en/about/previous-releases", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"At the 2026-10-14 cutoff Node 26 is Current; Node 24 and Node 22 are LTS. Node.js advises production applications to use Active or Maintenance LTS."}
+    {
+      "title": "agent-harness-evals README.md at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/README.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Qualification: 35 recorded outcomes, 31 passes, 3 verifier failures, 1 timeout; operational evidence across repair revisions, not comparative Stage A ranking. README describes 25-task Stage A."
+    },
+    {
+      "title": "agent-harness-evals docs/evidence/current-qualification-180-final.md at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/docs/evidence/current-qualification-180-final.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Seven-arm/five-project qualification completed 2026-09-18; 35/35 outcomes, 36 attempts, four execution revisions; five Python tasks do not support comparative ranking or freeze."
+    },
+    {
+      "title": "agent-harness-evals docs/contracts/staged-multilang-benchmark-v5.md at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/docs/contracts/staged-multilang-benchmark-v5.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "2026-10-03 amendment makes executable Stage A 23 reviewed archive tasks, 161 seven-arm slots, continuous cohort. Contract is prospective and not an actual numerical freeze or permission to run."
+    }
   ],
-  "repo_facts": [{"repo":"financial-hq-ui", "commit":"534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0", "facts":["package.json declares @angular/core and @angular/router 22.1.7, nx/@nx/angular 23.2.1, typescript 6.0.3, and @playwright/test ^1.60.0.", "yarn.lock resolves nx 23.2.1, typescript 6.0.3 and @playwright/test 1.60.0.", ".nvmrc pins 24.16.0; tracked GitHub Actions workflows use actions/setup-node with node-version-file .nvmrc.", "This source snapshot does not prove successful builds, native-package compatibility, or runtime behavior under every documented Node line."]}],
-  "ambiguities": ["Angular's public table names 22.0.x while the repo uses 22.1.7; describe the extrapolation rather than claiming an exact minor-row match.", "A package engines field, a current docs page, and a tested version-specific support statement are different levels of evidence for Playwright 1.60.", "Documented compatibility is not a successful build or e2e run in this repository.", "The prompt does not prescribe LTS priority, so Node 22, 24 and 26 recommendations can be defensible with different tradeoffs."],
-  "grading_guidance": {"must_check": ["Angular Node and TypeScript ranges and the Angular 22.1 documentation caveat", "Nx 23 Node/TypeScript ranges and Angular 22.1-to-Nx minimum", "Playwright 1.60 version-specific documentation limit", "A reasoned Node recommendation aligned with local and CI pins"], "acceptable_alternatives": ["Node 24.x >=24.15.0 is the lowest-disruption LTS choice; keeping the current 24.16.0 pin is defensible.", "Node 22.x >=22.22.3 can be recommended with an explanation of its LTS status and the need to update the current pin.", "Node 26.x can be recommended as a validated pilot or deliberate adoption if its Current status and version-specific test gap are acknowledged."], "do_not_penalize": ["Separating official matrix support from verified build success", "Calling the Playwright 1.60 Node 26 situation unresolved by the current docs instead of declaring it unsupported"]},
-  "decision_changing_errors": ["Claiming TypeScript 6.0.3 violates the documented Angular 22 or Nx 23 ranges.", "Claiming Nx 23.2.1 does not support Angular 22.1 or that Angular 22's documented row excludes Node 26.", "Calling Node 26 LTS on 2026-10-14 or treating a current Playwright docs page as version-specific proof for 1.60."]
+  "repo_facts": [
+    {
+      "repo": "agent-harness-evals",
+      "commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "facts": [
+        "README reports qualification outcomes and says a complete comparative Stage A has not been published.",
+        "Final qualification evidence labels the five Python tasks an operational gate, across repair revisions.",
+        "Current staged v5 contract amends executable Stage A to 23 reviewed tasks and requires a frozen admitted configuration and separately sealed outcomes."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "README opening still calls Stage A 25-task; the later 2026-10-03 amendment in the contract reduces the executable reviewed cohort to 23.",
+    "A pass matrix from operational qualification can be reported descriptively, but cannot be promoted to a controlled comparison."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "35 outcomes and disposition interpreted as operational qualification",
+      "No unsupported arm ranking or completed-Stage-A claim",
+      "23-task amended comparative cohort and 161 slots",
+      "Freeze, admission and seal requirements",
+      "Recognition of README 25 versus amended 23 discrepancy"
+    ],
+    "acceptable_alternatives": [
+      "A response may mention the 25-task candidate selection if it clearly distinguishes it from the amended 23-task executable cohort."
+    ],
+    "do_not_penalize": [
+      "Summarizing the freeze fields rather than listing every field."
+    ]
+  },
+  "decision_changing_errors": [
+    "Ranking the seven arms by 5-task pass count as a comparative conclusion.",
+    "Claiming the final qualification evidence is the 23-task Stage A outcome seal.",
+    "Claiming the v5 contract itself authorizes an executed numerical freeze."
+  ]
 }

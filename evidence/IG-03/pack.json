@@ -1,15 +1,70 @@
 {
-  "reference_answer": "GHSA-w3vv-58gj-gw77 was published September 11, 2026. The 22.x fix 22.7.9 was released September 1, and the 23.x fix 23.1.2 was released August 26, before advisory publication. The affected nx ranges are >=14.6.0 <22.7.9 and >=23.0.0 <23.1.2. Financial HQ UI declares and locks nx 23.2.1, outside the affected range: no advisory-driven update is required. People-and-orgs UI library declares and locks nx 22.7.1, inside the range: update nx and aligned @nx/* packages to at least 22.7.9 within the 22.x line. Exploitation requires another local user on the same machine while Nx daemon or plugin-worker sockets are available; shared development boxes, shared CI/build hosts and multi-UID containers are the concern. Confirm execution topology, run nx reset on shared hosts after upgrading, and use a private 0700 NX_SOCKET_DIR as an interim mitigation if needed. NX_DAEMON=false alone is insufficient because plugin-worker sockets remain.",
+  "reference_answer": "RelayView package.json declares Node >=22.19 <23 || >=24.11 <25; its package-lock resolves @playwright/test/playwright 1.62.1 and TypeScript 5.9.3. agent-harness-evals package.json declares Node >=22.19.0 and pins native CLIs including @anthropic-ai/claude-code 2.1.270, @openai/codex 0.144.0, opencode-ai 1.18.28, and @earendil-works/pi-coding-agent 0.85.0 in package-lock. Its pyproject.toml requires Python >=3.12, pins inspect-ai 0.3.261 and inspect-evals 0.16.0, and requires uv 0.12.9. The declared Node intersection is 22.19.0 through any 22.x below 23, or 24.11.0 through any 24.x below 25. The lowest shared Node is 22.19.0. Those declarations and lockfiles do not establish successful installation, native-module compatibility, or passing tests on a given machine.",
   "sources": [
-    {"title":"Nx advisory GHSA-w3vv-58gj-gw77", "url":"https://github.com/nrwl/nx/security/advisories/GHSA-w3vv-58gj-gw77", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Published 2026-09-11. nx affected >=14.6.0 <22.7.9 and >=23.0.0 <23.1.2; fixed 22.7.9 and 23.1.2. Another unprivileged local user can reach daemon or plugin worker sockets on a multi-user host and execute code as the Nx user. NX_DAEMON=false alone does not remove plugin-worker socket exposure. Upgrade, nx reset on shared hosts, or use private NX_SOCKET_DIR mode 0700 while awaiting upgrade."},
-    {"title":"Nx 22.7.9 release", "url":"https://github.com/nrwl/nx/releases/tag/22.7.9", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"GitHub release published 2026-09-01T15:27:03Z. This is the first patched 22.x version named by the advisory."},
-    {"title":"Nx 23.1.2 release", "url":"https://github.com/nrwl/nx/releases/tag/23.1.2", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"GitHub release published 2026-08-26T22:46:39Z. This is the first patched 23.x version named by the advisory."}
+    {
+      "title": "relayview package.json at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/package.json",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "engines.node is >=22.19 <23 || >=24.11 <25; @playwright/test ^1.62.1; typescript ^5.9.2."
+    },
+    {
+      "title": "relayview package-lock.json at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/package-lock.json",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Resolved @playwright/test/playwright 1.62.1 and TypeScript 5.9.3."
+    },
+    {
+      "title": "agent-harness-evals package.json at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/package.json",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "engines.node >=22.19.0; native CLI package pins: Claude Code 2.1.270, Codex 0.144.0, OpenCode 1.18.28, Pi 0.85.0."
+    },
+    {
+      "title": "agent-harness-evals pyproject.toml at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/pyproject.toml",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "requires-python >=3.12; inspect-ai==0.3.261, inspect-evals[swe-bench]==0.16.0; tool.uv.required-version ==0.12.9."
+    }
   ],
   "repo_facts": [
-    {"repo":"financial-hq-ui", "commit":"534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0", "facts":["package.json declares nx and @nx/* packages at 23.2.1; yarn.lock resolves nx 23.2.1.", "The tracked playwright.config.ts uses NX_DAEMON=false for its webServer command, which is not a complete mitigation for affected Nx versions."]},
-    {"repo":"people-and-orgs-ui-library", "commit":"75b2f8102055a3835fcd0d8849d094f71bfa25ba", "facts":["package.json declares nx and multiple @nx/* packages at 22.7.1; pnpm-lock.yaml contains nx 22.7.1.", "This Nx workspace has build, test and serve scripts; the pinned source does not prove whether CI or development hosts have multiple local users."]}
+    {
+      "repo": "relayview",
+      "commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "facts": [
+        "Node engine range is >=22.19 <23 || >=24.11 <25.",
+        "Lockfile resolves Playwright 1.62.1 and TypeScript 5.9.3."
+      ]
+    },
+    {
+      "repo": "agent-harness-evals",
+      "commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "facts": [
+        "Node engine floor is >=22.19.0 with no declared upper bound.",
+        "Python floor is 3.12 and uv is pinned to 0.12.9.",
+        "Native CLI dependency versions are exact in package.json and package-lock.json."
+      ]
+    }
   ],
-  "ambiguities": ["The advisory's publication date is later than both first-fix release dates; do not assume chronological order without checking release records.", "A vulnerable version identifies a software defect, while exploitability depends on local user isolation and whether Nx sockets are in use.", "A package update recommendation should account for the repo's aligned Nx plugins and lockfile without requiring a 23.x major upgrade."],
-  "grading_guidance": {"must_check": ["Advisory date and both first-fix release dates", "Separate range assessment for 23.2.1 and 22.7.1", "Local multi-user precondition including plugin workers", "Minimal update for the affected 22.x repository"], "acceptable_alternatives": ["A later 22.x patch can be recommended if 22.7.9 is identified as the first fixed release.", "No change for financial HQ UI is a complete version-based conclusion; a routine future update is also reasonable if clearly optional."], "do_not_penalize": ["Conditioning urgency on whether machines actually have multiple local accounts", "Stating the CI execution topology cannot be proven from the repository snapshot"]},
-  "decision_changing_errors": ["Claiming financial HQ UI 23.2.1 is in the affected range or people-and-orgs 22.7.1 is fixed.", "Recommending NX_DAEMON=false alone as complete protection.", "Requiring people-and-orgs to jump to Nx 23.x for this fix."]
+  "ambiguities": [
+    "A compatible declared Node version is a prerequisite, not evidence that native packages or browser binaries work on that host.",
+    "The harness repo has no Node upper bound; RelayView supplies the intersection ceiling."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "Both Node declarations and their intersection",
+      "Python and uv requirements belong to agent-harness-evals",
+      "Relevant locked dependency versions",
+      "Distinguish declarations from validated runtime"
+    ],
+    "acceptable_alternatives": [
+      "Recommending either Node 22.19+ or Node 24.11+ within RelayView bounds is acceptable if the minimum intersection is correctly identified."
+    ],
+    "do_not_penalize": [
+      "Omitting unrelated package versions."
+    ]
+  },
+  "decision_changing_errors": [
+    "Claiming Node 23 or 26 fits both declared ranges.",
+    "Treating a lockfile as proof that installation and tests pass."
+  ]
 }

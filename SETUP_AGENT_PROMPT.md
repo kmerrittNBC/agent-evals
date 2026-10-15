@@ -1,7 +1,7 @@
 # Manual setup prompt
 
 Help me finish manual CLI setup for the evaluation repository at
-`/Users/206768009@bwt3.com/repos/agent-evals` on this Mac. Walk me through one
+`/home/anodyine/Projects/agent-evals` on this machine. Walk me through one
 step at a time. Use current official vendor documentation to verify install,
 login, model names, headless flags, search tools, and pricing before giving
 commands. Pause only when I must sign in or approve organizational access.
@@ -22,8 +22,8 @@ The four pinned arms are in `config/arms.yaml`. Please:
    `tinyfish` websearch provider, which needs no account or billing. Confirm
    from the documentation that no key is required before proceeding.
 3. Read `README.md`, then create a new evaluation manifest with
-   `financial-hq-ui=$HOME/sportsengine/se-financial-hq-ui`,
-   `people-and-orgs-ui-library=$HOME/sportsengine/people-and-orgs-ui-library`,
+   `relayview=/home/anodyine/Projects/relayview`,
+   `agent-harness-evals=/home/anodyine/Projects/agent-harness-evals`,
    using an explicit information cutoff.
    Run live preflight, report every arm's ready/unavailable status and remaining
    manual action, and do not start the 20 evaluation runs.

@@ -58,7 +58,7 @@ def git(repo: Path, *args: str) -> str:
 
 
 def validate_repos(repo_args: list[str]) -> dict[str, dict]:
-    required = {"financial-hq-ui", "people-and-orgs-ui-library"}
+    required = {name for task in read_config("tasks")["tasks"] for name in task["repos"]}
     repos: dict[str, dict] = {}
     for item in repo_args:
         if "=" not in item:
@@ -77,39 +77,8 @@ def validate_repos(repo_args: list[str]) -> dict[str, dict]:
     return repos
 
 
-def discover_angular_root(value: str) -> tuple[dict[str, dict], dict]:
-    root = Path(value).expanduser().resolve()
-    if not root.is_dir():
-        raise ValueError(f"Angular repo root not found: {root}")
-    repos: dict[str, dict] = {}
-    for child in sorted(root.iterdir()):
-        if not child.is_dir() or not (child / ".git").exists():
-            continue
-        try:
-            commit = git(child, "rev-parse", "HEAD")
-            data = json.loads(git(child, "show", f"{commit}:package.json"))
-        except (OSError, json.JSONDecodeError, subprocess.SubprocessError):
-            continue
-        deps = {**data.get("dependencies", {}), **data.get("devDependencies", {})}
-        if "@angular/core" not in deps:
-            continue
-        name = f"sportsengine/{child.name}"
-        repos[name] = {"path": str(child), "commit": commit,
-                       "working_tree_dirty": bool(git(child, "status", "--porcelain")),
-                       "angular_version_spec": deps["@angular/core"]}
-    if not repos:
-        raise ValueError(f"No Angular Git repos found under {root}")
-    return repos, {"path": str(root), "repo_names": sorted(repos)}
-
-
 def task_repo_names(task: dict, manifest: dict) -> list[str]:
-    names: list[str] = []
-    for name in task["repos"]:
-        if name == "@angular-root":
-            names.extend(manifest.get("angular_root", {}).get("repo_names", []))
-        else:
-            names.append(name)
-    return names
+    return task["repos"]
 
 
 def pack_path(task_id: str) -> Path:

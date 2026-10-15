@@ -6,7 +6,7 @@ from pathlib import Path
 
 from . import adapters
 from .core import (RESULTS, ROOT, atomic_json, capture, config_hashes,
-                   discover_angular_root, load_manifest, manifest_path, pack_status, read_config,
+                   load_manifest, manifest_path, pack_status, read_config,
                    static_arm_check, utc_now, validate_cutoff, validate_repos)
 
 
@@ -110,7 +110,7 @@ def live_arm_probe(arm: dict, timeout: int) -> dict:
 
 
 def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
-              angular_root: str | None, live: bool) -> dict:
+              live: bool) -> dict:
     def same_pin(left: dict, right: dict) -> bool:
         return left["path"] == right["path"] and left["commit"] == right["commit"]
 
@@ -127,26 +127,13 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
                 if name in manifest["repos"] and not same_pin(manifest["repos"][name], info):
                     raise ValueError("Repository pin differs from existing manifest")
             manifest["repos"].update(repos)
-        if angular_root:
-            repos, group = discover_angular_root(angular_root)
-            if manifest.get("angular_root") and manifest["angular_root"] != group:
-                raise ValueError("Angular root selection differs from existing manifest")
-            for name, info in repos.items():
-                if name in manifest["repos"] and not same_pin(manifest["repos"][name], info):
-                    raise ValueError("Angular repository pin differs from existing manifest")
-            manifest["repos"].update(repos)
-            manifest["angular_root"] = group
     else:
         if not cutoff:
             raise ValueError("A new evaluation requires --cutoff")
         repos = validate_repos(repo_args)
-        group = None
-        if angular_root:
-            discovered, group = discover_angular_root(angular_root)
-            repos.update(discovered)
         manifest = {"evaluation_id": evaluation_id, "created_at": utc_now(),
                     "cutoff": validate_cutoff(cutoff), "config_hashes": config_hashes(),
-                    "repos": repos, "angular_root": group, "preflight": {},
+                    "repos": repos, "preflight": {},
                     "judge_preflight": {"status": "needs_live_probe"}}
     arms = read_config("arms")["arms"]
     tasks = read_config("tasks")["tasks"]

@@ -14,3 +14,5 @@ and guidance fields, repo commits, and placeholder text before `run` or `judge`.
 Use `pack.template.json` as a shape guide. Source URLs alone can change after
 the information cutoff; save relevant excerpts with retrieval timestamps or
 commit a stable snapshot when license and access rules allow it.
+`repo://<name>/<commit>/<path>` locates a file in a pinned repository snapshot
+for repo-specific facts; the runner exports that same commit for the agent.

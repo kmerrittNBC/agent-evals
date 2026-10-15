@@ -1,10 +1,56 @@
 {
-  "reference_answer": "GHSA-ff3f-86qr-9cv3 was published September 23, 2026. It concerns denial of service through numeric matrix parameters when @angular/router parses attacker-controlled URLs during Node.js/V8 SSR. Angular 22 versions >=22.0.0 and <22.2.0 are affected; 22.2.0 is the first patched 22.x release. Financial HQ UI declares 22.1.7, so its declared package is in the affected range. The pinned source lacks @angular/ssr or @angular/platform-server and no tracked server entry point was found, supporting a client-side assessment, but the snapshot cannot prove deployed topology or reverse-proxy filtering. Verify SSR, URL routing and proxy behavior; if exposed, upgrade the Angular 22 packages together to >=22.2.0 promptly. If confirmed client-only, there is no demonstrated runtime exposure to this advisory, though a normal patch update remains sensible.",
+  "reference_answer": "RelayView verifies owner authority before merge admission. PullRequestMergeStore.admit transactionally inserts a pending effect keyed by binding ID, native PR ID and head revision; an existing identical intent is reused and a conflicting one errors. Only a newly admitted intent dispatches requestExactMerge, fast-forward-only. A provider timeout marks the effect unknown. On retry the coordinator reads provider state and confirms only an observed merged PR with matching head and merged revision; otherwise it leaves the result unknown and throws rather than dispatching again. A concurrent admission that wins the same candidate also prevents a second dispatch. Tests exercise timeout, retry, later observed confirmation and concurrent admission; they do not prove provider-side exactly-once execution or external state after an unreadable provider response.",
   "sources": [
-    {"title":"Angular advisory GHSA-ff3f-86qr-9cv3", "url":"https://github.com/angular/angular/security/advisories/GHSA-ff3f-86qr-9cv3", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Published 2026-09-23, high. @angular/router affected >=22.0.0 <22.2.0; fixed 22.2.0. Preconditions: Node.js/V8 SSR enabled; attacker-controlled request URLs parsed by router during SSR; proxy forwards semicolons and multiple path segments. Numeric matrix parameters amplify V8 heap use and can crash SSR worker. Pure client-side SPAs are unaffected."}
+    {
+      "title": "relayview src/pr/mergeCoordinator.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/mergeCoordinator.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "verifyAuthority precedes getByCandidate/admit. Existing or concurrently won intent takes read-only observation path; only new intent calls requestExactMerge; catches markUnknown."
+    },
+    {
+      "title": "relayview src/pr/mergeStore.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/mergeStore.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Transactional admit stores pending effect, reuses same intent or throws identity conflict; confirm requires merged revision equal to head revision."
+    },
+    {
+      "title": "relayview src/pr/mergeCoordinator.test.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/mergeCoordinator.test.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Timeout yields unknown; retry makes no second merge call; matching merged observation confirms. Concurrent admission test records zero merge calls."
+    }
   ],
-  "repo_facts": [{"repo":"financial-hq-ui", "commit":"534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0", "facts":["package.json declares @angular/router 22.1.7 alongside Angular 22.1.7 packages.", "The pinned package.json does not declare @angular/ssr or @angular/platform-server.", "No tracked server.ts or main.server.ts was found in the pinned tree; the tracked Playwright config starts an Nx client serve target.", "The pinned source snapshot does not establish production deployment or proxy filtering."]}],
-  "ambiguities": ["An affected dependency version does not by itself establish runtime exploitability.", "Absence of an SSR dependency or entry point in the pinned tree supports but does not prove a client-only deployment; deployment artifacts and proxy rules may live elsewhere."],
-  "grading_guidance": {"must_check": ["Correct advisory ID, date, package, affected and patched range", "DoS mechanism and all material SSR/proxy preconditions", "Separation of declared-version finding from confirmed deployment exposure"], "acceptable_alternatives": ["Immediate routine update to >=22.2.0 is reasonable even if SSR is unconfirmed, provided urgency is conditional on exposure.", "A candidate may recommend a later patched 22.x release instead of exactly 22.2.0 if it states 22.2.0 is the first fix."], "do_not_penalize": ["Saying exploitability cannot be confirmed from source alone", "Calling a confirmed client-only deployment unaffected by this advisory"]},
-  "decision_changing_errors": ["Analyzing a different GHSA in place of GHSA-ff3f-86qr-9cv3.", "Calling 22.1.7 fixed or all browser-only Angular apps remotely exploitable.", "Presenting SSR deployment or proxy behavior as confirmed without evidence."]
+  "repo_facts": [
+    {
+      "repo": "relayview",
+      "commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "facts": [
+        "Merge coordinator uses durable pending/unknown/confirmed effect state.",
+        "Store has candidate identity on binding ID, native PR ID, head revision and rejects mismatched intent.",
+        "Tests assert one provider merge dispatch across uncertain retries and zero dispatch after concurrent admission."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "Read-only observation cannot prove a timed-out provider call did nothing.",
+    "Tests use an in-memory SQLite store and fake provider, so they establish local behavior under tested conditions rather than all production races."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "Authority check and durable intent before dispatch",
+      "No second dispatch after timeout or concurrent admission",
+      "Exact observation needed for confirmation",
+      "Limits of test and provider guarantees"
+    ],
+    "acceptable_alternatives": [
+      "A concise state transition description is sufficient if it captures pending, unknown and confirmed."
+    ],
+    "do_not_penalize": [
+      "Not specifying the storage table name when the uniqueness key and behavior are correct."
+    ]
+  },
+  "decision_changing_errors": [
+    "Claiming a timeout is safe to retry by issuing another provider merge.",
+    "Claiming the tests establish provider-side exactly-once semantics."
+  ]
 }
