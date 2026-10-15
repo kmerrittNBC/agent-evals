@@ -18,4 +18,13 @@ reruns, and cannot be divided reliably among the scored task attempts. Luna
 usage also combines Pi and OpenCode. The 15 scored Sol + Pi attempts and 30
 scored Luna attempts are only part of the account activity represented here.
 
+For a rough usage-normalized comparison, assume Luna was used twice as often
+as Sol, since Luna ran with both Pi and OpenCode in the scored matrix. Dividing
+each model's total by relative usage counts gives
+`(367.98 / 1) / (50.32 / 2) = 14.63`: about **14.6 times as many Sol credits
+per assumed use**. This is an assumption-based estimate, not a measured
+per-attempt credit ratio. The 2:1 mix is known for scored attempts, but the
+account totals also include probes, pilots, and possible reruns whose mix is
+not established.
+
 ![GitHub AI usage screenshot](source.png)

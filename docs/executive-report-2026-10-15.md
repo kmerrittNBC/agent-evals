@@ -52,9 +52,11 @@ judged quality, or time matters most:
 - **Aggregate Copilot credit signal: Sol consumed more.** A user-supplied
   GitHub AI usage screenshot for 1–15 October shows 367.98 credits for
   GPT-6 Sol and 50.32 for GPT-6 Luna, a 7.31× model-level difference. The
-  operator reports using this Copilot account only for the evaluations.
-  This is an aggregate comparison across tests and probes, not measured
-  credits for any pair's individual attempts.
+  operator reports using this Copilot account only for the evaluations. If
+  Luna was used twice as often as Sol, as in the scored matrix, Sol's
+  usage-normalized credit intensity was about **14.6×** Luna's. That ratio
+  is a rough estimate across tests and probes, not measured credits for any
+  pair's individual attempts.
 - **Recommended mixed-workload exclusion: OpenCode + Luna.** It completed 8/15
   tasks, including only 1/5 IG and 2/5 DU tasks, and received Unacceptable
   ratings in both columns. It also had the lowest mean quality (3.93/5) and
@@ -229,10 +231,15 @@ Sol accounted for about 88% of the 418.30 model-attributed credits shown;
 its aggregate was 7.31 times Luna's. This includes evaluation activity
 beyond the scored attempts, such as live probes and any pilots or reruns.
 The scored comparison itself contains 15 Sol + Pi attempts and 30 Luna
-attempts split between Pi and OpenCode. The screenshot groups by model, so
+attempts split between Pi and OpenCode. Assuming the 2:1 Luna-to-Sol use
+ratio also held across all account activity, the usage-normalized comparison
+is `(367.98 / 1) / (50.32 / 2) = 14.63`, or about **14.6× more Sol credits
+per assumed use**. This is an estimate: the mix of probes, pilots, and reruns
+is unknown. The screenshot groups by model, so
 it cannot allocate Luna credits between those harnesses or assign credits
 to individual tasks. It establishes a strong **directional, model-level**
-consumption difference for this account, not a per-task price ratio. The
+consumption difference for this account; neither ratio is a measured per-task
+price ratio. The
 original screenshot and a machine-readable transcription are preserved with
 the results.
 

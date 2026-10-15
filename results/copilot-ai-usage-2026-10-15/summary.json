@@ -24,7 +24,9 @@
   "derived": {
     "model_credits_sum": 418.30,
     "sol_to_luna_credit_ratio": 7.3128,
-    "sol_share_of_model_credits": 0.8797
+    "sol_share_of_model_credits": 0.8797,
+    "assumed_luna_to_sol_use_count_ratio": 2,
+    "assumption_normalized_sol_to_luna_credit_intensity_ratio": 14.6256
   },
-  "attribution_limit": "The screenshot groups all Copilot activity by model. It includes evaluation probes and any pilot or rerun usage; it cannot allocate Luna credits between Pi and OpenCode or assign credits to individual attempts."
+  "attribution_limit": "The screenshot groups all Copilot activity by model. It includes evaluation probes and any pilot or rerun usage; it cannot allocate Luna credits between Pi and OpenCode or assign credits to individual attempts. The normalized ratio assumes 2 Luna uses per Sol use across all activity; only the scored attempt mix is known to be 2:1."
 }
