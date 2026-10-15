@@ -237,9 +237,14 @@ recorded status, event times, artifacts, tool activity, and native usage.
 
 The evaluated pairs were GPT-6 Luna in Pi, GPT-6 Sol in Pi, GPT-6 Luna in
 OpenCode, and Claude Opus 5.5 in Claude Code, all at medium reasoning effort.
-The standalone Copilot CLI was excluded because its headless probe could not
-use web search; Pi still accessed the Luna and Sol models through the Copilot
-provider. Antigravity was excluded from the current four-pair configuration
+The goal was to identify a versatile coding agent setup that can serve all
+three task categories, rather than select a different harness for each one.
+The standalone Copilot CLI's headless probe could not use web search, a
+requirement for the information-gathering category, so it was excluded from
+the shared three-category comparison. This is a scope decision, not a measured
+result for Copilot CLI on repository updates or architecture work. Pi still
+accessed the Luna and Sol models through the Copilot provider. Antigravity was
+excluded from the current four-pair configuration
 after command-permission problems in an earlier run and an account quota limit
 in the command-allowed follow-up. Its historical results were not pooled with
 these runs. [TBD: link a durable exclusion decision record if one is created.]
