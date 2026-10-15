@@ -48,8 +48,13 @@ judged quality, or time matters most:
   critical-error judgments that still need human review.
 - **Fastest overall: Pi + Sol.** Its median final deliverable time was 44.3
   seconds, the lowest of the four pairs. It finished faster than Pi + Luna
-  on all 15 matched tasks and faster than Claude Code + Opus on 14/15. The
-  timing result describes these runs; it does not establish comparative cost.
+  on all 15 matched tasks and faster than Claude Code + Opus on 14/15.
+- **Aggregate Copilot credit signal: Sol consumed more.** A user-supplied
+  GitHub AI usage screenshot for 1–15 October shows 367.98 credits for
+  GPT-6 Sol and 50.32 for GPT-6 Luna, a 7.31× model-level difference. The
+  operator reports using this Copilot account only for the evaluations.
+  This is an aggregate comparison across tests and probes, not measured
+  credits for any pair's individual attempts.
 - **Recommended mixed-workload exclusion: OpenCode + Luna.** It completed 8/15
   tasks, including only 1/5 IG and 2/5 DU tasks, and received Unacceptable
   ratings in both columns. It also had the lowest mean quality (3.93/5) and
@@ -210,11 +215,32 @@ comparisons after blind human review.]
 | Luna + Pi vs Luna + OpenCode | DU | 2 / 3 / 0 | 2/5 |
 | Luna + Pi vs Luna + OpenCode | AR | 3 / 2 / 0 | 1/5 |
 
+**Account-level Copilot usage, 1–15 October 2026.** The operator supplied a
+[GitHub AI usage snapshot](../results/copilot-ai-usage-2026-10-15/README.md)
+and confirmed that this Copilot account was used only for these evaluations
+in the period. The page showed:
+
+| Model | Included AI credits | Displayed included usage |
+|---|---:|---:|
+| GPT-6 Sol | 367.98 | $3.68 |
+| GPT-6 Luna | 50.32 | $0.50 |
+
+Sol accounted for about 88% of the 418.30 model-attributed credits shown;
+its aggregate was 7.31 times Luna's. This includes evaluation activity
+beyond the scored attempts, such as live probes and any pilots or reruns.
+The scored comparison itself contains 15 Sol + Pi attempts and 30 Luna
+attempts split between Pi and OpenCode. The screenshot groups by model, so
+it cannot allocate Luna credits between those harnesses or assign credits
+to individual tasks. It establishes a strong **directional, model-level**
+consumption difference for this account, not a per-task price ratio. The
+original screenshot and a machine-readable transcription are preserved with
+the results.
+
 | Measurement needed for final decision | Current status |
 |---|---|
 | AR completion, score distribution, critical errors, and timing | Available in the AR report and table above |
 | Blind human review of critical errors and disputed judgments | **TBD** |
-| Copilot credits attributable to individual runs | Unavailable across IG, DU, and AR |
+| Copilot credits attributable to individual runs | Unavailable; an account-level model comparison is available below |
 | Comparable monetary cost across Copilot and Anthropic billing | **TBD**; native usage units differ |
 | GUI usability | Outside this evaluation; **TBD** separately |
 
@@ -270,6 +296,21 @@ are in the [adapter](../src/agent_eval/adapters.py), [arm
 configuration](../config/arms.yaml), and the [IG](../results/local-repos-20261015-122649/manifest.json),
 [DU](../results/du-2026-10-15-adjudicated/manifest.json), and
 [AR](../results/ar-2026-10-15-full/manifest.json) manifests.
+
+### Copilot credit attribution
+
+The [account screenshot](../results/copilot-ai-usage-2026-10-15/source.png) is
+a point-in-time billing view for 1–15 October,
+not an export keyed to evaluation IDs. GitHub's [billing report
+reference](https://docs.github.com/en/billing/reference/billing-reports)
+describes AI usage grouped by date, model, and username. The runner saved
+per-attempt token counts and harness-native cost fields, but none of the 45
+Copilot-backed scored attempts emitted an AI credit or `totalNanoAiu` field.
+Those native cost fields were therefore not converted into Copilot credits.
+The screenshot supports the model-level comparison above under the operator's
+exclusive-use statement, while per-pair and per-task credit totals remain
+unavailable. Live preflight probes also consume model usage and are outside
+the scored attempt rows.
 
 ### Agentic judge and evidence packs
 
