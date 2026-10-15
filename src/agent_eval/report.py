@@ -155,11 +155,13 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
         lines += ["", f"Median ratio: {statistics.median(sol/luna for _, sol, luna in pairs):.2f}."]
     else:
         lines.append("Unavailable: provider-reported credits are not present for paired Pi runs.")
-    lines += ["", "Anthropic and Google usage remain in native units in `summary.csv`; they are not converted to Copilot credits.",
+    lines += ["", "Non-Copilot usage remains in native units in `summary.csv`; it is not converted to Copilot credits.",
               "Copilot values derived from `totalNanoAiu / 1e9` are approximate until reconciled with GitHub billing. See each row's `credit_classification`.",
               "", "Judge scores are opinions. Times and native usage come from the runner and provider events. "
-              "A missing value means unavailable, never zero. Antigravity CLI is a headless harness; this report does not measure the desktop app.",
+              "A missing value means unavailable, never zero.",
               "", "Every critical-error judgment should receive blind human review before acting on rankings.", ""]
+    if any(arm["harness"] == "antigravity" for arm in arms):
+        lines.append("Antigravity CLI is a headless harness; this report does not measure the desktop app.")
     report_path = directory / "report.md"
     report_path.write_text("\n".join(lines))
     return csv_path, report_path

@@ -3,10 +3,12 @@ import subprocess
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 from src.agent_eval import adapters
-from src.agent_eval.core import prepare_workspace, tree_digest, validate_cutoff
+from src.agent_eval.core import pack_status, prepare_workspace, read_config, tree_digest, validate_cutoff
 from src.agent_eval.judge import anonymized_transcript, validate_judgment
+from src.agent_eval.preflight import live_arm_probe
 from src.agent_eval.report import _credit
 
 
@@ -62,6 +64,26 @@ class RunnerContractTests(unittest.TestCase):
         self.assertEqual(adapters.tool_activity(events),
                          {"search_calls": 1, "fetch_calls": 1, "other_tool_calls": 0})
 
+    def test_antigravity_quota_failure_is_explained_by_live_probe(self):
+        arm = {"id": "antigravity-flash", "harness": "antigravity", "binary": "agy",
+               "model": "gemini-3.8-flash-medium", "reasoning": "medium"}
+        events = [
+            {"channel": "stdout", "data": {"event": "step_update", "step_update": {
+                "step_type": "tool", "state": "DONE", "tool_name": "search_web"}}},
+            {"channel": "stdout", "data": {"event": "result", "result": {
+                "status": "ERROR", "response": "", "error": "Individual quota reached"}}},
+            {"channel": "stderr", "data": {"raw_text":
+                'AGY_ERROR: {"status":"RESOURCE_EXHAUSTED","error_code":429}'}}
+        ]
+        for exit_code in (0, 3):
+            with self.subTest(exit_code=exit_code), patch(
+                    "src.agent_eval.preflight.capture", return_value={
+                        "events": events, "exit_code": exit_code, "timed_out": False}):
+                probe = live_arm_probe(arm, 180)
+                self.assertEqual(probe["status"], "unavailable")
+                self.assertIn("quota", probe["reason"].lower())
+                self.assertEqual(probe["probe_tool_names"], ["search_web"])
+
     def test_claude_permission_denial_does_not_count_as_web_activity(self):
         events = [
             {"data": {"type": "assistant", "message": {"role": "assistant", "content": [
@@ -88,6 +110,21 @@ class RunnerContractTests(unittest.TestCase):
     def test_cutoff_requires_timezone(self):
         with self.assertRaises(ValueError):
             validate_cutoff("2026-10-14T17:00:00")
+
+    def test_current_tasks_have_complete_judge_packs(self):
+        tasks = read_config("tasks")["tasks"]
+        self.assertEqual(len(tasks), 5)
+        for task in tasks:
+            with self.subTest(task=task["id"]):
+                self.assertEqual(pack_status(task["id"]), (True, "ready"))
+        self.assertEqual(tasks[2]["repos"], ["financial-hq-ui", "people-and-orgs-ui-library"])
+        self.assertEqual(tasks[4]["repos"], ["financial-hq-ui"])
+
+    def test_active_arms_exclude_copilot_cli_and_antigravity(self):
+        arms = read_config("arms")["arms"]
+        self.assertEqual(len(arms), 3)
+        self.assertEqual({arm["id"] for arm in arms},
+                         {"pi-luna", "pi-sol", "claude-opus"})
 
     def test_judgment_rejects_missing_evidence(self):
         names = ["factual_accuracy", "task_completion", "source_quality", "synthesis_and_judgment",

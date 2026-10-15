@@ -58,7 +58,7 @@ def git(repo: Path, *args: str) -> str:
 
 
 def validate_repos(repo_args: list[str]) -> dict[str, dict]:
-    required = {"financial-hq-ui", "other-angular"}
+    required = {"financial-hq-ui", "people-and-orgs-ui-library"}
     repos: dict[str, dict] = {}
     for item in repo_args:
         if "=" not in item:
@@ -124,11 +124,24 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
         pack = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         return False, "judge evidence pack is invalid JSON"
-    fields = ("reference_answer", "sources", "repo_facts", "ambiguities", "decision_changing_errors")
+    if not isinstance(pack, dict):
+        return False, "judge evidence pack must be an object"
+    fields = ("reference_answer", "sources", "repo_facts", "ambiguities",
+              "grading_guidance", "decision_changing_errors")
     if any(field not in pack for field in fields):
         return False, "judge evidence pack is incomplete"
     if "REPLACE" in json.dumps(pack) or not pack["reference_answer"] or not pack["sources"]:
         return False, "judge evidence pack contains placeholders or no sources"
+    if not isinstance(pack["sources"], list) or any(
+           not isinstance(source, dict) or
+           not all(source.get(key) for key in ("title", "url", "retrieved_at", "snapshot_or_excerpt"))
+           for source in pack["sources"]):
+        return False, "judge evidence pack has an incomplete source"
+    guidance = pack["grading_guidance"]
+    if not isinstance(guidance, dict) or any(not isinstance(guidance.get(key), list) or
+                                             not all(isinstance(item, str) and item for item in guidance[key])
+                                             for key in ("must_check", "acceptable_alternatives", "do_not_penalize")):
+        return False, "judge evidence pack has incomplete grading guidance"
     if manifest is not None:
         task = next(task for task in read_config("tasks")["tasks"] if task["id"] == task_id)
         selected = task_repo_names(task, manifest)

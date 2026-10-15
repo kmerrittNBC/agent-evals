@@ -1,24 +1,25 @@
 # Coding agent information-gathering evaluation
 
-This repository runs the five prompts in `config/tasks.yaml` through five pinned
+This repository runs the five prompts in `config/tasks.yaml` through three pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
 judgment, and a traceable report for every attempted run. The first full run is
 in [`results/ig-2026-10-14-five-arm-v2/report.md`](results/ig-2026-10-14-five-arm-v2/report.md)
-(local, ignored by Git). It attempted all 25 slots; unavailable and failed
-slots remain visible in the report.
+(local, ignored by Git). It used the earlier, broader prompts and evidence
+packs. Its scores should not be pooled with runs of the current prompts. It
+attempted all 25 slots; unavailable and failed slots remain visible in the
+report. Use a new evaluation ID for the current five prompts.
 
 A separate [Antigravity command-permission follow-up](results/ig-2026-10-14-antigravity-command-allowed/report.md)
 completed IG-01 and IG-02 after explicitly allowing commands in its sandbox.
 The remaining three tasks hit the account's individual quota and are recorded
 as failures. These follow-up results are not pooled with the first run.
+Antigravity is inactive in the current configuration; its adapter and historical
+results remain available if it is added back later.
 
 ## Requirements
 
 - Python 3.11 or newer; no Python packages are required.
 - The CLIs in `config/arms.yaml`, authenticated for the exact models.
-- On this Mac, source `~/.zshrc_local` before preflight or run so Antigravity
-  inherits the required certificate configuration. Do not copy its contents
-  into this repository.
 - A pinned Git checkout of each relevant Angular repository for IG-02 through
   IG-05. The runner exports the commits into temporary read-only directories.
 - Completed judge-only packs in `evidence/IG-*/pack.json`. See the template and
@@ -29,15 +30,15 @@ Run `python3 -m agent_eval --help` for commands. A typical sequence is:
 
 ```sh
 python3 -m agent_eval preflight --evaluation-id pilot --cutoff 2026-10-14T17:00:00-04:00 \
-  --repo financial-hq-ui=/absolute/path --repo other-angular=/absolute/path \
-  --angular-root /absolute/path/to/sportsengine
+  --repo financial-hq-ui=/absolute/path/to/se-financial-hq-ui \
+  --repo people-and-orgs-ui-library=/absolute/path/to/people-and-orgs-ui-library
 python3 -m agent_eval preflight --evaluation-id pilot --live
 python3 -m agent_eval run --evaluation-id pilot --full
 python3 -m agent_eval judge --evaluation-id pilot
 python3 -m agent_eval report --evaluation-id pilot
 ```
 
-If you need help with CLI installation, sign-in, or the Copilot search probe,
+If you need help with CLI installation or sign-in,
 give a separate agent the prompt in
 [`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md). It requests no evaluation run.
 
@@ -45,12 +46,8 @@ Pi's installed `pi-web-search` extension is configured with the
 `github-copilot` provider and sends a native `web_search` request through the
 Copilot model endpoint. Pi's `pi-web-fetch` extension renders and extracts
 pages locally, then can use the configured Copilot model to process their
-contents. A working Pi search does not establish that Copilot CLI exposes its
-own `web_search` tool. In the first run, Copilot CLI 1.0.96 exposed
-`web_fetch` but not `web_search` in the live headless probe. The GitHub
-[web-search organization policy](https://docs.github.com/en/copilot/reference/supported-surfaces-for-policies)
-does not govern Copilot CLI, so its disabled setting is not an established
-cause. The CLI arm remains unavailable pending a verified tool or setup fix.
+contents. The standalone Copilot CLI arm was removed after its headless probe
+could not use web search. Pi still uses the Copilot-backed Luna and Sol models.
 
 `preflight --live` spends a small amount of model usage to verify the exact
 model, search, and page fetch in each headless harness, plus a schema-conforming
@@ -58,12 +55,14 @@ Codex judgment. The runner refuses `run` until all provisioned arms have
 passed those probes. An unavailable arm is recorded as unavailable; its model
 is never replaced. `run` also refuses missing repository commits or judge
 packs. Use `--arm` and `--task` on `run` for a pilot. The full run has a separate
-`--full` flag and requires all 25 slots to be preflighted. A failed or timed-out
+`--full` flag and requires all 15 slots to be preflighted. A failed or timed-out
 run remains in the record; rerunning it requires a new evaluation ID.
+The stopped four-arm evaluation has a recorded run plan; start a new evaluation
+ID for the current three-arm configuration.
 
 If a GitHub billing record can be attributed to one isolated run, attach it
 with `python3 -m agent_eval reconcile-credits --evaluation-id pilot --task IG-01
---arm copilot-luna --billing-credits 0.36 --billing-record-id RECORD-ID`.
+--arm pi-luna --billing-credits 0.36 --billing-record-id RECORD-ID`.
 The report marks a matching `totalNanoAiu / 1e9` value reconciled; a mismatch
 stays approximate. Pi credits remain unavailable unless a native
 field or an attributable billing record is present.
@@ -73,10 +72,10 @@ judge packs, and results stay outside those workspaces. The runner verifies
 their contents did not change after each run. The tool allowlists further limit
 file editing. This is an integrity check, not an OS-level security boundary;
 run untrusted agents in a separate sandbox if that guarantee is required.
-For IG-05, `--angular-root` discovers immediate child Git repositories whose
-root `package.json` declares `@angular/core`, pins each HEAD, and exports all
-of them into the same agent workspace. Uncommitted work is never exported;
-the manifest records whether each source checkout was dirty.
+The current IG-05 asks about financial HQ UI only. `--angular-root` remains
+available for a future fleet task but is not needed for these five prompts.
+Uncommitted work is never exported; the manifest records whether each source
+checkout was dirty.
 
 ## Measurements and review
 

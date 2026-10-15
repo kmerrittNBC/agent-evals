@@ -16,6 +16,36 @@ PROBE = ("Use the tool named web_search to search for the official Python "
          "are required for this capability check.")
 
 
+def _probe_failure(result: dict, answer: str) -> tuple[str, str | None]:
+    """Classify known CLI failures without copying stderr or credentials to the manifest."""
+    diagnostics: list[str] = []
+    result_status = None
+    for entry in result["events"]:
+        data = entry.get("data")
+        if not isinstance(data, dict):
+            continue
+        if entry.get("channel") == "stderr":
+            diagnostics.append(str(data.get("raw_text", "")))
+        if data.get("event") == "result" and isinstance(data.get("result"), dict):
+            payload = data["result"]
+            result_status = str(payload.get("status")) if payload.get("status") else None
+            diagnostics.append(str(payload.get("error", "")))
+    error_text = "\n".join(diagnostics).lower()
+    if "resource_exhausted" in error_text or "individual quota reached" in error_text:
+        return "Individual model quota reached (RESOURCE_EXHAUSTED)", result_status
+    if "x509" in error_text or "certificate signed by unknown authority" in error_text:
+        return "TLS certificate verification failed (x509)", result_status
+    if result["timed_out"]:
+        return "Live probe timed out", result_status
+    if result_status and result_status != "SUCCESS":
+        return f"Harness returned {result_status} during live probe", result_status
+    if result["exit_code"] != 0:
+        return f"Harness exited {result['exit_code']} during live probe", result_status
+    if not answer:
+        return "Live probe produced no final answer", result_status
+    return "Live probe failed", result_status
+
+
 def _judge_probe(directory: Path, timeout: int) -> dict:
     schema = directory / "probe-schema.json"
     schema.write_text(json.dumps({"type": "object", "additionalProperties": False,
@@ -64,8 +94,12 @@ def live_arm_probe(arm: dict, timeout: int) -> dict:
         search = any(any(word in name.lower() for word in ("web_search", "websearch", "search_web")) for name in names)
         fetch = any(any(word in name.lower() for word in ("fetch", "webpage", "browse", "open_url", "read_url_content")) for name in names)
         if result["exit_code"] or result["timed_out"] or not answer:
-            return {"status": "unavailable", "reason": "Live probe failed or produced no answer",
-                    "probe_exit_code": result["exit_code"], "probe_tool_names": names}
+            reason, result_status = _probe_failure(result, answer)
+            return {"status": "unavailable", "reason": reason,
+                    "probe_exit_code": result["exit_code"],
+                    "probe_timed_out": result["timed_out"],
+                    "probe_result_status": result_status,
+                    "probe_answer_present": bool(answer), "probe_tool_names": names}
         if not (search and fetch):
             return {"status": "unavailable", "reason": "Search and page fetch were not both observed in headless events",
                     "probe_tool_names": names}

@@ -1,155 +1,16 @@
 {
-  "reference_answer": "As of October 14, 2026, do not standardize all 12 pinned Angular repositories on Node 26. Node 26 is still Current, while 24 is LTS. Angular 22 permits Node 26, but Angular 21 and 20 support only 20/22/24, Angular 19 excludes 26, and Angular 8 is far older. Nx 22/23 itself supports Node 26, so Angular and other build dependencies are the main framework gates. The fleet has Angular 8, 19, 20, 21 and 22 plus .nvmrc and CI pins ranging from Node 14 through 24. A safe plan is a compatibility inventory, migrations of older Angular apps and related TypeScript/build tooling, lockfile/native dependency tests, CI/runtime updates, then a pilot on the Angular 22 repo before a fleet-wide standard; Node 24 is a more plausible interim common supported line for Angular 20-22 but not the Angular 8/19 repos.",
+  "reference_answer": "For the pinned financial HQ UI versions, the documented intersection includes Node 22.22.3+, Node 24.15.0+, and Node 26.x, subject to each major's own semver range. Angular's public compatibility table labels its row 22.0.x rather than 22.1.x, so applying it to 22.1.7 should be called an inference or checked against version-specific release notes. That row requires TypeScript >=6.0.0 <6.1.0. Nx 23.x supports Node 26.x, 24.x and ^22.12.0, TypeScript >=5.8.0 <7.1.0; the Nx/Angular matrix explicitly supports Angular ~22.1.0 with Nx >=23.2.0. Thus declared Angular 22.1.7, Nx 23.2.1 and TypeScript 6.0.3 fit the published ranges. Current Playwright installation docs list Node 22/24/26, but they are not clearly versioned for Playwright 1.60; its published package engines field is only >=18, which is a weaker statement than tested browser support. The repo pins Node 24.16.0 in .nvmrc and its GitHub Actions use that file. Recommend keeping Node 24 LTS at >=24.15.0, using the same pinned patch locally and in CI, with build/e2e validation. Node 26 is a plausible pilot, but it was still Current rather than LTS on October 14, 2026; Node 22 at >=22.22.3 is also documented but less aligned with the existing pin.",
   "sources": [
-    {
-      "title": "Angular version compatibility",
-      "url": "https://angular.dev/reference/versions",
-      "retrieved_at": "2026-10-14T15:03:00-04:00",
-      "snapshot_or_excerpt": "Angular 22 supports Node ^22.22.3 || ^24.15.0 || ^26.0.0. Angular 21 and 20 list Node 20/22/24, not 26. Angular 19 lists 18/20/22. Angular 8.1 lists Node ^10.9.0."
-    },
-    {
-      "title": "Nx Node support matrix",
-      "url": "https://nx.dev/docs/technologies/node/introduction",
-      "retrieved_at": "2026-10-14T15:03:00-04:00",
-      "snapshot_or_excerpt": "Nx 23.x and 22.x support Node 26.x. Nx states Node 26 is Current and enters LTS in October 2026."
-    },
-    {
-      "title": "Node.js release status",
-      "url": "https://nodejs.org/en/about/previous-releases",
-      "retrieved_at": "2026-10-14T15:03:00-04:00",
-      "snapshot_or_excerpt": "On October 14, 2026, Node 26 is Current; Node 24 and 22 are LTS."
-    }
+    {"title":"Angular version compatibility", "url":"https://angular.dev/reference/versions", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"The supported table has a 22.0.x row (no separate 22.1.x row): Node ^22.22.3 || ^24.15.0 || ^26.0.0, TypeScript >=6.0.0 <6.1.0. Applicability to 22.1.7 is inferred from the 22 major line, not explicitly stated by the row label."},
+    {"title":"Nx Node support matrix", "url":"https://nx.dev/docs/technologies/node/introduction", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Nx 23.x: Node 26.x, 24.x or ^22.12.0. Nx states this matrix is authoritative even though nx package.json intentionally omits an engines field."},
+    {"title":"Nx TypeScript support matrix", "url":"https://nx.dev/docs/technologies/typescript/introduction", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Nx 23.x: TypeScript >=5.8.0 <7.1.0. The declared 6.0.3 fits."},
+    {"title":"Nx and Angular compatibility matrix", "url":"https://nx.dev/docs/kb/angular-nx-version-matrix", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Angular ~22.1.0 supports Nx >=23.2.0; Nx 23.2.1 fits. The matrix is distinct from the Nx Node and TypeScript matrices."},
+    {"title":"Playwright installation requirements", "url":"https://playwright.dev/docs/intro#system-requirements", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Current online installation docs list latest Node 22.x, 24.x or 26.x. The page is not pinned to Playwright 1.60 and should not be treated as proof of a 1.60-specific tested-runtime statement."},
+    {"title":"@playwright/test 1.60.0 npm package metadata", "url":"https://registry.npmjs.org/@playwright/test/1.60.0", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"Version-specific package metadata declares engines.node >=18. This installation constraint is broader than the current documentation's recommended runtime set and does not alone establish browser-binary support on every newer Node major."},
+    {"title":"Node.js release status", "url":"https://nodejs.org/en/about/previous-releases", "retrieved_at":"2026-10-14", "snapshot_or_excerpt":"At the 2026-10-14 cutoff Node 26 is Current; Node 24 and Node 22 are LTS. Node.js advises production applications to use Active or Maintenance LTS."}
   ],
-  "repo_facts": [
-    {
-      "repo": "sportsengine/membership_ui",
-      "commit": "ab1c6d00c9f98922d39c5a17a8e83030a547ee71",
-      "facts": [
-        "@angular/core 19.2.19",
-        "nx not declared",
-        ".nvmrc 18.20.2",
-        "package engines.node ^18.19.1 || ^20.11.1 || ^22.0.0"
-      ]
-    },
-    {
-      "repo": "sportsengine/payments",
-      "commit": "f3ffd452232e27bd1e2a7dbec3203b6fa4a7b668",
-      "facts": [
-        "@angular/core 8.1.2",
-        "nx not declared",
-        ".nvmrc 14.21.3",
-        "package engines.node not declared"
-      ]
-    },
-    {
-      "repo": "sportsengine/people-and-orgs-ui-library",
-      "commit": "75b2f8102055a3835fcd0d8849d094f71bfa25ba",
-      "facts": [
-        "@angular/core 21.2.19",
-        "nx 22.7.1",
-        ".nvmrc 24.16.0",
-        "package engines.node >=22.13"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-commerce-ui",
-      "commit": "5b4037f60e70085cc5b534789576475034feb1e4",
-      "facts": [
-        "@angular/core ^21.2.17",
-        "nx 22.5.3",
-        ".nvmrc 24.16.0",
-        "package engines.node not declared"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-fe-angular-services",
-      "commit": "4dbc4c67137d9788f5339ea362ac61a62c587d68",
-      "facts": [
-        "@angular/core ~20.3.25",
-        "nx not declared",
-        ".nvmrc 20.19.5",
-        "package engines.node not declared"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-financial-admin-ui-library",
-      "commit": "ec94a1b92f328592141af94906f6fab64c764f13",
-      "facts": [
-        "@angular/core ^21.2.0",
-        "nx not declared",
-        ".nvmrc 22.13.0",
-        "package engines.node >=22.13.0"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-financial-hq-ui",
-      "commit": "534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0",
-      "facts": [
-        "@angular/core 22.1.7",
-        "nx 23.2.1",
-        ".nvmrc 24.16.0",
-        "package engines.node not declared"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-financial-reports-ui",
-      "commit": "e76c2c97485c36d1a311155e7ac3e0f4fa766a36",
-      "facts": [
-        "@angular/core ^20.3.16",
-        "nx not declared",
-        ".nvmrc 22.13.0",
-        "package engines.node >=22.13.0"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-financial-settings-ui",
-      "commit": "d68d6d9d06552c76af4c009e653d024432e6c380",
-      "facts": [
-        "@angular/core 20.3.26",
-        "nx not declared",
-        ".nvmrc 22.13.0",
-        "package engines.node >=22.13.0"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-payments-ui",
-      "commit": "5ba24790accddcf853b5f2c6120da74a771f0ead",
-      "facts": [
-        "@angular/core 20.3.18",
-        "nx not declared",
-        ".nvmrc 22.13.0",
-        "package engines.node >=22.13.0"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-product-management-ui",
-      "commit": "748fa3c1296396cac3e2f9035d2bb8434a6339db",
-      "facts": [
-        "@angular/core ^21.2.0",
-        "nx 22.5.3",
-        ".nvmrc 20.19.0",
-        "package engines.node >=20"
-      ]
-    },
-    {
-      "repo": "sportsengine/se-store-ui",
-      "commit": "e6609707b935a55fa052b08e45c5e4a6ea1605e5",
-      "facts": [
-        "@angular/core ^19.2.20",
-        "nx not declared",
-        ".nvmrc 20.19.0",
-        "package engines.node >=20"
-      ]
-    }
-  ],
-  "ambiguities": [
-    "Does standardize mean every Angular repo or a subset? The pinned evaluation scope is all 12 Angular package roots under ~/sportsengine.",
-    "A declaration in package.json or .nvmrc does not prove all CI/deployment runtimes; inspect workflows and images.",
-    "Framework support does not guarantee every native package and private integration works on Node 26."
-  ],
-  "decision_changing_errors": [
-    "Claiming Angular 20/21 or Angular 8 officially supports Node 26.",
-    "Ignoring the older Angular repos or treating Nx support as proof that the whole fleet is ready.",
-    "Calling Node 26 LTS on October 14, 2026."
-  ]
+  "repo_facts": [{"repo":"financial-hq-ui", "commit":"534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0", "facts":["package.json declares @angular/core and @angular/router 22.1.7, nx/@nx/angular 23.2.1, typescript 6.0.3, and @playwright/test ^1.60.0.", "yarn.lock resolves nx 23.2.1, typescript 6.0.3 and @playwright/test 1.60.0.", ".nvmrc pins 24.16.0; tracked GitHub Actions workflows use actions/setup-node with node-version-file .nvmrc.", "This source snapshot does not prove successful builds, native-package compatibility, or runtime behavior under every documented Node line."]}],
+  "ambiguities": ["Angular's public table names 22.0.x while the repo uses 22.1.7; describe the extrapolation rather than claiming an exact minor-row match.", "A package engines field, a current docs page, and a tested version-specific support statement are different levels of evidence for Playwright 1.60.", "Documented compatibility is not a successful build or e2e run in this repository.", "The prompt does not prescribe LTS priority, so Node 22, 24 and 26 recommendations can be defensible with different tradeoffs."],
+  "grading_guidance": {"must_check": ["Angular Node and TypeScript ranges and the Angular 22.1 documentation caveat", "Nx 23 Node/TypeScript ranges and Angular 22.1-to-Nx minimum", "Playwright 1.60 version-specific documentation limit", "A reasoned Node recommendation aligned with local and CI pins"], "acceptable_alternatives": ["Node 24.x >=24.15.0 is the lowest-disruption LTS choice; keeping the current 24.16.0 pin is defensible.", "Node 22.x >=22.22.3 can be recommended with an explanation of its LTS status and the need to update the current pin.", "Node 26.x can be recommended as a validated pilot or deliberate adoption if its Current status and version-specific test gap are acknowledged."], "do_not_penalize": ["Separating official matrix support from verified build success", "Calling the Playwright 1.60 Node 26 situation unresolved by the current docs instead of declaring it unsupported"]},
+  "decision_changing_errors": ["Claiming TypeScript 6.0.3 violates the documented Angular 22 or Nx 23 ranges.", "Claiming Nx 23.2.1 does not support Angular 22.1 or that Angular 22's documented row excludes Node 26.", "Calling Node 26 LTS on 2026-10-14 or treating a current Playwright docs page as version-specific proof for 1.60."]
 }
