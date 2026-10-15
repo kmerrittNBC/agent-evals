@@ -1,6 +1,6 @@
 # Coding agent capability evaluation
 
-This repository compares **model plus coding-agent pairs** on the work a development team might assign an agent. It evaluates three task categories:
+This repository compares **model plus harness pairs** on the work a development team might assign an agent. It evaluates three task categories:
 
 | Category | What the agent does | Tasks |
 |---|---|---:|
