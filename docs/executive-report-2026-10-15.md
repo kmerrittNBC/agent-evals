@@ -24,12 +24,12 @@ Across the 15 tasks, no pair led on every measure:
 
 These results apply to each **model plus coding agent**, not to a model in isolation. Different search tools and configurations may explain some differences. Five tasks per category and one attempt per pair and task make this an exploratory comparison.
 
-| Model + coding agent | IG: complete; rating | DU: complete; rating | AR: complete; rating | All complete | 5/5 scores | Mean quality / 5 | Median final time | Critical errors |
-|---|---|---|---|---:|---:|---:|---:|---:|
-| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 9/15 | 4.47 | 75.7 s | 2 |
-| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | 5/5; Excellent | 12/15 | 11/15 | 4.60 | 44.3 s | 2 |
-| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | 5/5; Good | 8/15 | 2/15 | 3.93 | 72.4 s | 2 |
-| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | 5/5; Good | 14/15 | 5/15 | 4.20 | 102.7 s | 1 |
+| Model + coding agent | IG: complete; rating | DU: complete; rating | AR: complete; rating | All complete | Mean quality / 5 | Median final time | Critical errors |
+|---|---|---|---|---:|---:|---:|---:|
+| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 4.47 | 75.7 s | 2 |
+| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | 5/5; Excellent | 12/15 | 4.60 | 44.3 s | 2 |
+| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | 5/5; Good | 8/15 | 3.93 | 72.4 s | 2 |
+| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | 5/5; Good | 14/15 | 4.20 | 102.7 s | 1 |
 
 IG, DU, and AR are the task categories defined above. “Complete” means the judge found the requested deliverable complete; all 60 agent processes finished, but some produced only partial work. “Critical error” means the judge identified a consequential mistake; those calls still need human review. Mean quality summarizes 15 scores on a 1–5 scale and is not a calibrated estimate of general ability. The [rating rules](../config/rubric.yaml) assign Excellent, Good, or Practical from a category's median quality, completion rate, and critical-error count; Unacceptable means the category fell below the Practical threshold. Each rating summarizes five tasks; no pooled 15-task rating was assigned.
 
