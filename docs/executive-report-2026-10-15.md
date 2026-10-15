@@ -1,8 +1,8 @@
 # Coding agent evaluation: executive report
 
-**Draft — 15 October 2026.** Information gathering (IG) and defined updates
-(DU) have scored results. Architecture (AR) results and the final cross-column
-conclusion are **TBD**. The DU figures below use the [adjudicated DU
+**Draft — 15 October 2026.** All three columns have scored results. Human
+review of consequential judgments, comparable cost data, and the final
+operating recommendation remain **TBD**. The DU figures below use the [adjudicated DU
 record](../results/du-2026-10-15-adjudicated/ADJUDICATION.md), which replays
 saved attempts and corrects the original evaluation; it is not a second agent
 run. Result directories are local and ignored by Git, so they must accompany
@@ -27,32 +27,34 @@ We assigned the same five frozen tasks in each column to four model and
 harness pairs. Each attempt had a fresh session and the same task-specific
 starting commit. We retained agent outputs, code changes, checks, timings, and
 usage, then used a fresh blinded Codex judgment for each completed attempt.
-DU code was validated against prepared tests in disposable worktrees. The
-details of task selection, exclusions, judging, and adjudication follow the
-results sections.
+DU code was validated against prepared tests in disposable worktrees; AR-05
+was checked with the runner test suite. Details of task selection, exclusions,
+judging, and adjudication follow the results sections.
 
 ### Conclusions and overall results
 
-**Provisional finding.** Across IG and DU, Claude Code + Opus completed 9/10
-tasks, Pi + Luna 8/10, Pi + Sol 7/10, and OpenCode + Luna 3/10. Pi + Sol had
-the highest mean judge quality score (4.5/5) and was faster than Pi + Luna on
-all ten matched tasks, while Pi + Luna completed one more. The same named Luna
-model completed five more tasks through Pi than through OpenCode. These are
-pair-level observations; different tool and search setups prevent assigning
-the entire difference to a model or a single harness feature. AR may change
-the final operating conclusion. Five tasks per category are exploratory.
+**Provisional finding.** All four pairs completed all five AR tasks, with no
+critical errors or timeouts. Pi + Sol and Pi + Luna each received an Excellent
+AR rating; Sol finished faster on all five matched AR tasks. Across all 15
+tasks, Claude Code + Opus completed 14, Pi + Luna 13, Pi + Sol 12, and
+OpenCode + Luna 8. Pi + Sol had the highest mean judge quality score (4.6/5)
+and finished faster than Pi + Luna on all 15 matched tasks, while Pi + Luna
+completed one more. OpenCode + Luna's 5/5 AR completion contrasts with its
+3/10 IG+DU completion. These are pair-level observations; different tool and
+search setups prevent assigning the entire difference to a model or a single
+harness feature. Five tasks per category are exploratory.
 
-| Model + harness pair | IG: tasks complete; rating | DU: tasks complete; rating | AR: tasks complete; rating | IG+DU complete | IG+DU mean quality / 5 | IG+DU critical errors |
+| Model + harness pair | IG: tasks complete; rating | DU: tasks complete; rating | AR: tasks complete; rating | All tasks complete | Mean quality / 5 | Critical errors |
 |---|---|---|---|---:|---:|---:|
-| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | **TBD** | 8/10 | 4.3 | 2 |
-| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | **TBD** | 7/10 | 4.5 | 2 |
-| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | **TBD** | 3/10 | 3.8 | 2 |
-| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | **TBD** | 9/10 | 4.2 | 1 |
+| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 4.47 | 2 |
+| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | 5/5; Excellent | 12/15 | 4.60 | 2 |
+| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | 5/5; Good | 8/15 | 3.93 | 2 |
+| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | 5/5; Good | 14/15 | 4.20 | 1 |
 
 “Tasks complete” is the judge's deliverable-completion judgment, not merely
-an agent process exiting successfully. Mean quality summarizes ten ordinal
+an agent process exiting successfully. Mean quality summarizes 15 ordinal
 scores and is not a calibrated estimate of general ability. Category ratings
-apply to five tasks in that category; no pooled IG+DU rating was assigned.
+apply to five tasks in that category; no pooled 15-task rating was assigned.
 
 | Task type | Pair | Tasks complete | Quality distribution, scores 1/2/3/4/5 | Median final time | Critical errors | Validated green |
 |---|---|---:|---|---:|---:|---:|
@@ -64,12 +66,12 @@ apply to five tasks in that category; no pooled IG+DU rating was assigned.
 | DU | Sol + Pi | 4/5 | 0/0/1/0/4 | 40.9 s | 1 | 5/5 |
 | DU | Luna + OpenCode | 2/5 | 0/0/1/4/0 | 57.7 s | 1 | 5/5 |
 | DU | Opus + Claude Code | 4/5 | 0/1/0/1/3 | 43.8 s | 1 | 4/5 |
-| AR | Luna + Pi | **TBD** | **TBD** | **TBD** | **TBD** | task-dependent |
-| AR | Sol + Pi | **TBD** | **TBD** | **TBD** | **TBD** | task-dependent |
-| AR | Luna + OpenCode | **TBD** | **TBD** | **TBD** | **TBD** | task-dependent |
-| AR | Opus + Claude Code | **TBD** | **TBD** | **TBD** | **TBD** | task-dependent |
+| AR | Luna + Pi | 5/5 | 0/0/0/1/4 | 178.9 s | 0 | 1/1 code task |
+| AR | Sol + Pi | 5/5 | 0/0/0/1/4 | 103.7 s | 0 | 1/1 code task |
+| AR | Luna + OpenCode | 5/5 | 0/0/0/4/1 | 165.0 s | 0 | 1/1 code task |
+| AR | Opus + Claude Code | 5/5 | 0/0/0/4/1 | 254.6 s | 0 | 1/1 code task |
 
-**Decision to fill after AR and review:** [TBD: recommended pair or deployment
+**Decision to fill after human review and cost reconciliation:** [TBD: recommended pair or deployment
 rule by task type, with explicit speed, reliability, and cost tradeoffs].
 
 ## Detailed results supporting the summary
@@ -120,37 +122,76 @@ the adjudicated table above is the comparison basis.
 
 ### AR: architectural planning and refactoring
 
-The AR run is [in progress](../results/ar-2026-10-15-full/manifest.json) as
-this draft is written. Four tasks request plans; AR-05 requests a code
-refactor. Fill this table from the completed run, judgment, and report, rather
-than treating a saved attempt as a scored result.
+All 20 AR attempts finished and were judged complete, with zero critical
+errors. Four tasks requested plans; AR-05 requested a code refactor. Each cell
+gives **quality score / completion**. `V` on AR-05 also means the runner test
+suite passed in a fresh checkout. The full [AR report](../results/ar-2026-10-15-full/report.md)
+links each answer, patch, and judgment.
 
 | Task | Deliverable | Luna + Pi | Sol + Pi | Luna + OpenCode | Opus + Claude Code |
 |---|---|---:|---:|---:|---:|
-| AR-01 — PR effect coordinators | Plan | **TBD** | **TBD** | **TBD** | **TBD** |
-| AR-02 — research MCP sidecar recovery | Plan | **TBD** | **TBD** | **TBD** | **TBD** |
-| AR-03 — Stage A scheduler recovery | Plan | **TBD** | **TBD** | **TBD** | **TBD** |
-| AR-04 — desktop/backend run durability | Plan | **TBD** | **TBD** | **TBD** | **TBD** |
-| AR-05 — runner workspace/conversation seam | Code | **TBD** | **TBD** | **TBD** | **TBD** |
+| AR-01 — PR effect coordinators | Plan | 5/C | 5/C | 4/C | 5/C |
+| AR-02 — research MCP sidecar recovery | Plan | 5/C | 5/C | 5/C | 4/C |
+| AR-03 — Stage A scheduler recovery | Plan | 5/C | 4/C | 4/C | 4/C |
+| AR-04 — desktop/backend run durability | Plan | 5/C | 5/C | 4/C | 4/C |
+| AR-05 — runner workspace/conversation seam | Code | 4/C/V | 5/C/V | 4/C/V | 4/C/V |
 
-[TBD: distinguish the four plan outcomes from AR-05's patch and test outcome;
-record any timeout, incomplete answer, or judge failure in its own cell.]
+Pi + Sol and Pi + Luna had the same score distribution (four 5s and one 4).
+Sol's median final time was 103.7 seconds versus Luna's 178.9 seconds, and it
+finished faster on each of the five matched AR tasks. Their 4s came on
+different tasks. The judge found an unresolved migration step in Sol's AR-03
+recovery plan; Luna's AR-05 code change lacked direct tests of cleanup and
+failure behavior. OpenCode + Luna completed all five tasks, in contrast with
+its lower completion rate in IG and DU. Claude Code + Opus also completed all
+five, but had the longest median final time at 254.6 seconds.
+
+All four AR-05 patches passed the configured runner suite in a fresh checkout:
+18 tests for Pi + Luna, 18 for Pi + Sol, 17 for OpenCode + Luna, and 20 for
+Claude Code + Opus. Counts differ because agents added different tests. The
+four planning tasks had no automated pass/fail validation; their scores are
+judgments of the proposed plans, not proof that the plans will work when
+implemented. [TBD: blind human review of selected AR plans and AR-05 diffs.]
+
+**AR final deliverable time, seconds** (rounded from the runner's measurements):
+
+| Task | Luna + Pi | Sol + Pi | Luna + OpenCode | Opus + Claude Code |
+|---|---:|---:|---:|---:|
+| AR-01 | 122 | 104 | 84 | 255 |
+| AR-02 | 209 | 67 | 94 | 234 |
+| AR-03 | 454 | 239 | 217 | 535 |
+| AR-04 | 164 | 164 | 165 | 279 |
+| AR-05 | 179 | 97 | 171 | 103 |
+
+Sol + Pi was faster than Luna + Pi on AR-04 by about 0.05 seconds; rounding
+both to 164 seconds conceals that small difference. The full CSV retains the
+unrounded values. First visible event times are not substituted for final
+deliverable times because harness event streams differ.
 
 ### Cross-pair interpretation and remaining measurements
 
-On the ten scored IG+DU prompts, Pi + Luna completed 8 versus OpenCode +
-Luna's 3 with the same named model. Pi + Sol completed 7 versus Pi + Luna's 8;
-Sol was faster on all ten matched prompts and had two quality wins, eight
-ties, and no losses. Claude Code + Opus completed 9, one more than Pi + Luna
-and two more than Pi + Sol. These comparisons do not isolate model quality
-from harness, tool, or provider effects. [TBD: recompute matched comparisons
-over all 15 tasks after AR judgment and human review.]
+Across all 15 prompts, Pi + Luna completed 13 versus OpenCode + Luna's 8 with
+the same named model. Pi + Sol completed 12 versus Pi + Luna's 13; Sol was
+faster on all 15 matched prompts and had three quality wins, eleven ties, and
+one loss. Claude Code + Opus completed 14, one more than Pi + Luna and two
+more than Pi + Sol. Its greater completion rate did not come with a lead in
+mean judge quality or final time. These comparisons do not isolate model
+quality from harness, tool, or provider effects. [TBD: revisit matched
+comparisons after blind human review.]
+
+| First pair versus second | Column | Quality wins / ties / losses for first pair | First pair faster |
+|---|---|---:|---:|
+| Sol + Pi vs Luna + Pi | IG | 0 / 5 / 0 | 5/5 |
+| Sol + Pi vs Luna + Pi | DU | 2 / 3 / 0 | 5/5 |
+| Sol + Pi vs Luna + Pi | AR | 1 / 3 / 1 | 5/5 |
+| Luna + Pi vs Luna + OpenCode | IG | 4 / 0 / 1 | 0/5 |
+| Luna + Pi vs Luna + OpenCode | DU | 2 / 3 / 0 | 2/5 |
+| Luna + Pi vs Luna + OpenCode | AR | 3 / 2 / 0 | 1/5 |
 
 | Measurement needed for final decision | Current status |
 |---|---|
-| AR completion, score distribution, critical errors, and timing | **TBD** |
+| AR completion, score distribution, critical errors, and timing | Available in the AR report and table above |
 | Blind human review of critical errors and disputed judgments | **TBD** |
-| Copilot credits attributable to individual runs | Unavailable in IG and DU |
+| Copilot credits attributable to individual runs | Unavailable across IG, DU, and AR |
 | Comparable monetary cost across Copilot and Anthropic billing | **TBD**; native usage units differ |
 | GUI usability | Outside this evaluation; **TBD** separately |
 
@@ -211,5 +252,7 @@ This is an exploratory comparison of five tasks per category, with a single
 run per pair and task. Ratings are category summaries under the runner's
 precommitted rule, not statistically precise rankings. Scores are ordinal and
 judge-dependent; code checks can miss defects. Missing cost or timing fields
-mean unavailable, never zero. The final recommendation should follow AR
-scoring and blind review of consequential errors.
+mean unavailable, never zero. First visible event times are also less
+comparable across harnesses than final deliverable times because event streams
+differ. The final recommendation should follow blind review of consequential
+errors and representative AR plans and code changes.
