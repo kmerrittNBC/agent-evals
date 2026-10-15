@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 4,
+      "reason": "The answer accurately describes the frozen cohort, active reservation stop, progress recovery, and seal boundary. It misnames the scheduler initializer as `new_state()`."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "It delivers a concrete plan covering replay, resume, terminal failure, state transitions, trust checks, tests, and rollback while preserving 161 frozen slots."
+    },
+    "source_quality": {
+      "score": 4,
+      "reason": "The transcript shows inspection of relevant code, ADRs, contracts, and runbooks, but the final answer gives no direct links or line references for verification."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "It distinguishes a recoverable completed result from an uncertain attempt, recommends a guarded terminal disposition, and keeps uncertain work from being replayed."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "It explicitly avoids inferring that provider contact did not occur from missing local files and stops when quiescence or evidence integrity cannot be established."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "The proposed recovery operation, audit changes, rejection cases, focused tests, and rollback behavior are specific enough to guide implementation."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "factual_accuracy",
+      "answer_passage": "`stage_scheduler.new_state()` derives stable slot/trial identities from the complete freeze digest",
+      "evidence": "The inspected scheduler exposes `initialize_state()` for ledger creation; no `new_state()` entry point appears in the supplied transcript.",
+      "reason": "The function name is inaccurate, though the underlying freeze identity point is sound."
+    },
+    {
+      "dimension": "source_quality",
+      "answer_passage": "“The continuous-cohort runbook and ADR 0016 bind…” and the other source descriptions in “What the current flow does.”",
+      "evidence": "The transcript shows those documents and implementation files were read, but the final answer supplies no direct source links or precise locations.",
+      "reason": "The evidence base is strong, but readers must locate the supporting passages themselves."
+    }
+  ],
+  "first_substantive_event_index": 32
+}

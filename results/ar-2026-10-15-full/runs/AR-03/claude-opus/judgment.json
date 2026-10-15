@@ -1,0 +1,53 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 4,
+      "reason": "The plan preserves the frozen 23-task, seven-arm cohort and treats an ambiguous native attempt as terminal or blocked. Its claim that a new cohort after retirement is necessarily a forbidden replay overstates what the cited recovery policy establishes."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "It delivers a concrete plan covering the freeze, slot ledger, seal, runbooks, alternatives, transitions, trust checks, tests, rollout, and rollback."
+    },
+    "source_quality": {
+      "score": 4,
+      "reason": "It traces repository modules and runbooks with specific locations. The reported seal reproduction and test count cannot be independently confirmed from the supplied validation results."
+    },
+    "synthesis_and_judgment": {
+      "score": 4,
+      "reason": "The C0–C3 distinctions connect recovery choices to provider-contact risk and preserve attempt and charge accounting. The proposed resume path depends on new durability guarantees that should be explicit acceptance criteria."
+    },
+    "ambiguity_handling": {
+      "score": 4,
+      "reason": "Unclassifiable evidence fails closed, and the plan recognizes that missing local output may conceal provider activity. Its categorical 'No' for C0/C1 is stronger than the evidence warrants until the proposed witnesses are implemented and verified."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "Named implementation slices, tests, records, commands, and rollback paths make the proposal reviewable."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "useful_but_avoidable",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "ambiguity_handling",
+      "answer_passage": "“C0: reserved, not launched” and “C1: launched, before the boundary” both state provider or research contact is “No.”",
+      "evidence": "The evidence pack notes that an interrupted attempt may have reached a provider despite missing local output. The plan itself identifies a currently unsynced attempt-directory entry and proposes new durable witnesses.",
+      "reason": "These classifications are defensible as targets for the proposed implementation, but absence of files alone is not yet conclusive. Recovery must require verified durability and fail closed when a witness could have been lost."
+    },
+    {
+      "dimension": "factual_accuracy",
+      "answer_passage": "“Today's only path re-runs the interrupted native attempt in a new cohort ... the replay the rules forbid.”",
+      "evidence": "The cited runbook path retires the stopped attempt and requires a new freeze. The evidence pack prohibits silent replay of an ambiguous attempt; it does not establish that every later run under a newly approved freeze is prohibited.",
+      "reason": "The passage conflates retirement followed by a newly approved cohort with silent replay under the frozen cohort."
+    },
+    {
+      "dimension": "source_quality",
+      "answer_passage": "“The seal rejects a recovered slot (current defect) ... reproduced” and “216 passed.”",
+      "evidence": "The transcript shows a probe and focused test commands, but their recorded tool results are empty; the supplied validation results are also empty.",
+      "reason": "These may be true, but the provided record does not independently substantiate the reported red result or passing count."
+    }
+  ],
+  "first_substantive_event_index": 50
+}

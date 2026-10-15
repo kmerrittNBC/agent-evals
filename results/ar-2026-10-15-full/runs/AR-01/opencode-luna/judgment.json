@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The three flows, their distinct persisted states, authority checks, exact identity rules, and read-only recovery after uncertain outcomes match the cited repository evidence."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "Delivers a bounded plan with multiple seams, a recommendation, effect-specific rules, migration, rollback, and no-duplicate recovery tests."
+    },
+    "source_quality": {
+      "score": 4,
+      "reason": "Grounded in primary repository code, tests, migrations, and authoritative documentation. The final answer names files but gives no precise line references."
+    },
+    "synthesis_and_judgment": {
+      "score": 4,
+      "reason": "The narrow helper is a prudent choice that preserves dispatch authority. Its behavior across each coordinator’s different failure path needs a more explicit contract."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Recognizes that a generic lifecycle could obscure authority and that persisted state shapes should remain separate."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "The staged steps and named tests are clear, but the proposed helper’s callback and error-handling boundaries remain somewhat underspecified."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "synthesis_and_judgment",
+      "answer_passage": "Add a small internal helper ... for the repeated observe → match → confirm, otherwise mark unknown portion of an effect lifecycle.",
+      "evidence": "Draft confirmation throws on an identity mismatch; ready reconciliation catches unreadable or invalid observations and marks unknown; merge delegates immediate dispatch and observation to requestExactMerge, while retained effects follow a separate read path.",
+      "reason": "A single settlement rule needs explicit handling for these distinct mismatch and error outcomes to preserve current behavior."
+    },
+    {
+      "dimension": "actionability_and_clarity",
+      "answer_passage": "Give it typed callbacks for observing provider state, deciding whether that observation proves this specific effect, confirming it in the effect’s store, and recording an unknown outcome.",
+      "evidence": "The coordinators use different observation methods, confirmation payloads, and error paths in the supplied source excerpts.",
+      "reason": "The plan does not specify which errors propagate, which become unknown, or how each coordinator adopts the helper."
+    }
+  ],
+  "first_substantive_event_index": 15
+}

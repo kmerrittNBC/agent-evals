@@ -1,0 +1,41 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "Accurately describes the in-memory run store, local API and SSE flow, Lit state, and Tauri sidecar shutdown."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "Delivers the requested plan with ownership alternatives, IDs, transitions, errors, migration, tests, and rollback. Recovery of runs still queued at shutdown is not explicit."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "Grounded in inspected repository code, tests, and architecture documents."
+    },
+    "synthesis_and_judgment": {
+      "score": 4,
+      "reason": "The FastAPI-owned SQLite boundary fits the existing architecture and handles interrupted model calls honestly. Startup recovery should also dispatch previously accepted queued work."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Distinguishes saved state from a surviving worker, documents at-least-once retries, and avoids claiming that old in-memory runs can be migrated after shutdown."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "Provides concrete contracts, implementation order, acceptance tests, and rollback steps; the queued-run recovery rule needs one more explicit step."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "During FastAPI lifespan startup, inspect durable runs left in `running`. Requeue only the interrupted stage from a committed checkpoint under the same run ID.",
+      "evidence": "The plan defines `queued` as durable work accepted but not yet owned by a worker, yet its startup recovery and restart tests address abandoned `running` records only.",
+      "reason": "A restart after accepting a run but before a worker claims it could leave that run queued indefinitely unless startup also dispatches queued work."
+    }
+  ],
+  "first_substantive_event_index": 21
+}

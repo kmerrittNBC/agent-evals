@@ -1,0 +1,47 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 4,
+      "reason": "The summary matches the diff and the 18 passing tests. It overstates test coverage of cleanup and contract preservation."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "The bounded diff separates workspace lifecycle from conversation capture and leaves prompts, arms, and schema untouched. Failure-path cleanup and a continuation status change remain insufficiently checked."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "The assessment is grounded in the actual diff, repository code, test changes, and an intact frozen-check run."
+    },
+    "synthesis_and_judgment": {
+      "score": 4,
+      "reason": "The provider seam is coherent, and the answer correctly identifies the integrity-policy change needed for writable worktrees. It does not discuss the altered session-status check."
+    },
+    "ambiguity_handling": {
+      "score": 4,
+      "reason": "It clearly distinguishes the current read-only behavior from future writable behavior, but does not qualify untested error paths."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "The changed seam, future use, and validation are stated clearly and concisely."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "useful_but_avoidable",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "Added tests for workspace lifecycle, provider injection, and the clarification, continuation, event, and answer contracts.",
+      "evidence": "The new snapshot test checks cleanup after a normal context exit; no new test raises during provisioning or capture. The provider test mocks conversation capture and checks only a successful run.",
+      "reason": "Cleanup on errors and failed-run behavior are material runner invariants that the added tests do not verify."
+    },
+    {
+      "dimension": "synthesis_and_judgment",
+      "answer_passage": "Task prompts, arm models, and output schema were not changed.",
+      "evidence": "The diff changes the status condition from `asked and not adapters.session_id(arm[\"harness\"], all_events)` to `asked and not session`. For Pi and Copilot, `session` is assigned a path or generated ID even when the captured events contain no session ID.",
+      "reason": "This can change when a clarification run is marked failed. The passing tests do not exercise that case, so continuation-status preservation is less certain than the answer implies."
+    }
+  ],
+  "first_substantive_event_index": 8290
+}

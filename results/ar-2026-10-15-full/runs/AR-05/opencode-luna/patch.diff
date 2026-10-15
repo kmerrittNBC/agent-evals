@@ -1,0 +1,236 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..18f9a39 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -8,14 +8,13 @@ import queue
+ import random
+ import shutil
+ import subprocess
+-import tarfile
+-import tempfile
+ import threading
+ import time
+ from pathlib import Path
+ from typing import Any
+ 
+ from . import adapters
++from .workspace import ArchiveWorkspaceProvider, WorkspaceProvider, prepare_workspace, tree_digest
+ 
+ ROOT = Path(__file__).resolve().parents[2]
+ RESULTS = ROOT / "results"
+@@ -184,61 +183,6 @@ def static_arm_check(arm: dict) -> dict:
+     return details
+ 
+ 
+-def prepare_workspace(repos: dict[str, dict], task: dict, destination: Path) -> dict[str, str]:
+-    destination.mkdir(parents=True, exist_ok=False)
+-    commits: dict[str, str] = {}
+-    for name in task["repos"]:
+-        info = repos[name]
+-        source = Path(info["path"])
+-        target = destination / name
+-        target.mkdir(parents=True)
+-        proc = subprocess.Popen(["git", "-C", str(source), "archive", "--format=tar", info["commit"]],
+-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+-        assert proc.stdout is not None
+-        links: list[tuple[Path, str]] = []
+-        with tarfile.open(fileobj=proc.stdout, mode="r|") as tar:
+-            for member in tar:
+-                member_path = (target / member.name).resolve()
+-                if not member_path.is_relative_to(target.resolve()):
+-                    proc.kill()
+-                    raise ValueError("Unsafe path in git archive")
+-                if member.issym():
+-                    if Path(member.linkname).is_absolute() or not (member_path.parent / member.linkname).resolve().is_relative_to(target.resolve()):
+-                        proc.kill()
+-                        raise ValueError("Unsafe symlink in git archive")
+-                    links.append((member_path, member.linkname))
+-                    continue
+-                if member.islnk():
+-                    proc.kill()
+-                    raise ValueError("Unsupported hard link in git archive")
+-                tar.extract(member, target, filter="data")
+-        stderr = proc.stderr.read().decode(errors="replace") if proc.stderr else ""
+-        if proc.wait() != 0:
+-            raise RuntimeError(f"git archive failed: {stderr[:500]}")
+-        proc.stdout.close()
+-        if proc.stderr:
+-            proc.stderr.close()
+-        for link_path, link_target in links:
+-            link_path.symlink_to(link_target)
+-        commits[name] = info["commit"]
+-    for path in destination.rglob("*"):
+-        if path.is_file():
+-            path.chmod(0o444)
+-        elif path.is_dir():
+-            path.chmod(0o555)
+-    destination.chmod(0o555)
+-    return commits
+-
+-
+-def tree_digest(root: Path) -> str:
+-    digest = hashlib.sha256()
+-    for path in sorted(root.rglob("*")):
+-        digest.update(str(path.relative_to(root)).encode())
+-        if path.is_file():
+-            digest.update(path.read_bytes())
+-    return digest.hexdigest()
+-
+-
+ def capture(command: list[str], cwd: Path, env: dict[str, str], timeout: int,
+             events_path: Path) -> dict:
+     """Capture stdout/stderr as received with monotonic offsets and no shell."""
+@@ -288,7 +232,8 @@ def capture(command: list[str], cwd: Path, env: dict[str, str], timeout: int,
+ 
+ 
+ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+-            timeout: int | None = None) -> dict:
++            timeout: int | None = None,
++            workspace_provider: WorkspaceProvider | None = None) -> dict:
+     run_dir = RESULTS / evaluation_id / "runs" / task["id"] / arm["id"]
+     if run_dir.exists():
+         raise ValueError(f"Run already exists: {run_dir}; use a new evaluation ID")
+@@ -306,11 +251,11 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+         return metrics
+     if status != "ready":
+         raise ValueError(f"Arm {arm['id']} has not passed live preflight")
+-    with tempfile.TemporaryDirectory(prefix="agent-eval-") as temporary:
+-        workspace = Path(temporary) / "workspace"
+-        prepare_workspace(manifest["repos"], {"repos": task_repo_names(task, manifest)}, workspace)
+-        before = tree_digest(workspace)
+-        env = adapters.environment(arm, workspace)
++    provider = workspace_provider if workspace_provider is not None else ArchiveWorkspaceProvider()
++    with provider.open(manifest["repos"], {"repos": task_repo_names(task, manifest)}) as workspace:
++        workspace_path = workspace.path
++        before = workspace.snapshot_digest_before
++        env = adapters.environment(arm, workspace_path)
+         session = None
+         all_events: list[dict] = []
+         phase_results: list[dict] = []
+@@ -322,11 +267,11 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+             if phase and not asked:
+                 break
+             event_path = run_dir / f"phase-{phase}.jsonl"
+-            cmd = adapters.command(arm, prompt, workspace, run_dir, session)
++            cmd = adapters.command(arm, prompt, workspace_path, run_dir, session)
+             if arm["harness"] == "copilot" and phase == 0:
+                 import uuid
+                 cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
+-            result = capture(cmd, workspace, env, timeout or policy["timeout_seconds"], event_path)
++            result = capture(cmd, workspace_path, env, timeout or policy["timeout_seconds"], event_path)
+             phase_results.append({key: value for key, value in result.items() if key != "events"})
+             offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
+             for entry in result["events"]:
+@@ -349,8 +294,8 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+         with (run_dir / "events.jsonl").open("w") as f:
+             for entry in all_events:
+                 f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+-        after = tree_digest(workspace)
+-        if before != after:
++        unchanged, after = workspace.verify_integrity()
++        if not unchanged:
+             status = "failed"
+             reason = "Repository snapshot was modified"
+         elif phase_results[-1]["timed_out"]:
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..f54bd4c 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -2,15 +2,17 @@ import json
+ import subprocess
+ import tempfile
+ import unittest
++from contextlib import contextmanager
+ from pathlib import Path
+ from unittest.mock import patch
+ 
+ from src.agent_eval import adapters
+-from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
++from src.agent_eval.core import (pack_status, prepare_workspace, read_config, run_one,
+                                  static_arm_check, tree_digest, validate_cutoff)
+ from src.agent_eval.judge import anonymized_transcript, validate_judgment
+ from src.agent_eval.preflight import live_arm_probe
+ from src.agent_eval.report import _credit
++from src.agent_eval.workspace import ArchiveWorkspaceProvider
+ 
+ 
+ class RunnerContractTests(unittest.TestCase):
+@@ -35,6 +37,78 @@ class RunnerContractTests(unittest.TestCase):
+             (workspace / "relayview/package.json").write_text("changed")
+             self.assertNotEqual(before, tree_digest(workspace))
+ 
++    def test_archive_workspace_provider_owns_temporary_lifecycle(self):
++        with ArchiveWorkspaceProvider().open({}, {"repos": []}) as workspace:
++            path = workspace.path
++            self.assertTrue(path.is_dir())
++            unchanged, after = workspace.verify_integrity()
++            self.assertTrue(unchanged)
++            self.assertEqual(workspace.snapshot_digest_before, after)
++        self.assertFalse(path.exists())
++
++    def test_runner_keeps_conversation_contract_behind_workspace_seam(self):
++        class FakeWorkspace:
++            path: Path
++            snapshot_digest_before = "same-tree"
++
++            def verify_integrity(self):
++                return True, "same-tree"
++
++        class FakeProvider:
++            def __init__(self, path):
++                self.path = path
++                self.closed = False
++
++            @contextmanager
++            def open(self, repos, task):
++                workspace = FakeWorkspace()
++                workspace.path = self.path
++                try:
++                    yield workspace
++                finally:
++                    self.closed = True
++
++        first = {"type": "text", "sessionID": "session-1",
++                 "part": {"text": "What should I prioritize?"}}
++        second = {"type": "text", "sessionID": "session-1",
++                  "part": {"text": "Here is the completed answer."}}
++        usage = {"type": "step_finish", "sessionID": "session-1",
++                 "part": {"tokens": {"input": 12, "output": 7}, "cost": {"total": 0.02}}}
++        captures = [
++            {"events": [{"index": 0, "elapsed_seconds": 1.0, "channel": "stdout", "data": first}],
++             "exit_code": 0, "timed_out": False, "elapsed_seconds": 1.0, "started_at": "start"},
++            {"events": [{"index": 0, "elapsed_seconds": 0.5, "channel": "stdout", "data": second},
++                        {"index": 1, "elapsed_seconds": 0.6, "channel": "stdout", "data": usage}],
++             "exit_code": 0, "timed_out": False, "elapsed_seconds": 0.6, "started_at": "continue"},
++        ]
++        arm = {"id": "test-opencode", "harness": "opencode", "binary": "opencode",
++               "model": "provider/model", "reasoning": "medium", "search_provider": "tinyfish"}
++        task = {"id": "IG-test", "repos": [], "prompt": "Original prompt"}
++        manifest = {"repos": {}, "preflight": {arm["id"]: {"status": "ready"}}}
++
++        with tempfile.TemporaryDirectory() as temporary:
++            root = Path(temporary)
++            provider = FakeProvider(root / "workspace")
++            with patch("src.agent_eval.core.RESULTS", root / "results"), \
++                    patch("src.agent_eval.core.adapters.command", return_value=[]), \
++                    patch("src.agent_eval.core.capture", side_effect=captures) as capture:
++                metrics = run_one(arm, task, manifest, "eval", workspace_provider=provider)
++
++            self.assertEqual(capture.call_count, 2)
++            self.assertTrue(provider.closed)
++            self.assertEqual(metrics["status"], "completed")
++            self.assertTrue(metrics["asked_clarification"])
++            self.assertEqual(metrics["continuations"], 1)
++            self.assertEqual(metrics["answer"], "Here is the completed answer.")
++            self.assertEqual(metrics["usage"], {
++                "classification": "measured", "source": "opencode step_finish",
++                "raw": {"tokens": {"input": 12, "output": 7}, "cost": {"total": 0.02}}})
++            events = [json.loads(line) for line in
++                      (root / "results/eval/runs/IG-test/test-opencode/events.jsonl").read_text().splitlines()]
++            self.assertEqual([(event["index"], event["phase"]) for event in events], [(0, 0), (1, 1), (2, 1)])
++            self.assertEqual((root / "results/eval/runs/IG-test/test-opencode/answer.md").read_text(),
++                             "Here is the completed answer.\n")
++
+     def test_no_usage_is_not_zero_credits(self):
+         self.assertEqual(_credit({"classification": "unavailable", "raw": None}), (None, "unavailable"))
+         self.assertEqual(_credit({"classification": "measured", "raw": {"totalNanoAiu": 100}}), (1e-07, "estimated"))

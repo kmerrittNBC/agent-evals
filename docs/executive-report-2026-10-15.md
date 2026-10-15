@@ -50,7 +50,7 @@ judged quality, or time matters most:
   seconds, the lowest of the four pairs. It finished faster than Pi + Luna
   on all 15 matched tasks and faster than Claude Code + Opus on 14/15. The
   timing result describes these runs; it does not establish comparative cost.
-- **Default mixed-workload exclusion: OpenCode + Luna.** It completed 8/15
+- **Recommended mixed-workload exclusion: OpenCode + Luna.** It completed 8/15
   tasks, including only 1/5 IG and 2/5 DU tasks, and received Unacceptable
   ratings in both columns. It also had the lowest mean quality (3.93/5) and
   only two 5/5 scores. Its 5/5 AR completion and Good AR rating make it a
@@ -243,6 +243,33 @@ provider. Antigravity was excluded from the current four-pair configuration
 after command-permission problems in an earlier run and an account quota limit
 in the command-allowed follow-up. Its historical results were not pooled with
 these runs. [TBD: link a durable exclusion decision record if one is created.]
+
+### Web search and page fetch by pair
+
+The pairs had different routes to online evidence. The runner exposed both
+search and fetch tools in every column, but equal tool names do not imply
+equal search results, page extraction, latency, or source coverage.
+
+| Pair | Web search route | Web fetch route |
+|---|---|---|
+| GPT-6 Luna + Pi | Installed `pi-web-search` extension sends `web_search` through the configured GitHub Copilot model endpoint. | Installed `pi-web-fetch` extension renders and extracts pages locally and can use the configured Copilot model to process the content. |
+| GPT-6 Sol + Pi | Same Pi extension and Copilot route, using the Sol model. | Same Pi fetch extension, using the Sol model when model processing is needed. |
+| GPT-6 Luna + OpenCode | OpenCode's `websearch` uses the pinned `tinyfish` hosted search provider, set in a per-process `OPENCODE_CONFIG_CONTENT` configuration. | OpenCode's `webfetch` tool was explicitly allowed in that configuration. |
+| Claude Opus 5.5 + Claude Code | Claude Code's built-in `WebSearch` tool was explicitly allowed. | Claude Code's built-in `WebFetch` tool was explicitly allowed. |
+
+OpenCode ran with `--standalone` so its private process inherited the pinned
+search configuration instead of a user's background service. The live
+preflight for **each pair in IG, DU, and AR** observed both a search and a
+page-fetch tool call before admitting the pair. This proves that the tools
+were callable in those probe sessions; it does not establish comparable
+result quality, indexing, extraction, or reliability on the evaluation
+prompts. The difference is especially relevant to IG tasks requiring external
+sources, and limits how confidently the Luna-in-Pi versus Luna-in-OpenCode
+gap can be attributed to the harness alone. Configuration and probe records
+are in the [adapter](../src/agent_eval/adapters.py), [arm
+configuration](../config/arms.yaml), and the [IG](../results/local-repos-20261015-122649/manifest.json),
+[DU](../results/du-2026-10-15-adjudicated/manifest.json), and
+[AR](../results/ar-2026-10-15-full/manifest.json) manifests.
 
 ### Agentic judge and evidence packs
 

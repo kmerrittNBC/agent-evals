@@ -1,0 +1,41 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "Accurately describes the frozen 23-task, seven-arm, 161-slot cohort, active-reservation stop, scoped cleanup, audit, and seal boundaries."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "Delivers a concrete plan covering replay, safe continuation, terminal failure, state transitions, trust checks, tests, and rollback."
+    },
+    "source_quality": {
+      "score": 4,
+      "reason": "Grounded in repository code and runbooks inspected in the transcript, though the final answer gives filenames without precise citations."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "Separates adopting completed evidence from replaying native work and keeps ambiguous attempts blocked until they can be reconciled."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Does not treat missing output as proof of no provider contact; requires evidence and quiescence before disposition."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "Names implementation seams, receipt contents, interruption checkpoints, focused tests, and a safe rollback path."
+    }
+  },
+  "overall_quality": 5,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "source_quality",
+      "answer_passage": "Follow `inspect-recovery-and-shakedown.md`; never use global Docker cleanup.",
+      "evidence": "The transcript shows direct inspection of that runbook and relevant repository files, but the final answer has no direct links or section references.",
+      "reason": "The plan is well sourced, but precise citations would make its repository claims easier to verify."
+    }
+  ],
+  "first_substantive_event_index": 5444
+}

@@ -1,0 +1,107 @@
+{
+  "task_id": "AR-05",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T19:00:59.305716+00:00",
+  "elapsed_seconds": 97.075897,
+  "answer": "Refactored `src/agent_eval/core.py` so `snapshot_workspace` owns creation and cleanup of the pinned read-only workspace, while `capture_conversation` runs the harness in a workspace supplied by its caller. `run_one` still checks the snapshot digest and produces the same events, answer, usage, continuation, and metrics outputs.\n\nAdded tests in `tests/test_runner.py` for cleanup on error, continuation and session handling, event timing, usage, and snapshot modification. A future writable-worktree runner could supply its own workspace lifecycle to `capture_conversation` and apply a different integrity policy without changing conversation capture.\n\nChecks passed: 18 unit tests and `git diff --check`.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 205,
+      "cacheRead": 21460,
+      "cacheWrite": 194,
+      "reasoning": 59,
+      "totalTokens": 21862,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00205,
+        "cacheRead": 0.004292000000000001,
+        "cacheWrite": 0.000485,
+        "total": 0.006833000000000001
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 95.508639,
+  "first_substantive_seconds": 97.052873,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 97.075897,
+      "started_at": "2026-10-15T19:00:59.305716+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 18
+  },
+  "changes": {
+    "tracked_patch_bytes": 17635,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-jp1vkbro/validation",
+        "/tmp/agent-eval-jp1vkbro/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/pi-sol",
+        "/home/anodyine/Projects/agent-evals/results/ar-2026-10-15-full/runs/AR-05/pi-sol",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.019s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}
