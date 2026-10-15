@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-03",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T01:57:31.117522+00:00",
+  "elapsed_seconds": 54.603988,
+  "answer": "GHSA-w3vv-58gj-gw77 affects the people-and-orgs UI library at Nx 22.7.1, which should go to 22.7.9. The financial HQ UI at Nx 23.2.1 is not affected and needs no change.\n\n## The advisory\n- **IDs:** GHSA-w3vv-58gj-gw77 / CVE-2026-104854, in the npm package `nx`.\n- **Severity:** High (CVSS v4 8.5). An attacker needs a local account with low privileges, and no user interaction is required. There is no known exploitation in the wild.\n- **The problem:** The Nx daemon and its plugin workers talk to each other over Unix sockets. Those sockets sit in a folder under the shared OS temp directory with default permissions, and they have no authentication.\n  - The folder name is unique but not secret, so other local users can find it.\n  - Another local user who reaches a socket can use the `PROCESS_IN_BACKGROUND` handler to make the daemon load and run a module from an absolute path. That code runs as the daemon's user.\n  - Other handlers on the same sockets leak workspace files, the project graph and task hashes.\n- **Affected versions:** `>=14.6.0 <22.7.9` and `>=23.0.0 <23.1.2`.\n- **Patched versions:** 22.7.9 and 23.1.2.\n\n## Dates\n| Event | Date |\n|---|---|\n| 23.1.2 released (fix, nrwl/nx#36370: \"restrict daemon and plugin worker socket access to the owning user\") | 2026-08-26 |\n| 22.7.9 released (same fix backported) | 2026-09-01 |\n| Advisory published on the nrwl/nx repo | 2026-09-11 |\n| Published to NVD | 2026-10-02 |\n| Added to the GitHub Advisory Database (last updated) | 2026-10-05 |\n\nBoth fixes came out before the advisory was published. Neither release note calls the change a security fix, so a team that read only the changelogs could have missed it.\n\n## Is each repo affected?\n| Repo | Declared | Lockfile resolves | Affected? |\n|---|---|---|---|\n| financial-hq-ui | `nx` and all `@nx/*` at 23.2.1 (`package.json:147`) | `nx@23.2.1` (`yarn.lock:9867`) | **No.** 23.2.1 is above 23.1.2. |\n| people-and-orgs-ui-library | `nx` and all `@nx/*` at 22.7.1 (`package.json:211`) | `nx@22.7.1` (`pnpm-lock.yaml:7568`) | **Yes.** 22.7.1 is in the `<22.7.9` range. |\n\n## Which environments make it matter\nThe issue only matters on a machine where **more than one OS user (UID)** can reach the temp directory while Nx is running a command or the daemon is up. That includes:\n- **Shared CI runners**, such as self-hosted runners that persist between jobs or are shared by several accounts.\n- **Shared build or dev servers**, such as remote dev boxes or jump hosts where several engineers have accounts.\n- **Containers or images that run several UIDs** and share `/tmp`.\n\nTurning the daemon off doesn't fully protect you. Plugin worker sockets are used during normal command runs even with `NX_DAEMON=false`.\n\nA single-user laptop or an ephemeral single-tenant VM is not meaningfully exposed.\n\nWhat I found in these repos:\n- **Workflows:** Every job in both repos runs on GitHub-hosted `ubuntu-latest`. Those are throwaway single-tenant VMs, so the risk there is low.\n- **Docker build:** The people-and-orgs `Dockerfile` runs Nx only in single-user, root-only build stages. The final image is nginx with no Nx in it.\n- **Not covered:** `dev-image.yml` calls an external template (`sportngin/se-actions-workflow-templates`), which I couldn't inspect. The real exposure is wherever this repo runs on self-hosted or shared runners, or on shared dev hosts, so check those.\n\n## Recommendations\n**people-and-orgs-ui-library: patch bump from 22.7.1 to 22.7.9.** This is the smallest fixed version, a patch release in the same 22.7 line, so you don't need a major update to 23.x.\n```bash\npnpm exec nx migrate 22.7.9\npnpm install\npnpm exec nx migrate --run-migrations   # only if migrations.json was generated\npnpm exec nx reset                      # clears old sockets/dirs, especially on shared hosts\n```\nMove `nx` and all eight `@nx/*` packages to 22.7.9 together and commit the updated `pnpm-lock.yaml`. Until the update ships, on any shared machine set `NX_SOCKET_DIR` to a directory you own with mode `0700`. The vulnerable versions already honor that setting.\n\n**financial-hq-ui: no update needed.** Keep it at 23.2.1 or later, and don't let it drop below 23.1.2.\n\nSources:\n- [GHSA-w3vv-58gj-gw77](https://github.com/advisories/GHSA-w3vv-58gj-gw77)\n- [Nx 22.7.9 release](https://github.com/nrwl/nx/releases/tag/22.7.9)\n- [Nx 23.1.2 release](https://github.com/nrwl/nx/releases/tag/23.1.2)",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 10,
+      "cache_creation_input_tokens": 12884,
+      "cache_read_input_tokens": 47218,
+      "output_tokens": 3871,
+      "output_tokens_details": {
+        "thinking_tokens": 694
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 12884,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 2263,
+          "cache_read_input_tokens": 15193,
+          "cache_creation_input_tokens": 2817,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2817
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 20.876501,
+  "first_substantive_seconds": 54.325483,
+  "snapshot_digest_before": "e92d84cee1628d736182f8c24fdd95a5211b499986c26612535932b62af0c476",
+  "snapshot_digest_after": "e92d84cee1628d736182f8c24fdd95a5211b499986c26612535932b62af0c476",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 54.603988,
+      "started_at": "2026-10-15T01:57:31.117522+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 3,
+    "other_tool_calls": 7
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T23:44:59.648856+00:00",
+  "elapsed_seconds": 308.171563,
+  "answer": "I built the matrix below from 6 primary or near-primary sources. Every cell has at least one sourced score, so none is fully unverified. Two pieces are unverified, though: an independent DeepSWE v1.1 score for Qwen3.8-27B, and any OpenAI-reported Terminal-Bench 2.1 score for GPT-6. Few of the numbers can be compared directly across rows; only scores from the same evaluator on the same harness line up.\n\n## Summary matrix\n\nScores are pass@1 %. Each cell starts with the independent result where one exists, followed by the vendor's own claim.\n\n| Model | Terminal-Bench 2.1 | DeepSWE v1.1 |\n|---|---|---|\n| **GPT-6 Sol** | **83.15** (Vals, Terminus 2) · vendor: *unverified*, OpenAI published none | **70.5 ±7.2** (Mercor) · vendor 68.8 (OpenAI, max) · not on the Datacurve board |\n| **GPT-6 Luna** | **73.03** (Vals, Terminus 2) · vendor: *unverified*, OpenAI published none | **67.0 ±6.8** (Mercor) · 64 (Artificial Analysis) · vendor 66.6 (OpenAI, max) |\n| **Qwen3.8-27B** | **58.43** (Vals, Terminus 2) · vendor 73.0 (Qwen, \"Terminus\") | Vendor only: 42.2 (Qwen, Claude Code). **No independent score: unverified** |\n| **GLM-5.3** | **71.54** (Vals, Terminus 2) · vendor 88.2 (Z.ai, Claude Code) | **69 ±3** (Datacurve official) · 70.5 ±6.3 (Mercor) · vendor 66.9 (Z.ai) |\n| **DeepSeek V4.1 Flash** | **74.53** (Vals, Terminus 2, 3 trials) · vendor 90.6 (DeepSeek's own harness) | **71.7 ±6.3** (Mercor) · vendor 74.2 (DeepSeek, mini-SWE) · not on the Datacurve board |\n\n## Terminal-Bench 2.1: each score in detail\n\nTerminal-Bench 2.1 has the same 89 tasks as 2.0, with fixes to 28 of them. Most model/agent pairs score higher on 2.1 than on 2.0.\n\n| Model | Score | Reported by | Harness and settings | Comparable? |\n|---|---|---|---|---|\n| GPT-6 Sol | 83.15 | Vals.ai | Terminus 2 on Daytona, pass@1, time limit rather than turn limit; effort not shown on the benchmark page | Yes, within the Vals set |\n| GPT-6 Luna | 73.03 | Vals.ai | Same as above | Yes, within the Vals set |\n| Qwen3.8-27B | 58.43 | Vals.ai | Same as above | Yes, within the Vals set |\n| Qwen3.8-27B | 73.0 | Qwen (HF model card) | Row label is \"Terminal Bench 2.1 (Terminus)\". No temperature, timeout or run count given | ⚠️ Settings unknown |\n| GLM-5.3 | 71.54 | Vals.ai | Terminus 2 | Yes, within the Vals set |\n| GLM-5.3 | 88.2 | Z.ai (HF model card) | Claude Code 2.1.207, temp 1.0, top_p 1, 65,536 max new tokens, 6-hour timeout | ⚠️ Different harness, long timeout |\n| DeepSeek V4.1 Flash | 74.53 | Vals.ai | 3 full trials. The model page lists max effort and temp 1 as general settings | Yes, within the Vals set |\n| DeepSeek V4.1 Flash | 90.6 | DeepSeek (arXiv 2609.19969, Table 3) | Its own \"DeepSeek Harness, Minimal mode\", 1M context, temp 1.0, top_p 0.95, N=3, max 500 steps, no network, max effort | ⚠️ Proprietary harness |\n| DeepSeek V4.1 Flash | 88.0 | DeepSeek (same paper, Table 4) | Claude Code v2.1.251. Four Claude Code versions average 87.8 | ⚠️ Closest to GLM's setup, but a different Claude Code version and timeout |\n\nNotes:\n- **Who has no number.** Artificial Analysis's Terminal-Bench 2.1 page and Snorkel's 2.1 board list none of the five models. Snorkel only lists predecessors such as GPT-5.6 Luna and GLM-5.1. llm-stats lists 0.906, 0.882 and 0.730 for DeepSeek, GLM and Qwen, but marks every entry \"self-reported, unverified\". Those are copies of the vendor numbers, not separate confirmations.\n- **Unconfirmed figure.** One aggregator cites an Artificial Analysis score of 79.8 (xhigh) for Qwen3.8-27B. I could not find it at the source.\n- **Benchmark status.** Vals says Terminal-Bench 2.1 has been superseded by 4.0 and is no longer run on new models.\n\n## DeepSWE v1.1: each score in detail\n\nDeepSWE v1.1 is Datacurve's benchmark: 113 tasks, with each agent's committed patch graded in a fresh container. The official board runs every model on mini-swe-agent.\n\n| Model | Score | Reported by | Harness and settings | Comparable? |\n|---|---|---|---|---|\n| GLM-5.3 | 69 ±3 | **Datacurve official board** | mini-swe-agent, max effort, $3.99/task | Yes. The only official entry among the five |\n| GPT-6 Sol | 70.5 ±7.2 | Mercor (via BenchLM, captured Oct 12) | mini-swe-agent, 500-step limit, 2-hour limit, k=3, max effort | Yes, within the Mercor set |\n| GPT-6 Luna | 67.0 ±6.8 | Mercor | Same as above | Yes, within the Mercor set |\n| GLM-5.3 | 70.5 ±6.3 | Mercor | Same as above | Yes, within the Mercor set |\n| DeepSeek V4.1 Flash | 71.7 ±6.3 | Mercor | Same as above | Yes, within the Mercor set |\n| GPT-6 Luna | 64 | Artificial Analysis (Sep 22 article) | Max effort; harness not stated | ⚠️ Harness unknown |\n| GPT-6 Sol | 68.8 | OpenAI launch charts (via secondary coverage; openai.com returned 403) | Max effort, \"OpenAI's research environment\", harness not named | ⚠️ Internal harness |\n| GPT-6 Luna | 66.6 | OpenAI | Max effort, same caveat. Lower efforts: xhigh 61.3, high 59.3, medium 44.5, low 2.4 | ⚠️ Internal harness |\n| GLM-5.3 | 66.9 | Z.ai (HF model card) | mini-swe-agent, temp 0.95, top_p 1.0, 6-hour timeout, 400K context | ~ Same harness as official, different limits |\n| DeepSeek V4.1 Flash | 74.2 | DeepSeek (arXiv Table 3) | mini-SWE, N=8, max 500 steps, max effort | ~ Same harness as official |\n| DeepSeek V4.1 Flash | 65.5–72.6 | DeepSeek (arXiv Table 4) | Same model on other harnesses: Claude Code 69.8, Codex 65.6, OpenCode 65.5, Pi 66.2, DeepSeek Minimal 72.6 / Standard 70.5 / PTC 67.6 | Shows how much the harness alone moves the score (~9 pts) |\n| Qwen3.8-27B | 42.2 | Qwen (HF model card, footnote 3) | **Claude Code**, temp 1.0, top_p 0.95, 256K context; effort and run count not stated | ⚠️ Different harness, no independent check |\n\nNotes:\n- **Wrong models on the official board.** Datacurve lists `qwen3.8-max` (57%) and `deepseek-v4-flash` (53%). Those are different models and should not be used for Qwen3.8-27B or V4.1 Flash.\n- **GPT-6.1 Sol.** Secondary coverage says it replaced GPT-6 Sol on Sep 29 and scored 75.2 (high effort) on DeepSWE 1.1. Don't mix it up with GPT-6 Sol.\n- **Possible grading defects.** A community tracker reports that Epoch AI found grading defects in at least 23 of the 113 tasks. I have this second-hand and did not check it against Epoch's own write-up.\n\n## What comparisons the evidence supports\n\n**Terminal-Bench 2.1:** Vals is the only source that ran all five models on one harness, so that ranking is the only clean one:\n- GPT-6 Sol (83.2) is ahead.\n- DeepSeek V4.1 Flash (74.5), GPT-6 Luna (73.0) and GLM-5.3 (71.5) sit within 3 points of each other. With 89 tasks, I'd treat that cluster as tied. Vals doesn't publish confidence intervals, so this is my own estimate.\n- Qwen3.8-27B (58.4) is clearly last. Its 13–16 point gap is likely real.\n- Sol's lead of about 9 points over the cluster is probable but not certain without confidence intervals.\n\n**Vendor Terminal-Bench numbers (90.6, 88.2, 73.0):** these can't be ranked against each other or against Vals. Each vendor used a different harness, and each claim is 15–17 points above the Vals result for the same model. The DeepSeek-vs-GLM \"lead\" in vendor tables comes from different harnesses, not demonstrated ability. The nearest like-for-like pairing is DeepSeek on Claude Code (88.0) against GLM on Claude Code (88.2), and that looks like a tie, but the Claude Code versions and timeouts differ.\n\n**DeepSWE v1.1:** Mercor ran four of the models on the same harness: DeepSeek 71.7, Sol 70.5, GLM 70.5, Luna 67.0. Their ±6–7 point margins all overlap, so the evidence does not separate them. Two consistency checks hold up:\n- GLM-5.3's three scores (official 69, Mercor 70.5, Z.ai 66.9) agree with each other.\n- DeepSeek's own 74.2 is within the margin of Mercor's 71.7.\n\n**Not supported:**\n- **Qwen3.8-27B on DeepSWE.** The only score is Qwen's 42.2 on Claude Code, with no independent run. DeepSeek's own table shows the harness can move a score by about 9 points, so 42.2 can't be compared against mini-swe-agent numbers. On available evidence it trails clearly, but how far is unknown.\n- **OpenAI's DeepSWE numbers** (68.8 / 66.6) come from an unnamed internal harness. Use Mercor's figures to compare GPT-6 models with the others.\n- **Mixing versions.** Don't combine these with Terminal-Bench 3.0/4.0 or DeepSWE v1.0 scores, or with GLM-5.3-Flash, Qwen3.8-Max or GPT-6.1 Sol.\n\n**Bottom line:**\n- Terminal-Bench 2.1: GPT-6 Sol is ahead, then a three-way tie (DeepSeek V4.1 Flash, GPT-6 Luna, GLM-5.3), then Qwen3.8-27B.\n- DeepSWE v1.1: DeepSeek V4.1 Flash, GPT-6 Sol, GLM-5.3 and GPT-6 Luna are statistically indistinguishable. Qwen3.8-27B has only a vendor score.\n\nSources:\n- [Vals.ai – Terminal-Bench 2.1](https://www.vals.ai/benchmarks/terminal-bench-2-1)\n- [Vals.ai – DeepSeek V4.1 Flash](https://www.vals.ai/models/deepseek_deepseek-v4.1-flash)\n- [tbench.ai – Terminal-Bench 2.1 announcement](https://www.tbench.ai/news/terminal-bench-2-1)\n- [Artificial Analysis – Terminal-Bench 2.1](https://artificialanalysis.ai/evaluations/terminalbench-2-1)\n- [Snorkel – Terminal-Bench 2.1](https://snorkel.ai/leaderboard/terminal-bench-2-1/)\n- [llm-stats – Terminal-Bench 2.1](https://llm-stats.com/benchmarks/terminal-bench-2.1)\n- [llm-stats – DeepSWE 1.1](https://llm-stats.com/benchmarks/deepswe-1.1)\n- [Datacurve DeepSWE leaderboard](https://deepswe.datacurve.ai/)\n- [Datacurve – DeepSWE v1.1 blog](https://deepswe.datacurve.ai/blog/deepswe-v1-1)\n- [BenchLM – DeepSWE v1.1 (Mercor)](https://benchlm.ai/benchmarks/mercordeepswe11)\n- [DeepSWE 1.1 Tracker](https://www.deepswe.dev/)\n- [lprhodes/deepswe-tracker](https://github.com/lprhodes/deepswe-tracker)\n- [Respan – DeepSWE v1.1](https://www.respan.ai/models/benchmarks/deepswe-v1-1)\n- [Artificial Analysis – GPT-6 Sol and Luna](https://artificialanalysis.ai/articles/gpt-6-sol-and-luna-push-the-cost-efficiency-frontier)\n- [Digital Applied – GPT-6 Sol/Luna benchmarks](https://www.digitalapplied.com/blog/gpt-6-sol-luna-launch-pricing-benchmarks-2026)\n- [ComputingForGeeks – GPT-6 Sol/Luna](https://computingforgeeks.com/gpt-6-sol-luna-released-features-benchmarks/)\n- [Qwen/Qwen3.8-27B model card](https://huggingface.co/Qwen/Qwen3.8-27B)\n- [Qubrid – Qwen3.8-27B results](https://www.qubrid.com/blog/qwen38-27b-benchmarks-official-and-independent-results)\n- [zai-org/GLM-5.3 model card](https://huggingface.co/zai-org/GLM-5.3)\n- [DeepSeek-V4.1-Flash paper (arXiv 2609.19969)](https://arxiv.org/html/2609.19969v1)",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 20,
+      "cache_creation_input_tokens": 39276,
+      "cache_read_input_tokens": 238095,
+      "output_tokens": 13628,
+      "output_tokens_details": {
+        "thinking_tokens": 2552
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 39276,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 6635,
+          "cache_read_input_tokens": 42061,
+          "cache_creation_input_tokens": 2341,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 2341
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.447242,
+  "first_substantive_seconds": 307.820438,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 308.171563,
+      "started_at": "2026-10-14T23:44:59.648856+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 12,
+    "fetch_calls": 25,
+    "other_tool_calls": 0
+  }
+}

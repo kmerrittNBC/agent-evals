@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T20:21:49.812088+00:00",
+  "elapsed_seconds": 74.156819,
+  "answer": "Here’s a matrix using **Terminal-Bench 2.1** and **DeepSWE v1.1**. Scores are reported percentages.\n\n| Model | Terminal-Bench 2.1 | DeepSWE v1.1 |\n|---|---:|---:|\n| GPT-6 Luna | [73.03%](https://www.vals.ai/models/openai_gpt-6-luna) | [66.6%](https://openai.com/index/introducing-gpt-6-sol-and-luna/) |\n| GPT-6 Sol | [83.15%](https://www.vals.ai/models/openai_gpt-6-sol) | [68.8%](https://openai.com/index/introducing-gpt-6-sol-and-luna/) |\n| Qwen3.8-27B | [73.0%](https://huggingface.co/Qwen/Qwen3.8-27B) | [42.2%](https://huggingface.co/Qwen/Qwen3.8-27B) |\n| GLM-5.3 | [88.2%](https://huggingface.co/zai-org/GLM-5.3/blob/main/.eval_results/terminal-bench-2.1.yaml) | [66.9%](https://huggingface.co/zai-org/GLM-5.3) |\n| DeepSeek V4.1 Flash | [90.6%](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash) | [74.2%](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash) |\n\n**Comparison caveat:** These results come from different evaluators and model teams, with differing agent harnesses and settings. They are useful as a reported-results matrix, not a controlled head-to-head ranking.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 401,
+      "cacheRead": 17422,
+      "cacheWrite": 2400,
+      "reasoning": 0,
+      "totalTokens": 20226,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.0040100000000000005,
+        "cacheRead": 0.0034844000000000003,
+        "cacheWrite": 0.006,
+        "total": 0.013500400000000001
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 70.982217,
+  "first_substantive_seconds": 74.125095,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 74.156819,
+      "started_at": "2026-10-14T20:21:49.812088+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 8,
+    "fetch_calls": 4,
+    "other_tool_calls": 0
+  }
+}

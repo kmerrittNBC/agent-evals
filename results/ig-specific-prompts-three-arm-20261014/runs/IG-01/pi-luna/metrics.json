@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T23:42:10.456373+00:00",
+  "elapsed_seconds": 169.097405,
+  "answer": "## Results matrix\n\nScores below are percentages. These are **agent-plus-model evaluation results**, not model-only measurements. “Unverified” means I could not establish a sourced score for that *specific* evaluation setup; it does not mean the model has no result elsewhere.\n\n| Model | Terminal-Bench 2.1 | DeepSWE v1.1 |\n|---|---|---|\n| **GPT-6 Sol** | **87.7% pass@1** — Fidian’s run; **Terminus-2** in **Daytona**, GPT-6 Sol at max effort, OpenAI API. A third-party page also lists **89.1% as an estimate**, not a measured result; its harness and settings are not established. ([Fidian](https://fidian.ai/leaderboard/), [Benchgap](https://benchgap.net/b/terminalbench21/current)) | **68.8%** — reported by OpenAI at **max effort**. OpenAI does not specify the exact harness, sampling settings, or run count for this result. ([OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/)) |\n| **GPT-6 Luna** | **79.7% pass@1** — Fidian; **Terminus-2** in **Daytona**, max effort. A third-party page lists **84.0% as an estimate**; its harness and settings are not established. ([Fidian](https://fidian.ai/leaderboard/), [Benchgap](https://benchgap.net/b/terminalbench21/current)) | **66.6%** — reported by OpenAI at **max effort**. Exact harness, sampling settings, and run count are not specified in the announcement. ([OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/)) |\n| **Qwen3.8-27B** | **73.0%** — reported by Qwen; the model card identifies **Terminus**, but does not establish the further run settings needed to match another lab’s evaluation. **Fidian common-run result: unverified.** ([Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/README.md)) | **42.2%** — reported by Qwen using **Claude Code**; temperature **1.0**, top-p **0.95**, context **256K**. This is not established as a run on DeepSWE’s standardized leaderboard harness. ([Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B/blob/main/README.md)) |\n| **GLM-5.3** | **88.2%** — reported by Z.ai using **Claude Code 2.1.207**, temperature **1.0**, top-p **1**, 65,536-token output limit, and six-hour timeout; the cited report does not make the score’s run aggregation clear. **83.4% pass@1** — Fidian’s separate **Terminus-2 / Daytona** run, with GLM routed via OpenRouter. ([Z.ai](https://z.ai/blog/glm-5.3), [Fidian](https://fidian.ai/leaderboard/)) | **66.9%** — reported by Z.ai using **mini-swe-agent**, temperature **0.95**, top-p **1.0**, 400K context, and six-hour timeout. **69% ± 3%** — Datacurve’s leaderboard entry for **GLM-5.3 [max]**, using its common **mini-swe-agent** setup (Pier on Modal). These are separate reports/configurations, not one reconciled score. ([Z.ai](https://z.ai/blog/glm-5.3), [Datacurve DeepSWE](https://deepswe.datacurve.ai/)) |\n| **DeepSeek V4.1 Flash** | **90.6% pass@1** — DeepSeek’s **Harness Minimal** setup; the model card reports three samples per task. It also reports **84.1% with Codex**. Separate Fidian result: **72.4% pass@1**, using **Terminus-2 / Daytona**, with the model routed through Fireworks. ([DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash), [Fidian](https://fidian.ai/leaderboard/)) | **74.2%** with **mini-SWE-agent** and **72.6%** with **DeepSeek Harness Minimal**, both reported by DeepSeek for DeepSWE v1.1. These are different harness results, not a single agreed score. The card’s code-agent settings include max reasoning effort, temperature **1.0**, top-p **0.95**, and 1M context; it reports eight samples per DeepSWE task. ([DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash)) |\n\n## What is and isn’t comparable\n\n**Terminal-Bench 2.1:** The most useful common comparison in this set is Fidian’s Terminus-2-in-Daytona run: GPT-6 Sol **87.7**, GLM-5.3 **83.4**, GPT-6 Luna **79.7**, and DeepSeek V4.1 Flash **72.4** pass@1. That supports a comparison of those **reported model-and-provider configurations under Fidian’s shared harness**. It is not a controlled comparison of model weights alone, and the different provider routes and any sampling or coverage differences still matter. Qwen’s **73.0** comes from a different reported setup; its score should not be inserted into that ranking as if it were a Fidian run.\n\nOther Terminal-Bench numbers should remain separately attributed. Z.ai’s GLM-5.3 **88.2** and DeepSeek’s **90.6** use different harnesses from Fidian’s runs. DeepSeek’s own **90.6 vs. 84.1** comparison also illustrates why the harness matters. Benchgap’s GPT-6 Sol and Luna figures are labeled **estimates**, so they are not equivalent to measured scores. Terminal-Bench is specifically an agent benchmark: the harness is part of what is being evaluated. ([Terminal-Bench 2.1](https://www.tbench.ai/news/terminal-bench-2-1))\n\n**DeepSWE v1.1:** There is no fully matched, sourced five-model comparison in these results. The clearest common-harness evidence here is Datacurve’s GLM-5.3 entry, **69% ± 3%**, on its mini-swe-agent leaderboard. Z.ai reports GLM-5.3 at **66.9%** with mini-swe-agent but different disclosed settings. OpenAI’s GPT-6 results do not specify their harness, Qwen reports a Claude Code run, and DeepSeek reports two harnesses. Those scores are useful as attributed results, but a single cross-model ranking would overstate comparability. Datacurve describes DeepSWE v1.1 as a 113-task benchmark and its leaderboard as using a common agent harness. ([Datacurve DeepSWE](https://deepswe.datacurve.ai/), [DeepSWE methodology](https://deepswe.datacurve.ai/blog/deepswe))\n\n**Bottom line:** The evidence supports a same-harness Terminal-Bench comparison among the four Fidian entries, and it supports reporting the individual DeepSWE results with their sources and setups. It does **not** establish a fair five-model ranking across both benchmarks.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 3335,
+      "cacheRead": 43443,
+      "cacheWrite": 7395,
+      "reasoning": 1710,
+      "totalTokens": 54176,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.0016675,
+        "cacheRead": 0.00043443,
+        "cacheWrite": 0.000924375,
+        "total": 0.003026605
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 157.100258,
+  "first_substantive_seconds": 169.034887,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 169.097405,
+      "started_at": "2026-10-14T23:42:10.456373+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 25,
+    "fetch_calls": 9,
+    "other_tool_calls": 0
+  }
+}

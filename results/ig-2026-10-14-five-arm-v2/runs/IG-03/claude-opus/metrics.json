@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-03",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T20:43:40.259539+00:00",
+  "elapsed_seconds": 58.757155,
+  "answer": "**Short answer:** The repos themselves aren't affected. The risk is on developer machines, because both repos recommend the compromised VS Code extension.\n\n## What the incident was\nOn **May 18, 2026** someone published a malicious **Nx Console VS Code extension v18.95.0** (`nrwl.angular-console`). It was live from about 12:30 to 13:09 UTC: roughly 11 minutes on the VS Code Marketplace and 36 minutes on Open VSX. When the extension activated, it stole credentials and installed a backdoor. Nx says the `nx` CLI, the `@nx/*` npm packages and Nx Cloud were **not** affected. The attackers got in through the TanStack npm compromise on May 11.\n\n## What I found\n| | financial-hq-ui | other-angular |\n|---|---|---|\n| Nx version in the yarn.lock | 23.2.1 | 22.5.3 |\n| Affected by the 2026 extension incident? | No (npm packages weren't involved) | No |\n| Affected by the Aug 2025 \"s1ngularity\" npm attack? | No (those bad versions were 20.x and 21.x) | No |\n| `@tanstack/*` packages in the lockfile | None | None |\n| Recommends `nrwl.angular-console` in `.vscode/extensions.json` | **Yes** | **Yes** |\n\nThe lockfiles are clean. But both repos prompt developers to install Nx Console, so anyone who had it installed and auto-updating on May 18 may have pulled v18.95.0. A repo can't tell you that. Each person has to check their own machine.\n\n## What to do\n1. **Every developer on either repo** (including Cursor and other VS Code fork users) should run:\n   ```\n   code --list-extensions --show-versions | grep angular-console\n   ```\n   Then update to **18.100.x or later**. The current release is 18.100.5. An up-to-date version now doesn't rule out having auto-updated through 18.95.0 during the window, so also do step 2.\n2. **Check for signs of the malware on macOS/Linux:**\n   - `~/.local/share/kitty/cat.py`\n   - `~/Library/LaunchAgents/com.user.kitty-monitor.plist`\n   - `/var/tmp/.gh_update_state`\n   - `/tmp/kitty-*`\n   - a `python` process running `cat.py`, or any process with `__DAEMONIZED=1` set\n   - on Linux, unexpected entries in `/etc/sudoers`\n3. **If anyone was exposed,** treat that machine as compromised:\n   - Rotate GitHub, npm, SSH, AWS/GCP, Kubernetes and Vault credentials, plus any 1Password CLI sessions.\n   - Rotate secrets in `.env` files. That matters here because other-angular's `ui:tests:setup` script writes SSM secrets to `.env`, and its scripts use `AWS_PROFILE=se-staging`.\n   - Think about rebuilding the machine.\n4. **Optional hardening:** turn off extension auto-update, or delay it, on dev machines. You could also pin a minimum Nx Console version in your onboarding docs.\n\nNo code or lockfile changes are needed in either repo.\n\nSources:\n- [Nx Console v18.95.0 postmortem](https://nx.dev/blog/nx-console-v18-95-0-postmortem)\n- [The Hacker News: Compromised Nx Console 18.95.0](https://thehackernews.com/2026/05/compromised-nx-console-18950-targeted.html)\n- [GHSA-cxm3-wv7p-598c (2025 Nx npm advisory)](https://github.com/nrwl/nx/security/advisories/GHSA-cxm3-wv7p-598c)\n- [StepSecurity: s1ngularity](https://www.stepsecurity.io/blog/supply-chain-security-alert-popular-nx-build-system-package-compromised-with-data-stealing-malware)\n- [Aikido: nx packages compromised](https://www.aikido.dev/blog/popular-nx-packages-compromised-on-npm)\n- [The Register: Nx packages poisoned](https://www.theregister.com/2025/08/27/nx_npm_supply_chain_attack/)\n- [Cloudsmith: NX supply chain attack](https://cloudsmith.com/blog/nx-npm-supply-chain-attack)",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 8,
+      "cache_creation_input_tokens": 15799,
+      "cache_read_input_tokens": 38465,
+      "output_tokens": 2868,
+      "output_tokens_details": {
+        "thinking_tokens": 280
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 15799,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 1638,
+          "cache_read_input_tokens": 19062,
+          "cache_creation_input_tokens": 1863,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1863
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 5.329926,
+  "first_substantive_seconds": 58.546183,
+  "snapshot_digest_before": "02d2ee8c7e1479315603a894230b1c2e0e130e9e8110203f0650a892041994c0",
+  "snapshot_digest_after": "02d2ee8c7e1479315603a894230b1c2e0e130e9e8110203f0650a892041994c0",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 58.757155,
+      "started_at": "2026-10-14T20:43:40.259539+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 1,
+    "fetch_calls": 1,
+    "other_tool_calls": 7
+  }
+}

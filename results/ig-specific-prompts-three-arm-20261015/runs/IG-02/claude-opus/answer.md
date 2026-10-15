@@ -1,0 +1,37 @@
+**Bottom line:** the repo uses the affected version (`@angular/router` 22.1.7), but the condition that makes this exploitable, server-side rendering on Node.js, doesn't appear anywhere in it. Every app is built as browser-only static files and served from S3 behind CloudFront. I'd rate this low urgency: upgrade to 22.2.0 on your normal schedule, not as an emergency patch.
+
+## The advisory (GHSA-ff3f-86qr-9cv3 / CVE-2026-101896)
+
+- **Title:** Angular SSR: Denial of Service via Numeric URL Matrix Parameters. Rated High, CVSS v4 8.2, availability impact only.
+- **Published:** 23 September 2026. It was added to the GitHub Advisory Database and last updated on 30 September 2026.
+- **Affected:** 22.0.0 up to (not including) 22.2.0; 21.0.0 up to 21.2.24; 20.0.0 up to 20.3.32; and 19.2.25 and below.
+- **Fixed in:** 22.2.0, 21.2.24 and 20.3.32.
+- **How it works:** numeric matrix parameter or outlet names (for example `/a;990;2522`) make V8 allocate dense arrays, which uses about 350 times more memory than expected. Enough concurrent requests run the Node.js SSR worker out of memory. The advisory's example: 8 KB paths with 12–22 concurrent requests crash a 256–512 MiB worker.
+- **Required conditions (all must be true):** (1) SSR runs on Node.js/V8, (2) `@angular/router` parses URLs supplied by the user during SSR, and (3) the reverse proxy passes semicolons and multi-segment paths through. The advisory says apps that only run in the browser are not affected.
+- **Workarounds:** block or strip `;` in request paths at the proxy or WAF, limit path depth, or raise `--max-old-space-size`. The last one only raises the threshold.
+
+## What I found in the repo (read-only)
+
+**Confirmed:**
+- `package.json:56` declares `@angular/router` 22.1.7, and `yarn.lock:312` resolves it to exactly 22.1.7. That's inside the affected range.
+- There are no SSR packages: no `@angular/ssr`, `@angular/platform-server`, `@nguniversal/*` or `express`.
+- There's no SSR code or config anywhere outside `node_modules`: no `server.ts`, `main.server.ts`, `app.config.server.ts`, `provideServerRendering`, `CommonEngine`/`AngularNodeAppEngine`, `"ssr"`, `"server"`, `outputMode` or `prerender`.
+- All apps use the `@angular-devkit/build-angular:application` builder with only a `browser` entry (for example `apps/invoices/project.json:15`).
+- Every deployable app (docs, transactions, orders, invoices, payment-terms) deploys with `scripts/deploy-static-site.sh`. That script runs `aws s3 sync` and then a CloudFront invalidation, with no Node runtime involved.
+- `terraform/env/production/main.tf` sets up each app with the `tflib-appinfra-static-site` module, using `custom_origin_path = "/browser"` (the folder that holds only the browser build).
+- There's no Dockerfile, nginx config or serverless config.
+
+**Assumptions (not verified):**
+- That this repo reflects what's actually deployed. I couldn't see the external Terraform module (`sportngin/tflib-appinfra-static-site`) or the live infrastructure. If it attaches a Lambda@Edge or other Node origin that renders Angular, the assessment changes. A CloudFront Function used only for SPA URL rewrites wouldn't matter.
+- That no other repo or service imports these libraries and renders them on the server.
+- I didn't check whether CloudFront filters `;`. It doesn't matter if there's no SSR.
+- The advisory details come from a summary of the GitHub advisory page, not the raw text. Check the exact version ranges on the page before relying on them in a formal record.
+
+## Recommendation
+
+1. **Classify it as "affected version, not exploitable in this deployment."** That fits a VEX-style "vulnerable code not in execute path" justification. No emergency change or WAF rule is needed.
+2. **Upgrade to 22.2.0 in the next routine dependency update.** That clears scanner findings and protects you if SSR is added later. Bump every `@angular/*` package at 22.1.7 together, and move the `22.1.8` tooling (CLI, devkit, schematics) and `ng-packagr ~22.1.0` to matching 22.2.x versions. Re-run the `postinstall` patch scripts and the test suite, because they patch third-party `se-fe-*` packages for Angular compatibility.
+3. **Check one thing first:** ask the platform team, or read the external Terraform module, to confirm there's no Node/Lambda@Edge rendering in front of these CloudFront distributions.
+4. **Side note:** `libs/shared/feature/package.json` declares a peer `@angular/core >=20.3.0 <22`. The workspace already runs 22.1.7, which is outside that range. It's unrelated to this advisory, but worth fixing when you upgrade.
+
+Source: [GitHub Advisory GHSA-ff3f-86qr-9cv3](https://github.com/advisories/GHSA-ff3f-86qr-9cv3)

@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T01:39:48.159381+00:00",
+  "elapsed_seconds": 489.835048,
+  "answer": "# Reported results: Terminal-Bench 2.1 and DeepSWE v1.1\n\n**Unverified** means I could not establish a sourced score for that exact model and benchmark variant. All figures below are reported results—not independently rerun results.\n\n| Exact model | Terminal-Bench 2.1 | DeepSWE v1.1 |\n|---|---|---|\n| **GPT-6 Sol** | **83.15%** — Vals AI reports this on **Terminal-Bench 2.1**, using **Terminus 2**, max reasoning effort; Vals reports pass@1 averaged over three full trials. **87.7%** — Fidian’s separate result on **Terminal-Bench 2.1**, using **Terminus-2 in Daytona sandboxes**, max effort; Fidian reports pass@1 and 98% task coverage. These are distinct evaluator runs, not duplicate measurements. ([Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1); [Fidian](https://fidian.ai/leaderboard/)) | **68.8%** — OpenAI-reported score for **DeepSWE v1.1**, max effort. **The cited score disclosure does not establish the harness or further run settings**, so I cannot claim it used the leaderboard’s standard harness. ([OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/)) |\n| **GPT-6 Luna** | **73.03%** — Vals AI, **Terminal-Bench 2.1**, Terminus 2, max effort; Vals reports a three-trial average. **79.7%** — Fidian’s separate **Terminal-Bench 2.1** result, using Terminus-2 in Daytona, max effort; pass@1. ([Vals](https://www.vals.ai/models/openai_gpt-6-luna); [Fidian](https://fidian.ai/leaderboard/)) | **66.6%** — OpenAI-reported score for **DeepSWE v1.1**, max effort. The cited score disclosure does not identify the harness or complete run settings. ([OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/)) |\n| **Qwen3.8-27B** | **58.43%** — Vals AI, **Terminal-Bench 2.1**, Terminus 2. **73.0%** — Qwen-reported, **Terminal Bench 2.1**, labelled “Terminus.” Qwen’s cited result does not establish all run settings; the Terminus label alone does not demonstrate the same harness version or configuration as Vals’s Terminus 2 run. ([Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1); [Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B)) | **42.2%** — Qwen-reported, **DeepSWE 1.1**, using **Claude Code** as the harness—not the Claude model—with temperature 1.0, top-p 0.95 and 256K context. ([Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B)) |\n| **GLM-5.3** | **71.54%** — Vals AI, **Terminal-Bench 2.1**, Terminus 2. **83.4%** — Fidian, **Terminal-Bench 2.1**, Terminus-2/Daytona. **88.2%** — Z.ai-reported, **Terminal Bench 2.1**, using Claude Code 2.1.207; temperature 1, top-p 1, max output 65,536 tokens and six-hour timeout. These are separate reported evaluations. ([Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1); [Fidian](https://fidian.ai/leaderboard/); [Z.ai model card](https://huggingface.co/zai-org/GLM-5.3)) | **66.9%** — Z.ai-reported, **DeepSWE v1.1**, using mini-swe-agent; temperature 0.95, top-p 1.0, 400K context and six-hour timeout. **68.96% ± 3.02 points** — Datacurve’s **DeepSWE v1.1** leaderboard result for GLM-5.3 at max effort, using mini-swe-agent. The leaderboard’s uncertainty overlaps Z.ai’s score, so the difference does not establish a meaningful disagreement. ([Z.ai model card](https://huggingface.co/zai-org/GLM-5.3); [DeepSWE leaderboard](https://deepswe.datacurve.ai/)) |\n| **DeepSeek-V4.1-Flash** | **74.53%** — Vals AI, **Terminal-Bench 2.1**, Terminus 2. **90.6%** — DeepSeek-reported, **Terminal-Bench 2.1**, DeepSeek Harness (DSH) Minimal mode, max reasoning effort, 1M context; the card reports three samples per task. DeepSeek also reports **90.3% with mini-swe-agent** and **88.0% with Claude Code** for the same benchmark/model in a scaffold comparison. Those are different harness runs, not conflicting scores for one setup. ([Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1); [DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash)) | **74.2%** — DeepSeek-reported, **DeepSWE v1.1**, using mini-swe-agent, max reasoning effort and 1M context; the card reports eight samples per task. I did not establish a leaderboard result for this **V4.1-Flash** variant. A listed result for **DeepSeek V4 Flash** is a different model variant and should not be substituted. ([DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash); [DeepSWE leaderboard](https://deepswe.datacurve.ai/)) |\n\n## What the evidence supports\n\n- **The Terminal-Bench numbers do not support one simple cross-source ranking.** Each model has at least one score, but the runs mix evaluators and harnesses. Where results disagree, the separate figures above should remain separate: for example, GPT-6 Sol is 83.15% on Vals versus 87.7% on Fidian; GLM-5.3 is 71.54% on Vals, 83.4% on Fidian and 88.2% in Z.ai’s report. These are model-plus-evaluator results, not evidence of one uniquely correct score.\n- **Some within-evaluator comparisons are more informative.** Vals reports Terminus 2 results for all five requested models, so its scores are the closest common-set comparison in this roundup. Even there, they are not a fully controlled comparison of reasoning effort, provider or other model-specific settings. Fidian also gives same-evaluator results for GPT-6 Sol, GPT-6 Luna and GLM-5.3, but uses its own Terminus-2/Daytona setup.\n- **DeepSWE’s common-harness comparison is strongest for GLM-5.3.** Its Z.ai-reported mini-swe-agent score (66.9%) and Datacurve’s mini-swe-agent result (68.96% ± 3.02) are close, with overlapping uncertainty. The other DeepSWE scores come from model-provider reports with incomplete or different harness disclosures: in particular, Qwen reports Claude Code, while DeepSeek reports mini-swe-agent. OpenAI’s reported scores do not specify enough harness detail in the cited disclosure to establish like-for-like comparability.\n- **Do not compare Terminal-Bench 2.1 percentages directly with DeepSWE v1.1 percentages.** They are different benchmarks with different task suites and evaluation setups. The Terminal-Bench release describes an 89-task variant; DeepSWE v1.1 uses 113 tasks. ([Terminal-Bench 2.1](https://www.tbench.ai/news/terminal-bench-2-1); [DeepSWE](https://deepswe.datacurve.ai/))\n- **A controlled head-to-head would require rerunning the exact model variants with the same benchmark version, harness, settings, sandbox and trial protocol.** In particular, DeepSeek’s reported three samples per Terminal-Bench task should not be assumed to match the benchmark repository’s standard submission protocol.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 3935,
+      "cacheRead": 36855,
+      "cacheWrite": 2537,
+      "reasoning": 2070,
+      "totalTokens": 43330,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.0019675,
+        "cacheRead": 0.00036855,
+        "cacheWrite": 0.000317125,
+        "total": 0.002653475
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 471.44387,
+  "first_substantive_seconds": 489.779352,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 489.835048,
+      "started_at": "2026-10-15T01:39:48.159381+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 23,
+    "fetch_calls": 9,
+    "other_tool_calls": 0
+  }
+}

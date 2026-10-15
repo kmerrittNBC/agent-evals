@@ -1,0 +1,114 @@
+{
+  "evaluation_id": "ig-specific-prompts-static-20261014",
+  "created_at": "2026-10-14T21:44:41.992365+00:00",
+  "cutoff": "2026-10-14T17:44:35-04:00",
+  "config_hashes": {
+    "arms": "37eedfe174a6713a915d29bae05a88b46ac13f28988cb474a63bbe24cd9415b1",
+    "tasks": "fe440b0854753522f534b49cce380f78b539db53d06e622a4293807a8356afcd",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {
+    "financial-hq-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-hq-ui",
+      "commit": "534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0",
+      "working_tree_dirty": false
+    },
+    "people-and-orgs-ui-library": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/people-and-orgs-ui-library",
+      "commit": "75b2f8102055a3835fcd0d8849d094f71bfa25ba",
+      "working_tree_dirty": false
+    }
+  },
+  "angular_root": null,
+  "preflight": {
+    "pi-luna": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ]
+    },
+    "copilot-luna": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "GitHub Copilot CLI 1.0.96.",
+      "model": "gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified"
+    },
+    "pi-sol": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ]
+    },
+    "claude-opus": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "2.1.300 (Claude Code)",
+      "model": "claude-opus-5-5",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified"
+    },
+    "antigravity-flash": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "1.3.5",
+      "model": "gemini-3.8-flash-medium",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified"
+    }
+  },
+  "judge_preflight": {
+    "status": "needs_live_probe"
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "ready",
+      "sha256": null
+    },
+    "IG-02": {
+      "status": "ready",
+      "sha256": null
+    },
+    "IG-03": {
+      "status": "ready",
+      "sha256": null
+    },
+    "IG-04": {
+      "status": "ready",
+      "sha256": null
+    },
+    "IG-05": {
+      "status": "ready",
+      "sha256": null
+    }
+  }
+}

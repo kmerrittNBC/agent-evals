@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T01:35:59.084634+00:00",
+  "elapsed_seconds": 228.932114,
+  "answer": "## Results matrix\n\nScores are percentages. Each entry names the **reporter**, **harness and disclosed settings**, and **benchmark variant**. “Not directly comparable” means that a shared benchmark name does not establish a matched evaluation.\n\n| Model | Terminal-Bench **2.1** | DeepSWE **v1.1** |\n|---|---|---|\n| **GPT-6 Luna** | **73.03** — [Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1), Terminus 2, max reasoning, pass@1 on TB 2.1. **79.7** — [Fidian](https://fidian.ai/leaderboard/), Terminus-2 in Daytona, max reasoning, Fidian’s TB-2.1 pass@1 run; its row has 98% task coverage. **Different runs; not directly comparable.** | **66.6** — [OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/), max reasoning, DeepSWE v1.1; a complete agent configuration is not disclosed there. **67.0 ± 6.8** — [Mercor](https://www.mercor.com/apex/oss-benchmarks/oss-deep-swe-leaderboard/), mini-swe-agent, up to 500 steps and two hours, DeepSWE v1.1 pass@1. **Different runs.** |\n| **GPT-6 Sol** | **83.15** — [Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1), Terminus 2, max reasoning, TB-2.1 pass@1. **87.7** — [Fidian](https://fidian.ai/leaderboard/), Terminus-2/Daytona, max reasoning, its TB-2.1 pass@1 run; 98% task coverage. **Different runs.** | **68.8** — [OpenAI](https://openai.com/index/introducing-gpt-6-sol-and-luna/), max reasoning, DeepSWE v1.1; complete agent configuration not disclosed there. **70.5 ± 7.2** — [Mercor](https://www.mercor.com/apex/oss-benchmarks/oss-deep-swe-leaderboard/), mini-swe-agent, up to 500 steps/two hours, DeepSWE v1.1 pass@1. **Different runs.** |\n| **Qwen3.8-27B** | **73.0** — [Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B), row labeled *Terminal-Bench 2.1 (Terminus)*; further run settings are not specified for that row. **58.43** — [Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1), Terminus 2, TB-2.1 pass@1. **Different Terminus runs; not a matched comparison.** A Fidian score for **27B** is **unverified**; its Qwen3.8-Max row is another model. | **42.2** — [Qwen model card](https://huggingface.co/Qwen/Qwen3.8-27B), Claude Code, temperature 1.0, top-p 0.95, 256K context, DeepSWE 1.1. A 27B result from the [Datacurve board](https://deepswe.datacurve.ai/) or [Mercor](https://www.mercor.com/apex/oss-benchmarks/oss-deep-swe-leaderboard/) is **unverified**; their Qwen3.8-Max entries must not be substituted. |\n| **GLM-5.3** | **88.2** — [Z.ai model card](https://huggingface.co/zai-org/GLM-5.3), Claude Code 2.1.207, temperature 1.0, top-p 1, 65,536 max new tokens, six-hour timeout, TB 2.1. **71.54** — [Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1), Terminus 2, TB-2.1 pass@1. **83.4** — [Fidian](https://fidian.ai/leaderboard/), Terminus-2/Daytona, its TB-2.1 pass@1 run. **Not directly comparable across reporters.** | **66.9** — [Z.ai model card](https://huggingface.co/zai-org/GLM-5.3), mini-swe-agent, temperature 0.95, top-p 1, 400K context, six-hour timeout, DeepSWE v1.1. **68.96** — [Datacurve leaderboard](https://deepswe.datacurve.ai/), mini-swe-agent, max effort, 113/113 DeepSWE v1.1 tasks. **70.5 ± 6.3** — [Mercor](https://www.mercor.com/apex/oss-benchmarks/oss-deep-swe-leaderboard/), mini-swe-agent, up to 500 steps/two hours, DeepSWE v1.1 pass@1. **Separate runs despite the shared agent name.** |\n| **DeepSeek V4.1 Flash** | **90.6** — [DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/README.md), DeepSeek Harness Minimal, maximum reasoning (`reasoning_effort=100`), TB-2.1 pass@1. Its scaffold comparison specifies 1M context, temperature 1.0, top-p 0.95, up to 500 steps, no network and three samples per task. **74.53** — [Vals](https://www.vals.ai/benchmarks/terminal-bench-2-1), Terminus 2, TB-2.1 pass@1. **72.4** — [Fidian](https://fidian.ai/leaderboard/), Terminus-2/Daytona, max reasoning, its TB-2.1 pass@1 run (99% coverage). **Not directly comparable across harnesses/runs.** | **74.2** — [DeepSeek model card](https://huggingface.co/deepseek-ai/DeepSeek-V4.1-Flash/blob/main/README.md), **mini-SWE**, maximum reasoning; its scaffold comparison specifies 1M context, temperature 1.0, top-p 0.95, up to 500 steps and eight samples per task, DeepSWE v1.1 resolved. The same card reports **72.6 with DeepSeek Harness Minimal** on that variant—*a different scaffold*, not a correction to 74.2. **71.7 ± 6.3** — [Mercor](https://www.mercor.com/apex/oss-benchmarks/oss-deep-swe-leaderboard/), mini-swe-agent, up to 500 steps/two hours, DeepSWE v1.1 pass@1. **Separate runs.** |\n\n**What the evidence supports:** Within **Vals’ TB-2.1/Terminus 2 board**, the reported order is Sol 83.15 > DeepSeek 74.53 > Luna 73.03 > GLM-5.3 71.54 > Qwen3.8-27B 58.43. Within **Fidian’s TB-2.1 run**, Sol 87.7 > GLM-5.3 83.4 > Luna 79.7 > DeepSeek 72.4; it provides no verified 27B entry. The changed ordering is a reason *not* to assemble a ranking from the highest score reported for each model.\n\nFor **DeepSWE v1.1**, Mercor supplies the closest shared-run comparison for four of the five: DeepSeek 71.7, Sol and GLM-5.3 both 70.5, and Luna 67.0, with the reported uncertainty ranges above. It does **not** establish that those small differences are meaningful, nor does it include a verified Qwen3.8-27B score. OpenAI’s, Qwen’s, Z.ai’s and DeepSeek’s vendor figures are useful **attributed results**, not one controlled five-model test. In particular, neither *Terminal-Bench 2.1* nor *DeepSWE v1.1* should be confused with Fidian’s separate **TB-fn** variant or with scores for Qwen3.8-Max or GLM-5.3 Flash.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 2025,
+      "cacheRead": 40887,
+      "cacheWrite": 1708,
+      "reasoning": 144,
+      "totalTokens": 44623,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.02025,
+        "cacheRead": 0.008177400000000001,
+        "cacheWrite": 0.00427,
+        "total": 0.0327034
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 215.245874,
+  "first_substantive_seconds": 228.874127,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 228.932114,
+      "started_at": "2026-10-15T01:35:59.084634+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 18,
+    "fetch_calls": 8,
+    "other_tool_calls": 0
+  }
+}

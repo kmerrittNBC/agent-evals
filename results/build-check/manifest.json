@@ -1,0 +1,130 @@
+{
+  "evaluation_id": "build-check",
+  "created_at": "2026-10-14T18:38:38.482517+00:00",
+  "cutoff": "2026-10-14T17:00:00-04:00",
+  "config_hashes": {
+    "arms": "b55bd4390f6114676648121c35da2ac26dcb45c1921723e7eb546cb4c6b9e098",
+    "tasks": "00c94cc1c459c7684e6052d147394f5118205366acbf0a912576959206cebae2",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {},
+  "preflight": {
+    "pi-luna": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "copilot-luna": {
+      "status": "unavailable",
+      "reason": "Search and page fetch were not both observed in headless events",
+      "version": "GitHub Copilot CLI 1.0.96.",
+      "model": "gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "probe_tool_names": [
+        "web_fetch"
+      ]
+    },
+    "opencode-luna": {
+      "status": "unavailable",
+      "reason": "opencode not found in PATH",
+      "version": null
+    },
+    "pi-sol": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "claude-opus": {
+      "status": "unavailable",
+      "reason": "claude not found in PATH",
+      "version": null
+    },
+    "antigravity-flash": {
+      "status": "unavailable",
+      "reason": "agy not found in PATH",
+      "version": null
+    }
+  },
+  "judge_preflight": {
+    "status": "ready",
+    "reason": null,
+    "version": "codex-cli 0.158.0"
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "judge evidence pack missing",
+      "sha256": null
+    },
+    "IG-02": {
+      "status": "judge evidence pack missing",
+      "sha256": null
+    },
+    "IG-03": {
+      "status": "judge evidence pack missing",
+      "sha256": null
+    },
+    "IG-04": {
+      "status": "judge evidence pack missing",
+      "sha256": null
+    },
+    "IG-05": {
+      "status": "judge evidence pack missing",
+      "sha256": null
+    }
+  }
+}

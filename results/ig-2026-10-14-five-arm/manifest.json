@@ -1,0 +1,263 @@
+{
+  "evaluation_id": "ig-2026-10-14-five-arm",
+  "created_at": "2026-10-14T19:34:16.715535+00:00",
+  "cutoff": "2026-10-14T15:34:07-04:00",
+  "config_hashes": {
+    "arms": "37eedfe174a6713a915d29bae05a88b46ac13f28988cb474a63bbe24cd9415b1",
+    "tasks": "959ddad8a68609d46104d788a2b35b30e1e82e49d31299e1da21dfa83b253e24",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {
+    "financial-hq-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-hq-ui",
+      "commit": "534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0",
+      "working_tree_dirty": false
+    },
+    "other-angular": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-product-management-ui",
+      "commit": "748fa3c1296396cac3e2f9035d2bb8434a6339db",
+      "working_tree_dirty": false
+    },
+    "sportsengine/membership_ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/membership_ui",
+      "commit": "ab1c6d00c9f98922d39c5a17a8e83030a547ee71",
+      "working_tree_dirty": false,
+      "angular_version_spec": "19.2.19"
+    },
+    "sportsengine/payments": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/payments",
+      "commit": "f3ffd452232e27bd1e2a7dbec3203b6fa4a7b668",
+      "working_tree_dirty": false,
+      "angular_version_spec": "8.1.2"
+    },
+    "sportsengine/people-and-orgs-ui-library": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/people-and-orgs-ui-library",
+      "commit": "75b2f8102055a3835fcd0d8849d094f71bfa25ba",
+      "working_tree_dirty": false,
+      "angular_version_spec": "21.2.19"
+    },
+    "sportsengine/se-commerce-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-commerce-ui",
+      "commit": "5b4037f60e70085cc5b534789576475034feb1e4",
+      "working_tree_dirty": false,
+      "angular_version_spec": "^21.2.17"
+    },
+    "sportsengine/se-fe-angular-services": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-fe-angular-services",
+      "commit": "4dbc4c67137d9788f5339ea362ac61a62c587d68",
+      "working_tree_dirty": false,
+      "angular_version_spec": "~20.3.25"
+    },
+    "sportsengine/se-financial-admin-ui-library": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-admin-ui-library",
+      "commit": "ec94a1b92f328592141af94906f6fab64c764f13",
+      "working_tree_dirty": false,
+      "angular_version_spec": "^21.2.0"
+    },
+    "sportsengine/se-financial-hq-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-hq-ui",
+      "commit": "534bc80bd02d02d8ab0c7008ab64cf9acd4d1ca0",
+      "working_tree_dirty": false,
+      "angular_version_spec": "22.1.7"
+    },
+    "sportsengine/se-financial-reports-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-reports-ui",
+      "commit": "e76c2c97485c36d1a311155e7ac3e0f4fa766a36",
+      "working_tree_dirty": true,
+      "angular_version_spec": "^20.3.16"
+    },
+    "sportsengine/se-financial-settings-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-financial-settings-ui",
+      "commit": "d68d6d9d06552c76af4c009e653d024432e6c380",
+      "working_tree_dirty": false,
+      "angular_version_spec": "20.3.26"
+    },
+    "sportsengine/se-payments-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-payments-ui",
+      "commit": "5ba24790accddcf853b5f2c6120da74a771f0ead",
+      "working_tree_dirty": false,
+      "angular_version_spec": "20.3.18"
+    },
+    "sportsengine/se-product-management-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-product-management-ui",
+      "commit": "748fa3c1296396cac3e2f9035d2bb8434a6339db",
+      "working_tree_dirty": false,
+      "angular_version_spec": "^21.2.0"
+    },
+    "sportsengine/se-store-ui": {
+      "path": "/Users/206768009@bwt3.com/sportsengine/se-store-ui",
+      "commit": "e6609707b935a55fa052b08e45c5e4a6ea1605e5",
+      "working_tree_dirty": false,
+      "angular_version_spec": "^19.2.20"
+    }
+  },
+  "angular_root": {
+    "path": "/Users/206768009@bwt3.com/sportsengine",
+    "repo_names": [
+      "sportsengine/membership_ui",
+      "sportsengine/payments",
+      "sportsengine/people-and-orgs-ui-library",
+      "sportsengine/se-commerce-ui",
+      "sportsengine/se-fe-angular-services",
+      "sportsengine/se-financial-admin-ui-library",
+      "sportsengine/se-financial-hq-ui",
+      "sportsengine/se-financial-reports-ui",
+      "sportsengine/se-financial-settings-ui",
+      "sportsengine/se-payments-ui",
+      "sportsengine/se-product-management-ui",
+      "sportsengine/se-store-ui"
+    ]
+  },
+  "preflight": {
+    "pi-luna": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "copilot-luna": {
+      "status": "unavailable",
+      "reason": "Search and page fetch were not both observed in headless events",
+      "version": "GitHub Copilot CLI 1.0.96.",
+      "model": "gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "probe_tool_names": [
+        "web_fetch"
+      ]
+    },
+    "pi-sol": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.0.4",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-mcp-adapter",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-mcp-adapter",
+        "  npm:pi-web-search",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch",
+        "    /Users/206768009@bwt3.com/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "claude-opus": {
+      "status": "ready",
+      "reason": null,
+      "version": "2.1.300 (Claude Code)",
+      "model": "claude-opus-5-5",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cache_creation",
+        "cache_creation_input_tokens",
+        "cache_read_input_tokens",
+        "fallback_credit",
+        "inference_geo",
+        "input_tokens",
+        "iterations",
+        "output_tokens",
+        "output_tokens_details",
+        "server_tool_use",
+        "service_tier",
+        "speed"
+      ],
+      "probe_tool_names": [
+        "WebSearch",
+        "WebFetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "antigravity-flash": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.3.5",
+      "model": "gemini-3.8-flash-medium",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cache_read_tokens",
+        "input_tokens",
+        "output_tokens",
+        "thinking_tokens",
+        "total_tokens"
+      ],
+      "probe_tool_names": [
+        "search_web",
+        "read_url_content",
+        "view_file"
+      ],
+      "usage_classification": "measured"
+    }
+  },
+  "judge_preflight": {
+    "status": "ready",
+    "reason": null,
+    "version": "codex-cli 0.158.0"
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "ready",
+      "sha256": "de5c392748b5bb4246ece0dea8fd5af4885fc20159f8b68a2a62ececfd18544b"
+    },
+    "IG-02": {
+      "status": "ready",
+      "sha256": "f56988965cedec21b9badfc32568dab212c924d9e1be8265aaac07775069a27c"
+    },
+    "IG-03": {
+      "status": "ready",
+      "sha256": "040b1bc1dcdb203c82030d728ba70e8a4b80bf71486584378e530daf7b756438"
+    },
+    "IG-04": {
+      "status": "ready",
+      "sha256": "52aa193a4c62361bc7a49d013f7ce302577182f2f5fad7bc23e92dd339040167"
+    },
+    "IG-05": {
+      "status": "ready",
+      "sha256": "ca21da97c71510b4787607771c64668e108803f79e8a0bd503a354073f11ca88"
+    }
+  }
+}

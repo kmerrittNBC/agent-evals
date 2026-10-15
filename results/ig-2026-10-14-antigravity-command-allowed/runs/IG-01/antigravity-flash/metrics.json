@@ -1,0 +1,39 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "antigravity-flash",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T21:14:47.788423+00:00",
+  "elapsed_seconds": 121.539458,
+  "answer": "Here is the benchmark matrix comparing **Terminal-Bench** and **DeepSWE** results across the requested models:\n\n### Benchmark Comparison Matrix\n\n| Model | Provider / Architecture | Terminal-Bench 2.1 | DeepSWE v1.1 | Terminal-Bench 4.0 *(if evaluated)* |\n| :--- | :--- | :---: | :---: | :---: |\n| **DeepSeek V4.1 Flash** | DeepSeek (Sparse MoE / Causal Enc-Dec) | **90.6%** | **74.2%** | — |\n| **GLM-5.3** | Zhipu AI / Z.ai (MoE) | **88.2%** | **66.9%** | 41.8% |\n| **GPT-6 Sol** | OpenAI (Mid-tier Reasoning) | **83.15% – 85.4%** | **68.8%** *(75.2% on 6.1)* | 49.4% *(58.2% on 6.1)* |\n| **GPT-6 Luna** | OpenAI (Lightweight / High-Throughput) | **73.0%** | **66.6%** | 16.4% |\n| **Qwen3.8-27B** | Alibaba (Dense 27B / Hybrid DeltaNet) | **73.0%** | **42.2%** | — |\n\n---\n\n### Key Takeaways & Context\n\n* **DeepSeek V4.1 Flash**: Leads both benchmarks among this group, scoring **90.6%** on Terminal-Bench 2.1 and **74.2%** on DeepSWE v1.1, demonstrating strong efficiency-to-performance scaling with its sparse activation architecture.\n* **GLM-5.3**: Demonstrates substantial post-training gains on long-horizon terminal and systems engineering tasks, reaching **88.2%** on Terminal-Bench 2.1 and **66.9%** on DeepSWE v1.1.\n* **GPT-6 Sol**: Acts as OpenAI's primary coding workhorse, achieving **83.15%–85.4%** on Terminal-Bench 2.1 and **68.8%** on DeepSWE v1.1 (with the updated **GPT-6.1 Sol** reaching **75.2%** on DeepSWE v1.1 and **58.2%** on Terminal-Bench 4.0).\n* **GPT-6 Luna**: Designed for high throughput and lower inference cost; achieves **73.0%** on Terminal-Bench 2.1 and holds up well on repository-level code generation with **66.6%** on DeepSWE v1.1 at maximum reasoning effort.\n* **Qwen3.8-27B**: Performs strongly on command-line agent tasks for an open-weight dense 27B model (**73.0%** on Terminal-Bench 2.1), while showing expected limits on multi-file, long-horizon software refactoring (**42.2%** on DeepSWE v1.1).",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 102813,
+      "output_tokens": 3764,
+      "thinking_tokens": 1871,
+      "cache_read_tokens": 370212,
+      "total_tokens": 106577
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 116.685936,
+  "first_substantive_seconds": 117.652554,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 121.539458,
+      "started_at": "2026-10-14T21:14:47.788423+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 17,
+    "fetch_calls": 0,
+    "other_tool_calls": 1
+  }
+}

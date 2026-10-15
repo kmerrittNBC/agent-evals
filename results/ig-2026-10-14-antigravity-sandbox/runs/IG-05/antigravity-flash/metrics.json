@@ -1,0 +1,39 @@
+{
+  "task_id": "IG-05",
+  "arm_id": "antigravity-flash",
+  "status": "failed",
+  "reason": "No final answer parsed from events",
+  "started_at": "2026-10-14T21:11:09.770223+00:00",
+  "elapsed_seconds": 27.19197,
+  "answer": "",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 57595,
+      "output_tokens": 852,
+      "thinking_tokens": 509,
+      "cache_read_tokens": 0,
+      "total_tokens": 58447
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": null,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": "fb0fcbe1c2924de80d9c869e5c0ff67e9a2c2381036af70da56365e0c46170d9",
+  "snapshot_digest_after": "fb0fcbe1c2924de80d9c869e5c0ff67e9a2c2381036af70da56365e0c46170d9",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 27.19197,
+      "started_at": "2026-10-14T21:11:09.770223+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 1,
+    "fetch_calls": 1,
+    "other_tool_calls": 1
+  }
+}

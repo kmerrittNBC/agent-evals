@@ -1,0 +1,16 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "antigravity-flash",
+  "status": "unavailable",
+  "reason": "Live probe failed or produced no answer",
+  "started_at": "2026-10-14T21:52:08.676843+00:00",
+  "elapsed_seconds": 0,
+  "answer": "",
+  "usage": {
+    "classification": "unavailable",
+    "source": null,
+    "raw": null
+  },
+  "first_visible_seconds": null,
+  "first_substantive_seconds": null
+}

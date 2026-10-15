@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T20:02:23.704678+00:00",
+  "elapsed_seconds": 17.018771,
+  "answer": "I can't build this matrix yet. Web search and web fetch were both blocked by this session's permissions, so I couldn't look up any of the scores.\n\nI also can't fill it in from memory. My knowledge goes up to June 2026, and I don't have reliable Terminal-Bench or DeepSWE numbers for GPT-6 Luna, GPT-6 Sol, Qwen3.8-27B, GLM-5.3 or DeepSeek V4.1 Flash. Some of them were probably released after that date. Any numbers I gave you now would be guesses that look like real results, so I've left the table empty:\n\n| Model | Terminal-Bench | DeepSWE |\n|---|---|---|\n| GPT-6 Luna | — | — |\n| GPT-6 Sol | — | — |\n| Qwen3.8-27B | — | — |\n| GLM-5.3 | — | — |\n| DeepSeek V4.1 Flash | — | — |\n\nThere are two ways to get it filled in:\n1. **Allow WebSearch/WebFetch** for this session and ask again. I'll pull the numbers from the Terminal-Bench leaderboard (tbench.ai), the DeepSWE results and each vendor's model card or release post. I'll also note which Terminal-Bench version (1.0 or 2.0) and which agent harness each score comes from, because those change the numbers a lot.\n2. **Paste the sources** (leaderboard pages, release posts) here, and I'll turn them into the matrix with those same details noted.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 6,
+      "cache_creation_input_tokens": 2649,
+      "cache_read_input_tokens": 18383,
+      "output_tokens": 1221,
+      "output_tokens_details": {
+        "thinking_tokens": 178
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 2649,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 522,
+          "cache_read_input_tokens": 7446,
+          "cache_creation_input_tokens": 329,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 329
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 16.821718,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 17.018771,
+      "started_at": "2026-10-14T20:02:23.704678+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 0
+  }
+}
