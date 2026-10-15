@@ -1,0 +1,16 @@
+{
+  "task_id": "IG-04",
+  "arm_id": "copilot-luna",
+  "status": "unavailable",
+  "reason": "Search and page fetch were not both observed in headless events",
+  "started_at": "2026-10-14T20:54:11.637939+00:00",
+  "elapsed_seconds": 0,
+  "answer": "",
+  "usage": {
+    "classification": "unavailable",
+    "source": null,
+    "raw": null
+  },
+  "first_visible_seconds": null,
+  "first_substantive_seconds": null
+}

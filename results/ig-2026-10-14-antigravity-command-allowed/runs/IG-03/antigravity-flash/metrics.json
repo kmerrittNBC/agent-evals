@@ -1,0 +1,39 @@
+{
+  "task_id": "IG-03",
+  "arm_id": "antigravity-flash",
+  "status": "failed",
+  "reason": "Harness exited 3",
+  "started_at": "2026-10-14T21:18:32.625489+00:00",
+  "elapsed_seconds": 30.355959,
+  "answer": "",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 72332,
+      "output_tokens": 952,
+      "thinking_tokens": 465,
+      "cache_read_tokens": 0,
+      "total_tokens": 73284
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": null,
+  "first_substantive_seconds": null,
+  "snapshot_digest_before": "02d2ee8c7e1479315603a894230b1c2e0e130e9e8110203f0650a892041994c0",
+  "snapshot_digest_after": "02d2ee8c7e1479315603a894230b1c2e0e130e9e8110203f0650a892041994c0",
+  "phases": [
+    {
+      "exit_code": 3,
+      "timed_out": false,
+      "elapsed_seconds": 30.355959,
+      "started_at": "2026-10-14T21:18:32.625489+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 2,
+    "fetch_calls": 0,
+    "other_tool_calls": 3
+  }
+}

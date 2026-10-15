@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-05",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T00:20:11.895710+00:00",
+  "elapsed_seconds": 115.945493,
+  "answer": "I recommend **Node 24 LTS for both local development and CI, pinned to 24.22.0**. The repo's current `.nvmrc` (24.16.0) is already inside every tool's supported range, so nothing is broken. But it is an old patch, and the CI setup and project docs need cleaning up.\n\n## Documented requirements\n\n| Component | Node.js | TypeScript | Source |\n|---|---|---|---|\n| Angular 22.1.7 (`@angular/core`, `compiler-cli`) | `^22.22.3 \\|\\| ^24.15.0 \\|\\| >=26.0.0` | `>=6.0 <6.1` | npm `engines`/`peerDependencies`; angular.dev |\n| Angular CLI/build 22.1.8 | same | `>=6.0 <6.1` | `@angular/build` package.json |\n| Nx 23.x | 26.x, 24.x, `^22.12.0` | no Nx 23 TypeScript matrix; the Nx 23.1 release post claims \"full support for TypeScript 6\" | nx.dev Node matrix, 23.1 release post |\n| `@nx/angular` 23.2.1 | no `engines` | no TypeScript peer; Angular devkit `>=20 <23` | package.json |\n| Nx 23.2.1 ↔ Angular 22.1 | — | — | Nx matrix: Angular `~22.1.0` needs Nx `>=23.2.0` ✅ |\n| Playwright 1.60 | docs: \"latest 22.x, 24.x or 26.x\"; `engines`: `>=18` | — | playwright.dev; package.json |\n\nNode release status on 2026-10-14:\n- **Node 22:** maintenance LTS, end of life 2027-04-30.\n- **Node 24:** active LTS (latest is 24.22.0). It moves to maintenance on 2026-10-20 and reaches end of life on 2028-04-30.\n- **Node 26:** still \"Current\". It becomes LTS on 2026-10-28.\n\nTypeScript 6.0.3 satisfies Angular's peer range. TypeScript 7 does not: Angular closed the request to support it ([#69704](https://github.com/angular/angular/issues/69704)) as \"not planned\" for 22.x because it needs a compiler refactor.\n\n## Gaps and conflicting documentation\n\n1. **Angular's table has no 22.1 row.** angular.dev only lists `22.0.x`. The published 22.1.7 packages carry the same ranges, so the package metadata is the real source for 22.1.\n2. **`^26.0.0` vs `>=26.0.0`.** angular.dev says `^26.0.0`, but the package `engines` field says `>=26.0.0`. This only matters for Node 27 and later.\n3. **The Node 22 floor differs.** Nx accepts `^22.12.0`, but Angular needs `^22.22.3`. The stricter Angular floor is the one that applies.\n4. **Playwright contradicts itself.** Its `engines` field says `>=18`, but its docs say \"latest 22/24/26\". Node 18 and 20 are end-of-life and Angular rejects them anyway, so follow the docs. Note that 1.60 crashes with an unclear error on old Node instead of warning (fixed for 1.61, [#41045](https://github.com/microsoft/playwright/issues/41045)).\n5. **Nx documents no TypeScript range for 23.x.** No Nx package declares a TypeScript peer, so Angular's `>=6.0 <6.1` is the effective limit.\n6. **Some Nx pages couldn't be read directly.** The Nx Node matrix page returned empty when fetched, so its Nx 23 row comes from search results. Nx 23.3 shipped on Oct 7, so check that page again before relying on it.\n\n## Problems found in the repo\n\n- **`AGENTS.md:35` is out of date.** It says `nvm use` selects Node v20.20.0. Node 20 is end-of-life and Angular 22 won't run on it, so anyone following that file would get a broken setup.\n- **One CI job never sets the Node version.** In `.github/workflows/pull-request.yml`, the `lint-test-build` job (lines 44–69) runs lint and tests without `actions/setup-node`. It uses whatever Node the runner image ships, not `.nvmrc`. It also restores `node_modules` from cache with no install if the cache misses. The `setup` job uses `setup-node@v3`; the other workflows use v4.\n- **`@types/node` is 18.16.9.** That doesn't match a Node 24 runtime, so type-checking can disagree with the APIs actually available.\n- **`nx.json:15` points at a missing file.** `sharedGlobals` references `.github/workflows/ci.yml`, which doesn't exist, so CI config changes never invalidate the Nx cache.\n- **No `engines` field.** `package.json` doesn't declare a Node range, so nothing stops installs on an unsupported version.\n\n## Recommendation\n\n1. **Set `.nvmrc` to `24.22.0`.** Node 24 is the only line that every tool documents and that is LTS today. It is the middle of Angular's range and is supported until April 2028. Pinning an exact version keeps local and CI identical. Moving to the latest patch matches Playwright's \"latest 24.x\" wording and picks up security fixes.\n2. **Don't adopt Node 26 yet.** It isn't LTS until Oct 28, and Node itself discourages non-LTS lines for production. Re-evaluate in Q1 2027 once Nx and Playwright have shipped updates against Node 26 LTS.\n3. **Don't use Node 22.** It is supported, but only from 22.22.3 and only until April 2027, so it would force another upgrade soon.\n4. **Supporting fixes:**\n   - Add `setup-node` with `node-version-file: '.nvmrc'` to the `lint-test-build` job, and move all workflows to `setup-node@v4`.\n   - Add `\"engines\": { \"node\": \"^24.15.0\" }` to `package.json`.\n   - Bump `@types/node` to `^24`.\n   - Fix `AGENTS.md`.\n   - Point `sharedGlobals` at the real workflow files.\n   - Keep TypeScript on `~6.0.3` until an Angular release widens its peer range.\n\nI haven't changed any files. I can make these edits if you want.\n\nSources:\n- [Angular version compatibility](https://angular.dev/reference/versions)\n- [Angular issue #69704](https://github.com/angular/angular/issues/69704)\n- [@angular/core@22.1.7](https://unpkg.com/@angular/core@22.1.7/package.json), [@angular/compiler-cli@22.1.7](https://unpkg.com/@angular/compiler-cli@22.1.7/package.json), [@angular/build@22.1.8](https://unpkg.com/@angular/build@22.1.8/package.json)\n- [Nx and Angular Versions](https://nx.dev/docs/kb/angular-nx-version-matrix)\n- [Nx, Node.js and TypeScript Compatibility](https://nx.dev/using-nx/nx-nodejs-typescript-version-matrix)\n- [Nx 23.1 release post](https://nx.dev/blog/nx-23-1-release)\n- [@nx/angular@23.2.1](https://unpkg.com/@nx/angular@23.2.1/package.json), [nx@23.2.1](https://unpkg.com/nx@23.2.1/package.json), [@nx/js@23.2.1](https://unpkg.com/@nx/js@23.2.1/package.json)\n- [Playwright system requirements](https://playwright.dev/docs/intro)\n- [playwright-core@1.60.0](https://unpkg.com/playwright-core@1.60.0/package.json)\n- [Playwright issue #41045](https://github.com/microsoft/playwright/issues/41045)\n- [Node.js release schedule](https://github.com/nodejs/Release)\n- [Node.js previous releases](https://nodejs.org/en/about/previous-releases)",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 18,
+      "cache_creation_input_tokens": 29178,
+      "cache_read_input_tokens": 180184,
+      "output_tokens": 8340,
+      "output_tokens_details": {
+        "thinking_tokens": 1579
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 29178,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 3395,
+          "cache_read_input_tokens": 33058,
+          "cache_creation_input_tokens": 1246,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 1246
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 59.831118,
+  "first_substantive_seconds": 115.706072,
+  "snapshot_digest_before": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "snapshot_digest_after": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 115.945493,
+      "started_at": "2026-10-15T00:20:11.895710+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 5,
+    "fetch_calls": 20,
+    "other_tool_calls": 7
+  }
+}

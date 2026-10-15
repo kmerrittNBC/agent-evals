@@ -1,0 +1,66 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "claude-opus",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T20:08:37.496228+00:00",
+  "elapsed_seconds": 57.014587,
+  "answer": "I found every DeepSWE score, but the Terminal-Bench numbers can't go in one column. The labs report different versions of it (2.1, 3.0 and 4.0), and their scales are very different: 2.1 scores are in the 70s–90s, while 3.0 and 4.0 scores are mostly below 45. So the matrix gives each version its own column.\n\n| Model | DeepSWE v1.1 | Terminal-Bench 2.1 | Terminal-Bench 3.0 | Terminal-Bench 4.0 |\n|---|---|---|---|---|\n| **GPT-6 Sol** | 68.8 (max effort)¹ | 83.2 (Vals) | — | 44.4 (Vals)² |\n| **GPT-6 Luna** | 66.6 (max effort)¹ | 73.0 (Vals) | — | 13.6 (Vals)² |\n| **Qwen3.8-27B** | 42.2 | 73.0 | — | — |\n| **GLM-5.3** | 66.9 | — | 28.3 | — |\n| **DeepSeek V4.1 Flash** | **74.2** | **90.6** | 30.0 | 31.2³ |\n\n\"—\" means I couldn't find a published score.\n\n**Where the numbers come from and what to watch for:**\n- **DeepSWE:** every score is reported by the company that made the model, and no independent group has re-run them under a single setup. The DeepSWE results show both GPT-6 models are very sensitive to reasoning effort:\n  - Sol: 37.2 / 56.6 / 65.3 / 66.6 / 68.8 (low, medium, high, xhigh, max)\n  - Luna: 2.4 / 44.5 / 59.3 / 61.3 / 66.6\n- **Terminal-Bench for GPT-6:** OpenAI didn't publish any Terminal-Bench scores for Sol or Luna. The figures above come from Vals AI's independent runs at max effort.\n- **² Vals disagrees with itself:** its Sept 22 update lists lower Terminal-Bench 4.0 scores than its main table: Sol 34.3, Luna 9.6.\n- **³** The DeepSeek 4.0 score comes from a single secondary source, so treat it as soft. Its 2.1 and DeepSWE scores match DeepSeek's technical report and NVIDIA's model card.\n- **Qwen3.8-27B:** the numbers come from Alibaba's model card, passed along by blogs. A widely shared claim that it \"beats Opus on DeepSWE\" is wrong: the Opus cell in that table is blank.\n- **Possible mix-up:** GPT-6.1 Sol is a different model. It reportedly scores about 75.2 on DeepSWE, so check which Sol you need.\n\n**Takeaway:** on the numbers available, DeepSeek V4.1 Flash leads both benchmarks. GPT-6 Sol is next, with GLM-5.3 and GPT-6 Luna close together on DeepSWE. Qwen3.8-27B trails, though it's much smaller than the others. Even so, all the DeepSWE scores and most of the Terminal-Bench scores are self-reported, and the labs used different test setups, so the comparison is rough.\n\nSources:\n- [Emergent – GPT-6 Sol benchmarks](https://emergent.sh/learn/gpt-6-sol-benchmarks)\n- [Kingy AI – GPT-6 Sol & Luna](https://kingy.ai/blog/gpt-6-sol-luna-specs-benchmarks-pricing-comparison/)\n- [Vals AI – GPT-6 Luna](https://www.vals.ai/models/openai_gpt-6-luna)\n- [Vals AI – GPT-6 Sol](https://www.vals.ai/models/openai_gpt-6-sol)\n- [Artificial Analysis – GPT-6 Sol and Luna](https://artificialanalysis.ai/articles/gpt-6-sol-and-luna-push-the-cost-efficiency-frontier)\n- [Emergent – GPT-6.1 Sol](https://emergent.sh/learn/gpt-6-1-sol-benchmarks)\n- [Northflank – Qwen3.8-27B](https://northflank.com/blog/qwen3-8-27b-performance-benchmarks-gpu-requirements-and-how-to-run-it)\n- [Developers Digest – Qwen3.8-27B vs Opus](https://www.developersdigest.tech/blog/qwen-3-8-27b-local-agentic-coding-2026)\n- [Codersera – Qwen3.8-27B](https://codersera.com/blog/qwen-3-8-27b-complete-guide-2026/)\n- [Z.ai – GLM-5.3 docs](https://docs.z.ai/guides/llm/glm-5.3)\n- [MorphLLM – GLM-5.3](https://www.morphllm.com/glm-5-3)\n- [Emergent – GLM 5.3](https://emergent.sh/learn/glm-5-3-benchmarks)\n- [DeepSeek-V4.1-Flash technical report (arXiv)](https://arxiv.org/pdf/2609.19969)\n- [NVIDIA – DeepSeek-V4.1-Flash model card](https://build.nvidia.com/deepseek-ai/deepseek-v4.1-flash/modelcard)\n- [MindStudio – DeepSeek V4.1 Flash](https://www.mindstudio.ai/blog/deepseek-v4-1-flash-benchmarks)\n- [MorphLLM – DeepSeek V4](https://www.morphllm.com/deepseek-v4)",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input_tokens": 10,
+      "cache_creation_input_tokens": 12173,
+      "cache_read_input_tokens": 56171,
+      "output_tokens": 3796,
+      "output_tokens_details": {
+        "thinking_tokens": 498
+      },
+      "server_tool_use": {
+        "web_search_requests": 0,
+        "web_fetch_requests": 0
+      },
+      "service_tier": "standard",
+      "cache_creation": {
+        "ephemeral_1h_input_tokens": 12173,
+        "ephemeral_5m_input_tokens": 0
+      },
+      "inference_geo": "global",
+      "iterations": [
+        {
+          "input_tokens": 2,
+          "output_tokens": 2006,
+          "cache_read_input_tokens": 17071,
+          "cache_creation_input_tokens": 549,
+          "cache_creation": {
+            "ephemeral_5m_input_tokens": 0,
+            "ephemeral_1h_input_tokens": 549
+          },
+          "type": "message"
+        }
+      ],
+      "speed": "standard",
+      "fallback_credit": null
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 1.953856,
+  "first_substantive_seconds": 56.794849,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 57.014587,
+      "started_at": "2026-10-14T20:08:37.496228+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 5,
+    "fetch_calls": 6,
+    "other_tool_calls": 0
+  }
+}

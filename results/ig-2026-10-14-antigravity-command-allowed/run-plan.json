@@ -1,0 +1,25 @@
+{
+  "seed": 20261014,
+  "slots": [
+    {
+      "task_id": "IG-01",
+      "arm_id": "antigravity-flash"
+    },
+    {
+      "task_id": "IG-02",
+      "arm_id": "antigravity-flash"
+    },
+    {
+      "task_id": "IG-03",
+      "arm_id": "antigravity-flash"
+    },
+    {
+      "task_id": "IG-04",
+      "arm_id": "antigravity-flash"
+    },
+    {
+      "task_id": "IG-05",
+      "arm_id": "antigravity-flash"
+    }
+  ]
+}

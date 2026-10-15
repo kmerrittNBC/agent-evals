@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-02",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T00:04:08.742995+00:00",
+  "elapsed_seconds": 82.046174,
+  "answer": "**GHSA-ff3f-86qr-9cv3 is an SSR denial-of-service advisory, not a general client-side Angular Router vulnerability.** Angular [published the advisory](https://github.com/angular/angular/security/advisories/GHSA-ff3f-86qr-9cv3) on **September 23, 2026**; it was [published to the GitHub Advisory Database](https://github.com/advisories/GHSA-ff3f-86qr-9cv3) on **September 30, 2026**.\n\n| Affected `@angular/router` versions | First fixed version |\n|---|---|\n| `22.0.0` through `<22.2.0` | `22.2.0` |\n| `21.0.0` through `<21.2.24` | `21.2.24` |\n| `20.0.0` through `<20.3.32` | `20.3.32` |\n| `<=19.2.25` | None listed; that line is out of support |\n\n**Runtime conditions:** Exploitation requires Angular SSR on Node.js/V8, attacker-controlled request URLs being parsed by `@angular/router` during SSR, and an upstream path that lets the relevant semicolons and multiple path segments reach it. Crafted numeric matrix parameters can cause excessive memory allocation and crash an SSR worker. A browser-only SPA does not meet the advisory’s SSR condition.\n\n**Confirmed in this repo:** `financial-hq-ui/package.json` declares `@angular/router` **22.1.7**, and `financial-hq-ui/yarn.lock` resolves that version—so the *version* is in the affected range. The five frontend app build targets use browser entry points without configured SSR server entry points (for example, `financial-hq-ui/apps/invoices/project.json`). Their entry points bootstrap in the browser (for example, `apps/invoices/src/main.ts`). `financial-hq-ui/scripts/deploy-static-site.sh` publishes built files to S3 and invalidates CloudFront; `terraform/env/production/main.tf` references static-site infrastructure.\n\n**Assessment and action:** The repo strongly indicates static, client-rendered deployment, so the required Node SSR request-parsing condition **does not appear to apply**. That is an inference from checked-in configuration, **not verification of the live deployment** or every system that might consume its code. Confirm with the deployment owners that no separate SSR service renders these apps or consumes this router version. If there is one, prioritize upgrading the Angular packages together to a compatible **22.2.0 or later** release; edge rejection of semicolons or excessive path depth is an interim mitigation. If deployment is static-only, record this advisory as **version-present but SSR condition not met**, while still planning a routine upgrade.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 596,
+      "cacheRead": 33298,
+      "cacheWrite": 824,
+      "reasoning": 0,
+      "totalTokens": 34721,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.005960000000000001,
+        "cacheRead": 0.006659600000000001,
+        "cacheWrite": 0.00206,
+        "total": 0.0146856
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 75.837079,
+  "first_substantive_seconds": 82.031924,
+  "snapshot_digest_before": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "snapshot_digest_after": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 82.046174,
+      "started_at": "2026-10-15T00:04:08.742995+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 4,
+    "fetch_calls": 3,
+    "other_tool_calls": 14
+  }
+}

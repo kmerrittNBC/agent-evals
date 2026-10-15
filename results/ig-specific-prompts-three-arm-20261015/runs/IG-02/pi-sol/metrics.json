@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-02",
+  "arm_id": "pi-sol",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-15T01:50:56.819972+00:00",
+  "elapsed_seconds": 121.705844,
+  "answer": "## Confirmed facts\n\n- [GHSA-ff3f-86qr-9cv3](https://github.com/angular/angular/security/advisories/GHSA-ff3f-86qr-9cv3) was published by Angular on **September 23, 2026**. It was published to the [GitHub Advisory Database](https://github.com/advisories/GHSA-ff3f-86qr-9cv3) on **September 30, 2026**.\n- The affected `@angular/router` ranges are **≤19.2.25**, **20.0.0–20.3.31**, **21.0.0–21.2.23**, and **22.0.0–22.1.x**. The listed fixes are **20.3.32**, **21.2.24**, and **22.2.0**, respectively; no 19.x fix is listed. This repo declares **22.1.7** in `financial-hq-ui/package.json`, and `financial-hq-ui/yarn.lock` resolves that version.\n- Exploitation requires **Node.js/V8 server-side rendering** that passes attacker-controlled request URLs to Angular’s router, with an edge/proxy that permits the crafted semicolon-containing paths. Numeric URL matrix parameters can cause excessive memory allocation and crash an SSR worker. A browser-only SPA does **not** meet the SSR prerequisite.\n\n## Repo assessment and action\n\nThe repo **appears to be browser-only**: app build targets specify `browser` entries without SSR/server entries (for example, `financial-hq-ui/apps/orders/project.json` and `apps/docs/project.json`); `financial-hq-ui/scripts/deploy-static-site.sh` uploads built files to S3 and invalidates CloudFront; and `financial-hq-ui/terraform/env/production/main.tf` selects static-site modules. No Node SSR runtime is evident here. **Assumption to verify:** the deployed system follows these configurations and no separate service renders these apps with Angular on Node. A read-only repo inspection cannot establish the live architecture or edge filtering.\n\n**Recommendation:** verify that production and staging do not route requests through an Angular Node SSR service. If they do not, this advisory is **version-applicable but not apparently exploitable in this deployment**; plan an upgrade to **22.2.0 or later**, keeping Angular package versions aligned. If SSR exists elsewhere, prioritize that upgrade and, until deployed, reject the relevant semicolon-containing request paths at the edge.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 593,
+      "cacheRead": 30935,
+      "cacheWrite": 773,
+      "reasoning": 63,
+      "totalTokens": 32304,
+      "cost": {
+        "input": 6e-06,
+        "output": 0.00593,
+        "cacheRead": 0.006187000000000001,
+        "cacheWrite": 0.0019325,
+        "total": 0.014055500000000002
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 117.079717,
+  "first_substantive_seconds": 121.69255,
+  "snapshot_digest_before": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "snapshot_digest_after": "233c1b3639fae2492dd9dafb32d8616b43a60ffc1bc59087bf24fced9e503b84",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 121.705844,
+      "started_at": "2026-10-15T01:50:56.819972+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 4,
+    "fetch_calls": 4,
+    "other_tool_calls": 19
+  }
+}

@@ -1,0 +1,8 @@
+**GHSA-w3vv-58gj-gw77** is a local, cross-user Nx socket vulnerability: another user on the same host can access daemon or plugin-worker sockets and potentially execute code as the user running Nx. The [maintainer advisory](https://github.com/nrwl/nx/security/advisories/GHSA-w3vv-58gj-gw77) was published **September 11, 2026**; the [GitHub Advisory Database entry](https://github.com/advisories/GHSA-w3vv-58gj-gw77) was published **October 5, 2026**. The fixes preceded both publications: [23.1.2](https://github.com/nrwl/nx/releases/tag/23.1.2) was released **August 26**, and [22.7.9](https://github.com/nrwl/nx/releases/tag/22.7.9) **September 1, 2026**.
+
+| Repo | Declared and locked Nx | Assessment | Smallest appropriate change |
+|---|---:|---|---|
+| `financial-hq-ui/` | 23.2.1 | **Not affected**; the affected 23.x range ends before 23.1.2. | **No security update needed.** |
+| `people-and-orgs-ui-library/` | 22.7.1 | **Affected**; it is below the patched 22.7.9 release. | Update `nx` and the pinned `@nx/*` packages together to **22.7.9**, and regenerate `pnpm-lock.yaml`. No major-version jump is needed. |
+
+This matters when Nx runs on a **multi-user development machine, persistent shared build server, or CI host where jobs under different OS users can access the same host**. It is not the advisory’s exposure scenario on a single-user machine. Both repos’ checked-in GitHub Actions workflows specify `ubuntu-latest`; that alone does not establish a shared, cross-user runner exposure. On shared machines, reset Nx after upgrading to clear old sockets. Disabling the daemon alone is not a complete workaround because plugin-worker sockets are also affected.

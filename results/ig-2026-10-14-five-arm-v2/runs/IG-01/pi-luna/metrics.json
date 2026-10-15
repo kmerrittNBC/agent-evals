@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-14T20:09:34.571109+00:00",
+  "elapsed_seconds": 734.830883,
+  "answer": "| Model | Terminal-Bench 2.1¹ | DeepSWE 1.1 Pass@1² |\n|---|---:|---:|\n| GPT-6 Luna | 73.03% | 66.6% |\n| GPT-6 Sol | 83.15% | 68.8% |\n| Qwen3.8-27B | 58.43% | 42.2% |\n| GLM-5.3 | 71.54% | 66.9% |\n| DeepSeek V4.1 Flash | 74.53% | 74.2% |\n\n¹ Terminal-Bench scores are from the **Vals AI results** listed on the [AIEvals leaderboard](https://aievals.app/benchmarks/terminal-bench-2-1).  \n² DeepSWE scores are the reported results on the [DeepSWE 1.1 tracker](https://www.deepswe.dev/); the GPT and GLM figures are listed at **max** settings. Results may use different agents and evaluation setups, so they aren’t perfectly apples-to-apples.",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 3,
+      "output": 418,
+      "cacheRead": 12201,
+      "cacheWrite": 847,
+      "reasoning": 176,
+      "totalTokens": 13469,
+      "cost": {
+        "input": 3.0000000000000004e-07,
+        "output": 0.00020899999999999998,
+        "cacheRead": 0.00012201,
+        "cacheWrite": 0.000105875,
+        "total": 0.00043718500000000004
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 732.99583,
+  "first_substantive_seconds": 734.803219,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 734.830883,
+      "started_at": "2026-10-14T20:09:34.571109+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 12,
+    "fetch_calls": 8,
+    "other_tool_calls": 0
+  }
+}
