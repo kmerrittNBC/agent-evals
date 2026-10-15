@@ -33,23 +33,40 @@ judging, and adjudication follow the results sections.
 
 ### Conclusions and overall results
 
-**Provisional finding.** All four pairs completed all five AR tasks, with no
-critical errors or timeouts. Pi + Sol and Pi + Luna each received an Excellent
-AR rating; Sol finished faster on all five matched AR tasks. Across all 15
-tasks, Claude Code + Opus completed 14, Pi + Luna 13, Pi + Sol 12, and
-OpenCode + Luna 8. Pi + Sol had the highest mean judge quality score (4.6/5)
-and finished faster than Pi + Luna on all 15 matched tasks, while Pi + Luna
-completed one more. OpenCode + Luna's 5/5 AR completion contrasts with its
-3/10 IG+DU completion. These are pair-level observations; different tool and
-search setups prevent assigning the entire difference to a model or a single
-harness feature. Five tasks per category are exploratory.
+Across the 15 tasks, the strongest result depends on whether completion,
+judged quality, or time matters most:
 
-| Model + harness pair | IG: tasks complete; rating | DU: tasks complete; rating | AR: tasks complete; rating | All tasks complete | Mean quality / 5 | Critical errors |
-|---|---|---|---|---:|---:|---:|
-| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 4.47 | 2 |
-| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | 5/5; Excellent | 12/15 | 4.60 | 2 |
-| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | 5/5; Good | 8/15 | 3.93 | 2 |
-| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | 5/5; Good | 14/15 | 4.20 | 1 |
+- **Most consistent completion: Claude Code + Opus.** It completed 14/15
+  tasks, the most of any pair, and finished at least four of five in every
+  column. Pi + Luna was close at 13/15, with Good, Good, and Excellent
+  category ratings. These two pairs have the strongest completion records in
+  this sample.
+- **Highest judged quality: Pi + Sol.** It received 5/5 on 11 of 15 tasks,
+  the most of any pair, and its mean quality was 4.60/5. Pi + Luna followed
+  with nine 5s and a 4.47 mean. Sol completed 12/15 tasks, so its quality
+  lead did not also give it the completion lead. Both Pi pairs had two
+  critical-error judgments that still need human review.
+- **Fastest overall: Pi + Sol.** Its median final deliverable time was 44.3
+  seconds, the lowest of the four pairs. It finished faster than Pi + Luna
+  on all 15 matched tasks and faster than Claude Code + Opus on 14/15. The
+  timing result describes these runs; it does not establish comparative cost.
+- **Default mixed-workload exclusion: OpenCode + Luna.** It completed 8/15
+  tasks, including only 1/5 IG and 2/5 DU tasks, and received Unacceptable
+  ratings in both columns. It also had the lowest mean quality (3.93/5) and
+  only two 5/5 scores. Its 5/5 AR completion and Good AR rating make it a
+  plausible candidate for architecture work specifically, pending review.
+
+These are results for model **and** harness pairs. Different tool and search
+setups prevent assigning a pair's performance entirely to its model or to a
+single harness feature. Five tasks per category and one run per task make the
+comparison exploratory.
+
+| Model + harness pair | IG: complete; rating | DU: complete; rating | AR: complete; rating | All complete | 5/5 scores | Mean quality / 5 | Median final time | Critical errors |
+|---|---|---|---|---:|---:|---:|---:|---:|
+| GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 9/15 | 4.47 | 75.7 s | 2 |
+| GPT-6 Sol + Pi | 3/5; Practical | 4/5; Good | 5/5; Excellent | 12/15 | 11/15 | 4.60 | 44.3 s | 2 |
+| GPT-6 Luna + OpenCode | 1/5; Unacceptable | 2/5; Unacceptable | 5/5; Good | 8/15 | 2/15 | 3.93 | 72.4 s | 2 |
+| Claude Opus 5.5 + Claude Code | 5/5; Good | 4/5; Good | 5/5; Good | 14/15 | 5/15 | 4.20 | 102.7 s | 1 |
 
 “Tasks complete” is the judge's deliverable-completion judgment, not merely
 an agent process exiting successfully. Mean quality summarizes 15 ordinal
@@ -71,8 +88,11 @@ apply to five tasks in that category; no pooled 15-task rating was assigned.
 | AR | Luna + OpenCode | 5/5 | 0/0/0/4/1 | 165.0 s | 0 | 1/1 code task |
 | AR | Opus + Claude Code | 5/5 | 0/0/0/4/1 | 254.6 s | 0 | 1/1 code task |
 
-**Decision to fill after human review and cost reconciliation:** [TBD: recommended pair or deployment
-rule by task type, with explicit speed, reliability, and cost tradeoffs].
+**Provisional operating read:** Pi + Sol leads when turnaround and judged
+quality are the priorities; Claude Code + Opus leads when the goal is the
+highest observed completion rate. Pi + Luna offers nearly the same completion
+rate as Opus with more 5/5 judgments. [TBD: final operating choice after
+blind human review and cost reconciliation.]
 
 ## Detailed results supporting the summary
 
@@ -183,6 +203,9 @@ comparisons after blind human review.]
 | Sol + Pi vs Luna + Pi | IG | 0 / 5 / 0 | 5/5 |
 | Sol + Pi vs Luna + Pi | DU | 2 / 3 / 0 | 5/5 |
 | Sol + Pi vs Luna + Pi | AR | 1 / 3 / 1 | 5/5 |
+| Sol + Pi vs Opus + Claude Code | IG | 2 / 2 / 1 | 5/5 |
+| Sol + Pi vs Opus + Claude Code | DU | 2 / 3 / 0 | 4/5 |
+| Sol + Pi vs Opus + Claude Code | AR | 3 / 2 / 0 | 5/5 |
 | Luna + Pi vs Luna + OpenCode | IG | 4 / 0 / 1 | 0/5 |
 | Luna + Pi vs Luna + OpenCode | DU | 2 / 3 / 0 | 2/5 |
 | Luna + Pi vs Luna + OpenCode | AR | 3 / 2 / 0 | 1/5 |
