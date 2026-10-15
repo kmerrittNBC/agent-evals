@@ -1,0 +1,54 @@
+{
+  "reference_answer": "At the frozen commit GET /api/todos ignores the completed query and Store.List returns all rows ordered by id. A correct patch accepts absent, true and false values; absent retains all rows, true/false select by completed without changing order or stored data, and invalid values return 400. The prepared check fails because both rows are returned for completed=true. The full Go suite should continue passing.",
+  "sources": [
+    {
+      "title": "lit-go-todos main.go at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/main.go",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Store.List SELECTs all todos ORDER BY id; GET handler passes no query filter and writes JSON array."
+    },
+    {
+      "title": "lit-go-todos main_test.go at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/main_test.go",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Lifecycle and persistence tests cover unfiltered list and existing endpoints."
+    },
+    {
+      "title": "lit-go-todos README.md at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/README.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "API table describes GET /api/todos as listing todos without a filter."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "lit-go-todos",
+      "commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "facts": [
+        "The existing GET handler does not inspect query parameters.",
+        "Store.List orders by id and returns [] for an empty result."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "Parsing should reject strings other than true and false, including arbitrary values."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "optional true/false filter and unchanged unfiltered behavior",
+      "400 for invalid completed value",
+      "stable ordering and no data mutation",
+      "focused and full Go checks"
+    ],
+    "acceptable_alternatives": [
+      "Filtering in SQL or after retrieval is acceptable if behavior and performance are reasonable for this small app."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Treating an invalid value as false.",
+    "Changing stored completed values to satisfy the filter."
+  ]
+}

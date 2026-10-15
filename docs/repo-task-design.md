@@ -1,6 +1,12 @@
 # Task design for repository work
 
-The information-gathering pilot covers the first column of the proposed capability matrix. This document describes how to select the five tasks for each of the two remaining columns once suitable repositories are available. It does not define task prompts, choose repositories, or change the active evaluation arms.
+The selected records now live in `config/defined-updates.yaml` and
+`config/architecture.yaml`. Their evaluator-only packs are in
+`evidence/DU-*/pack.json` and `evidence/AR-*/pack.json`. The criteria below
+remain the selection and review standard. A task changed after an attempt
+needs a new version and evaluation ID.
+
+The information-gathering pilot covers the first column of the proposed capability matrix. This document describes the criteria used to select the five tasks for each of the two remaining columns. It does not change the active evaluation arms.
 
 The two categories should measure work developers actually delegate. Give every arm the same starting commit, task prompt, repository access, tool permissions, time limit, and opportunity for one standardized follow-up. Run each task in a fresh session and an isolated checkout. Keep the identity of the model and harness out of the judge's materials.
 
@@ -17,6 +23,12 @@ A suitable task has all of these properties:
 - The task can be done in an isolated checkout without production credentials, a deployment, or a GUI. If a service or fixture is needed, make it available to every arm in the same way.
 
 Prefer real, previously encountered maintenance work whose expected behavior can be reconstructed from an issue, acceptance criteria, or a reviewed fix. If a check must be prepared for the evaluation, prepare and freeze it before running any arm. Do not reveal a reference patch or hidden grading checks to agents. A known red check is part of the task setup; graders may also use held-out checks to catch superficial fixes.
+
+Format prepared checks before freezing them. Tell agents to add their own tests
+in separate files. If they edit a prepared check, archive that edit as evidence
+of their attempted coverage, then replay their code against the frozen check
+in a fresh checkout for validation. A modified check alone must not turn a
+finished attempt into a harness failure.
 
 Measure whether the agent reaches a correct green state, what it changed, how much time and intervention it needed, and whether its explanation accurately describes the result. A passing command alone is insufficient: review the diff for broken behavior, unsafe shortcuts, unnecessary scope, and whether the implementation satisfies the requested behavior. Record failures and partial attempts rather than silently retrying them.
 

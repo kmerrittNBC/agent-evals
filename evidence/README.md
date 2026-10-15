@@ -1,6 +1,7 @@
 # Judge-only evidence
 
-Complete one `pack.json` per task before the full run. Each pack needs a
+Complete one `pack.json` per task before the full run. This includes IG, DU,
+and AR tasks. Each pack needs a
 reference answer, dated primary sources or preserved source snapshots, pinned
 repository facts, known uncertainty, grading guidance, and decision-changing
 errors. The reference answer is one defensible synthesis, not an exhaustive
@@ -16,3 +17,5 @@ the information cutoff; save relevant excerpts with retrieval timestamps or
 commit a stable snapshot when license and access rules allow it.
 `repo://<name>/<commit>/<path>` locates a file in a pinned repository snapshot
 for repo-specific facts; the runner exports that same commit for the agent.
+For DU and AR, the blinded judge also receives the saved patch and local check
+results. Those artifacts are captured before the disposable worktree is removed.

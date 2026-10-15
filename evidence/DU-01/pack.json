@@ -1,0 +1,57 @@
+{
+  "reference_answer": "The pinned Go API has GET, POST and PUT handlers but no DELETE. A sound patch adds a store deletion that checks RowsAffected, maps missing IDs to 404, routes DELETE /api/todos/{id} through readID and returns 204 without JSON for success. SQLite deletion persists across reopen. Existing create/read/update behavior, strict JSON input validation, and the preexisting test that expects 405 must be reconciled. The prepared TestEvalDeleteTodo fails red with 405 at the frozen commit and should pass green with the same command; the full Go suite checks nearby behavior.",
+  "sources": [
+    {
+      "title": "lit-go-todos main.go at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/main.go",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Store implements List/Get/Create/Update; newAPIHandler registers GET, POST and PUT only; readID and writeError are shared."
+    },
+    {
+      "title": "lit-go-todos main_test.go at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/main_test.go",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "TestTodoLifecycleWithoutDelete expects DELETE 405 and covers create/list/update; other tests cover validation, missing records and persistence."
+    },
+    {
+      "title": "lit-go-todos README.md at 052ce21307c0",
+      "url": "repo://lit-go-todos/052ce21307c02f772619e4878b44949bd72f5e1b/README.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "README explicitly says deleting todos is not implemented and lists only GET/POST/PUT API methods."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "lit-go-todos",
+      "commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "facts": [
+        "DELETE is absent at the starting commit.",
+        "SQLite store uses one database connection and SQL methods; not-found is errTodoNotFound.",
+        "Prepared red check observes 405."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "A 204 response must have no JSON body.",
+    "A correct implementation must update the old absence expectation rather than deleting regression coverage."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "204 success and 404 missing",
+      "durable removal from store and list",
+      "nearby tests and README updated",
+      "green focused and full Go checks"
+    ],
+    "acceptable_alternatives": [
+      "Any safe SQL delete and status mapping that preserves the API contract."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Returning 200 with JSON for a successful delete.",
+    "Only hiding the item in memory or UI without deleting SQLite row.",
+    "Changing prepared test to make it pass."
+  ]
+}

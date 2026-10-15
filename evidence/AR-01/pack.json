@@ -1,0 +1,55 @@
+{
+  "reference_answer": "A defensible plan identifies overlap in intent admission and uncertain-outcome reconciliation, but keeps draft, ready and merge identity/authority rules separate. Draft depends on confirmed publication and policy, finds a PR by branches, and may observe after create. Ready has preflight and dispatching states and confirms a non-draft PR at exact head/base. Merge requires durable human decision and exact fast-forward merge revision; uncertain retries only read. One approach is a small generic effect lifecycle helper parameterized by store/observation rules; another is shared low-level admission/reconciliation primitives while retaining coordinators. Stage the refactor behind existing coordinator APIs, add scenario tests for timeout/concurrency/identity conflicts, and rollback without changing persisted effect states.",
+  "sources": [
+    {
+      "title": "relayview src/pr/draftCoordinator.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/draftCoordinator.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Draft checks publication and PR policy; admits an effect, finds by branches, never repeats uncertain create."
+    },
+    {
+      "title": "relayview src/pr/readyCoordinator.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/readyCoordinator.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Ready verifies authority, preflights exact PR identity, transitions through dispatching, reconciles by read."
+    },
+    {
+      "title": "relayview src/pr/mergeCoordinator.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/pr/mergeCoordinator.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Merge verifies owner decision, admits intent, dispatches exact fast-forward once, and only observes uncertain retry."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "relayview",
+      "commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "facts": [
+        "The three coordinators have overlapping lifecycle ideas but different admission and confirmation criteria.",
+        "The stores have distinct states and persisted record shapes."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "A common helper can obscure authority if it owns effect-specific policy.",
+    "Persisted effect migrations are risky and may be avoidable."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "accurate three-flow comparison",
+      "at least two viable seams",
+      "preserved no-duplicate effect invariant",
+      "migration, tests and rollback"
+    ],
+    "acceptable_alternatives": [
+      "A narrow no-refactor conclusion can be strong if supported by concrete duplication and risk analysis."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "One generic coordinator that bypasses effect-specific authority or exact identity.",
+    "Retrying an external merge or create after an ambiguous response."
+  ]
+}

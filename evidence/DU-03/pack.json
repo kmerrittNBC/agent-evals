@@ -1,0 +1,48 @@
+{
+  "reference_answer": "validate_repos currently iterates assignments and writes repos[name] for each item, so a later assignment silently overwrites an earlier one. Reject any repeated name with a clear ValueError before overwriting, even when the paths are identical. Keep the allowed-name and absolute-path checks and the pinned commit/dirty-status fields. The prepared duplicate test fails red with ValueError not raised and should pass green.",
+  "sources": [
+    {
+      "title": "agent-evals src/agent_eval/core.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/core.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "validate_repos derives allowed task names, splits name=path, resolves paths, pins HEAD and assigns repos[name] without duplicate guard."
+    },
+    {
+      "title": "agent-evals src/agent_eval/preflight.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/preflight.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "preflight uses validate_repos for new and existing manifests and separately rejects changed existing pins."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "agent-evals",
+      "commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "facts": [
+        "Duplicate assignments are currently last-wins.",
+        "Existing manifest pin comparison is a separate path."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "Repeated identical paths are still duplicate assignments."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "clear duplicate rejection",
+      "valid single assignments remain supported",
+      "no change to manifest pin semantics",
+      "focused and full unittest checks"
+    ],
+    "acceptable_alternatives": [
+      "A duplicate guard before or after path resolution is acceptable if it does not silently overwrite."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Only rejecting duplicates with different paths.",
+    "Allowing a repeated name to overwrite an earlier assignment."
+  ]
+}

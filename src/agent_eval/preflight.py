@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import json
+import shutil
 import tempfile
 from pathlib import Path
 
 from . import adapters
 from .core import (RESULTS, ROOT, atomic_json, capture, config_hashes,
                    load_manifest, manifest_path, pack_status, read_config,
-                   static_arm_check, utc_now, validate_cutoff, validate_repos)
+                   read_tasks, static_arm_check, utc_now, validate_cutoff, validate_repos)
+from .workspace import run_check, sandbox_command, task_workspace
 
 
 PROBE = ("Use the tool named web_search to search for the official Python "
@@ -74,7 +76,7 @@ def _version(binary: str) -> str | None:
         return None
 
 
-def live_arm_probe(arm: dict, timeout: int) -> dict:
+def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
     with tempfile.TemporaryDirectory(prefix="agent-eval-probe-") as temporary:
         directory = Path(temporary)
         run_dir = directory / "run"
@@ -104,25 +106,47 @@ def live_arm_probe(arm: dict, timeout: int) -> dict:
             return {"status": "unavailable", "reason": "Search and page fetch were not both observed in headless events",
                     "probe_tool_names": names}
         usage = adapters.usage(arm["harness"], result["events"], run_dir)
+        if writable:
+            write_dir = directory / "write"
+            write_dir.mkdir()
+            write_run_dir = directory / "write-run"
+            write_run_dir.mkdir()
+            target = write_dir / "write-probe.txt"
+            write_prompt = ("Create the file write-probe.txt in the current directory with "
+                            "exactly the text agent-eval-write-probe followed by a newline. "
+                            "Use an available file-writing tool, then report completion.")
+            write_cmd = adapters.command(arm, write_prompt, write_dir, write_run_dir,
+                                         writable=True)
+            write_cmd = sandbox_command(write_cmd, write_dir, write_run_dir, [])
+            write_env = adapters.environment(arm, write_dir, writable=True)
+            write_result = capture(write_cmd, write_dir, write_env, timeout,
+                                   directory / "write-events.jsonl")
+            if (write_result["exit_code"] != 0 or write_result["timed_out"] or
+                    not target.exists() or target.read_text() != "agent-eval-write-probe\n"):
+                return {"status": "unavailable",
+                        "reason": "Writable tool probe failed in isolated directory",
+                        "probe_tool_names": names}
         return {"status": "ready", "reason": None, "probe_tool_names": names,
                 "usage_fields": sorted(usage["raw"].keys()) if isinstance(usage["raw"], dict) else [],
                 "usage_classification": usage["classification"]}
 
 
 def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
-              live: bool) -> dict:
+              live: bool, column: str = "ig") -> dict:
     def same_pin(left: dict, right: dict) -> bool:
         return left["path"] == right["path"] and left["commit"] == right["commit"]
 
     path = manifest_path(evaluation_id)
     if path.exists():
         manifest = load_manifest(evaluation_id)
+        if manifest.get("column", "ig") != column:
+            raise ValueError("Column differs from existing manifest")
         if any((RESULTS / evaluation_id / "runs").rglob("metrics.json")):
             raise ValueError("Cannot modify preflight after runs begin")
         if cutoff and validate_cutoff(cutoff) != manifest["cutoff"]:
             raise ValueError("Cutoff differs from existing manifest")
         if repo_args:
-            repos = validate_repos(repo_args)
+            repos = validate_repos(repo_args, column)
             for name, info in repos.items():
                 if name in manifest["repos"] and not same_pin(manifest["repos"][name], info):
                     raise ValueError("Repository pin differs from existing manifest")
@@ -130,17 +154,49 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
     else:
         if not cutoff:
             raise ValueError("A new evaluation requires --cutoff")
-        repos = validate_repos(repo_args)
+        repos = validate_repos(repo_args, column)
         manifest = {"evaluation_id": evaluation_id, "created_at": utc_now(),
-                    "cutoff": validate_cutoff(cutoff), "config_hashes": config_hashes(),
+                    "cutoff": validate_cutoff(cutoff), "config_hashes": config_hashes(column),
                     "repos": repos, "preflight": {},
                     "judge_preflight": {"status": "needs_live_probe"}}
+        if column != "ig":
+            manifest["column"] = column
     arms = read_config("arms")["arms"]
-    tasks = read_config("tasks")["tasks"]
+    tasks = read_tasks(column)
+    manifest["task_preflight"] = {}
+    for task in tasks:
+        names = task["repos"]
+        missing = [name for name in names if name not in manifest["repos"]]
+        if missing:
+            manifest["task_preflight"][task["id"]] = {
+                "status": "unavailable", "reason": f"Missing repository: {', '.join(missing)}"}
+            continue
+        if task.get("starting_commit") and any(
+                manifest["repos"][name]["commit"] != task["starting_commit"] for name in names):
+            manifest["task_preflight"][task["id"]] = {
+                "status": "unavailable", "reason": "Repository HEAD differs from frozen starting commit"}
+            continue
+        if task.get("category") != "defined-update":
+            manifest["task_preflight"][task["id"]] = {"status": "ready", "reason": None}
+            continue
+        with tempfile.TemporaryDirectory(prefix="agent-eval-red-") as temporary:
+            with task_workspace(task, manifest["repos"], Path(temporary) / "workspace") as (_, checkout):
+                result = run_check(task["red_command"], checkout)
+        output = result["stdout"] + result["stderr"]
+        ready = (result["exit_code"] not in (None, 0) and
+                 task["red_output_contains"] in output)
+        manifest["task_preflight"][task["id"]] = {
+            "status": "ready" if ready else "unavailable",
+            "reason": None if ready else "Frozen red check did not fail as expected",
+            "red_command": task["red_command"], "red_exit_code": result["exit_code"],
+            "red_output_excerpt": output[-1000:]}
     for arm in arms:
         state = static_arm_check(arm)
+        if column != "ig" and not shutil.which("bwrap"):
+            state.update(status="unavailable", reason="Bubblewrap is required for writable task isolation")
         if live and state["status"] == "needs_live_probe":
-            state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"]))
+            state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"],
+                                        writable=column != "ig"))
         manifest["preflight"][arm["id"]] = state
     manifest["evidence"] = {task["id"]: {"status": pack_status(task["id"], manifest)[1],
                                         "sha256": None} for task in tasks}

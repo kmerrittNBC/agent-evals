@@ -1,0 +1,161 @@
+{
+  "tasks": [
+    {
+      "id": "AR-01",
+      "category": "architecture",
+      "deliverable": "plan",
+      "prompt": "Design a bounded refactor for RelayView’s pull-request draft, ready and merge effect coordinators to reduce repeated durable-effect lifecycle logic. Deliver an implementation plan, not code. Compare at least two seams, identify shared behavior versus effect-specific authority and provider rules, state migration and rollback steps, and name tests that would preserve no-duplicate external effects after uncertain outcomes.",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [],
+      "validation_commands": [],
+      "boundaries": [
+        "src/pr/draftCoordinator.ts",
+        "src/pr/readyCoordinator.ts",
+        "src/pr/mergeCoordinator.ts",
+        "src/pr/*Store.ts"
+      ],
+      "invariants": [
+        "durable intent before external dispatch",
+        "uncertain retry observes rather than repeats the effect",
+        "human authority and exact merge revision checks remain effect-specific"
+      ]
+    },
+    {
+      "id": "AR-02",
+      "category": "architecture",
+      "deliverable": "plan",
+      "prompt": "Design a recovery boundary for RelayView’s research MCP sidecar when its supervised process disappears during a trial. Deliver a decision and staged implementation plan, not code. Compare fail-closed trial termination with any safe restart design using the actual bridge, socket, credential and accounting contracts. Explain how you would avoid quota reset, credential exposure or a stale client attaching to a new session, and specify verification and rollback.",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [],
+      "validation_commands": [],
+      "boundaries": [
+        "src/research/mcp",
+        "src/research/core",
+        "docs/authoritative/research-mcp.md"
+      ],
+      "invariants": [
+        "trusted credentials arrive through inherited descriptors, not MCP or argv",
+        "trial accounting must not reset after restart",
+        "same-UID unrestricted shell is outside socket permission boundary"
+      ]
+    },
+    {
+      "id": "AR-03",
+      "category": "architecture",
+      "deliverable": "plan",
+      "prompt": "Plan how the Stage A scheduler could recover after a host interruption without replaying a native coding attempt or silently changing a frozen cohort. Deliver a concrete implementation plan, not code. Trace the current freeze, slot plan, outcome seal and recovery runbooks; compare replay, resume and terminal-failure choices; identify state transitions, trust checks, tests and rollback. Keep the 23-task continuous-cohort contract and seven-arm comparison intact.",
+      "repos": [
+        "agent-harness-evals"
+      ],
+      "starting_commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [],
+      "validation_commands": [],
+      "boundaries": [
+        "scripts/stage_scheduler.py",
+        "scripts/run_stage_a.py",
+        "docs/contracts/staged-multilang-benchmark-v5.md",
+        "docs/runbooks/inspect-recovery-and-shakedown.md"
+      ],
+      "invariants": [
+        "frozen manifest identity",
+        "one outcome per scheduled slot",
+        "no silent task replacement after first trial"
+      ]
+    },
+    {
+      "id": "AR-04",
+      "category": "architecture",
+      "deliverable": "plan",
+      "prompt": "Plan a durable boundary between the Tauri/Lit desktop and local FastAPI backend for question-clarification runs so a desktop restart can reconnect to an in-progress or completed run. Deliver a plan, not code. Inspect the current API client, run storage and UI state flow; compare at least two ownership options; specify IDs, status transitions, error handling, migration, tests and rollback. Do not assume a remote production service or cloud credentials.",
+      "repos": [
+        "data-analysis-agent"
+      ],
+      "starting_commit": "f3f81aba0567f08ad4af681345d603496e80b679",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [],
+      "validation_commands": [],
+      "boundaries": [
+        "apps/desktop/src/api",
+        "apps/desktop/src/components",
+        "apps/backend/src/insight_specialist_backend/runs.py",
+        "apps/backend/src/insight_specialist_backend/main.py"
+      ],
+      "invariants": [
+        "local-first execution",
+        "backend owns authoritative run state",
+        "restart cannot fabricate a completed result"
+      ]
+    },
+    {
+      "id": "AR-05",
+      "category": "architecture",
+      "deliverable": "code",
+      "prompt": "Refactor the runner so workspace creation and cleanup are separated from harness conversation capture while preserving the current event, answer, usage and continuation contracts. Deliver a bounded code change in src/agent_eval with tests; do not change the IG task prompts, arm models, or output schema. Explain the new seam and how a future writable-worktree workspace could use it.",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [],
+      "validation_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "boundaries": [
+        "src/agent_eval/core.py",
+        "src/agent_eval/adapters.py",
+        "src/agent_eval/judge.py"
+      ],
+      "invariants": [
+        "one fresh session per task/arm",
+        "same phase event offsets and metrics",
+        "workspace integrity check for read-only tasks"
+      ]
+    }
+  ]
+}

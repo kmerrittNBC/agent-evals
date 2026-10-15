@@ -1,0 +1,197 @@
+{
+  "verified_on": "2026-10-15",
+  "method": "Each task was tested in a disposable detached worktree at its frozen commit. A minimal local fix was used to verify the green path, then the worktree was removed; no reference patch is stored.",
+  "tasks": [
+    {
+      "task_id": "DU-01",
+      "repository": "lit-go-todos",
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "red_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "expected_red_contains": "DELETE status = 405",
+      "red_exit_code": 1,
+      "green_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "green_exit_code": 0,
+      "regression_commands": [
+        [
+          "go",
+          "test",
+          "./..."
+        ]
+      ],
+      "regression_exit_codes": [
+        0
+      ]
+    },
+    {
+      "task_id": "DU-02",
+      "repository": "lit-go-todos",
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "red_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "expected_red_contains": "completed filter =",
+      "red_exit_code": 1,
+      "green_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "green_exit_code": 0,
+      "regression_commands": [
+        [
+          "go",
+          "test",
+          "./..."
+        ]
+      ],
+      "regression_exit_codes": [
+        0
+      ]
+    },
+    {
+      "task_id": "DU-03",
+      "repository": "agent-evals",
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du03.py"
+      ],
+      "expected_red_contains": "ValueError not raised",
+      "red_exit_code": 1,
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du03.py"
+      ],
+      "green_exit_code": 0,
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "regression_exit_codes": [
+        0
+      ]
+    },
+    {
+      "task_id": "DU-04",
+      "repository": "agent-evals",
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "expected_red_contains": "AssertionError:",
+      "red_exit_code": 1,
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "green_exit_code": 0,
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "regression_exit_codes": [
+        0
+      ]
+    },
+    {
+      "task_id": "DU-05",
+      "repository": "agent-evals",
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "expected_red_contains": "KeyError: 'commit'",
+      "red_exit_code": 1,
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "green_exit_code": 0,
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "regression_exit_codes": [
+        0
+      ]
+    }
+  ]
+}

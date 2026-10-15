@@ -1,0 +1,270 @@
+{
+  "tasks": [
+    {
+      "id": "DU-01",
+      "category": "defined-update",
+      "deliverable": "code",
+      "prompt": "Add DELETE /api/todos/{id} to the Go todo API. A successful delete returns 204 with no body; deleting a missing ID returns 404. The removed item must stay absent from list and after reopening the SQLite store. Preserve create, read, update and validation behavior, update nearby tests and API documentation, and run the relevant checks. Do not add a delete UI.",
+      "repos": [
+        "lit-go-todos"
+      ],
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [
+        {
+          "source": "checks/DU-01/eval_delete_test.go",
+          "target": "eval_delete_test.go"
+        }
+      ],
+      "validation_commands": [],
+      "red_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "expected_red": "existing handler returns 405 Method Not Allowed",
+      "green_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalDeleteTodo",
+        "-count=1"
+      ],
+      "regression_commands": [
+        [
+          "go",
+          "test",
+          "./..."
+        ]
+      ],
+      "red_output_contains": "DELETE status = 405"
+    },
+    {
+      "id": "DU-02",
+      "category": "defined-update",
+      "deliverable": "code",
+      "prompt": "Let GET /api/todos optionally filter by completed=true or completed=false. With no filter it must retain the current list behavior and ordering. Reject any other completed value with 400; do not alter the stored todos or other endpoints. Update focused tests and API documentation.",
+      "repos": [
+        "lit-go-todos"
+      ],
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [
+        {
+          "source": "checks/DU-02/eval_filter_test.go",
+          "target": "eval_filter_test.go"
+        }
+      ],
+      "validation_commands": [],
+      "red_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "expected_red": "existing list ignores the query and returns both todos",
+      "green_command": [
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "regression_commands": [
+        [
+          "go",
+          "test",
+          "./..."
+        ]
+      ],
+      "red_output_contains": "completed filter ="
+    },
+    {
+      "id": "DU-03",
+      "category": "defined-update",
+      "deliverable": "code",
+      "prompt": "Reject duplicate --repo assignments during preflight, including two assignments with the same name and path. Report a clear ValueError instead of silently using the last one. Preserve valid single assignments and the existing manifest pin behavior.",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [
+        {
+          "source": "checks/DU-03/test_eval_du03.py",
+          "target": "tests/test_eval_du03.py"
+        }
+      ],
+      "validation_commands": [],
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du03.py"
+      ],
+      "expected_red": "duplicate assignment is accepted without an error",
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du03.py"
+      ],
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "red_output_contains": "ValueError not raised"
+    },
+    {
+      "id": "DU-04",
+      "category": "defined-update",
+      "deliverable": "code",
+      "prompt": "Make tree_digest include a symlink’s target text, including for a broken symlink, so retargeting a link changes the workspace integrity digest. Preserve the existing file-content and path checks. Add focused coverage and run the runner tests.",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [
+        {
+          "source": "checks/DU-04/test_eval_du04.py",
+          "target": "tests/test_eval_du04.py"
+        }
+      ],
+      "validation_commands": [],
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "expected_red": "retargeting a broken symlink leaves digest unchanged",
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "red_output_contains": "AssertionError:"
+    },
+    {
+      "id": "DU-05",
+      "category": "defined-update",
+      "deliverable": "code",
+      "prompt": "Make pack_status reject malformed repo_facts with a clear not-ready reason, without raising KeyError or TypeError. Require each repo fact to carry a nonempty repo name and a 40-character commit hash; preserve the existing pinned-commit comparison for well-formed packs. Add focused coverage and run the runner tests.",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900,
+      "network_access": "web and package registries available; no production credentials or deployment required",
+      "allowed_commands": [
+        "read source",
+        "edit within isolated worktree",
+        "run local checks"
+      ],
+      "setup_files": [
+        {
+          "source": "checks/DU-05/test_eval_du05.py",
+          "target": "tests/test_eval_du05.py"
+        }
+      ],
+      "validation_commands": [],
+      "red_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "expected_red": "malformed repo fact raises KeyError instead of returning not-ready",
+      "green_command": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "regression_commands": [
+        [
+          "python3",
+          "-m",
+          "unittest",
+          "discover",
+          "-s",
+          "tests"
+        ]
+      ],
+      "red_output_contains": "KeyError: 'commit'"
+    }
+  ]
+}

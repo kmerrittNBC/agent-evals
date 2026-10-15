@@ -29,7 +29,7 @@ def pi_binary_env() -> dict[str, str]:
     return env
 
 
-def environment(arm: dict, workspace: Path) -> dict[str, str]:
+def environment(arm: dict, workspace: Path, writable: bool = False) -> dict[str, str]:
     env = pi_binary_env() if arm["harness"] == "pi" else os.environ.copy()
     if arm["harness"] == "opencode":
         # OpenCode v2's server process reads OPENCODE_CONFIG_CONTENT, keeping this
@@ -46,6 +46,8 @@ def environment(arm: dict, workspace: Path) -> dict[str, str]:
                 {"action": "websearch", "resource": "*", "effect": "allow"},
                 {"action": "webfetch", "resource": "*", "effect": "allow"},
                 {"action": "question", "resource": "*", "effect": "allow"},
+                *([{"action": action, "resource": "*", "effect": "allow"}
+                   for action in ("bash", "edit", "write", "apply_patch")] if writable else []),
             ],
             "websearch": {"provider": arm.get("search_provider", "tinyfish")},
         })
@@ -54,7 +56,7 @@ def environment(arm: dict, workspace: Path) -> dict[str, str]:
 
 
 def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
-            session: str | None = None) -> list[str]:
+            session: str | None = None, writable: bool = False) -> list[str]:
     harness = arm["harness"]
     binary = arm["binary"]
     model = arm["model"]
@@ -66,7 +68,9 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
         provider, _, model_id = model.partition("/")
         cmd = [binary, "--print", "--mode", "json",
                "--provider", provider, "--model", model_id,
-               "--thinking", effort, "--tools", "read,grep,find,ls,web_search,web_fetch",
+               "--thinking", effort, "--tools",
+               ("read,bash,edit,write,grep,find,ls,web_search,web_fetch" if writable
+                else "read,grep,find,ls,web_search,web_fetch"),
                "--no-context-files", "--no-skills", "--no-approve",
                "--session", str(run_dir / "pi-session.jsonl")]
         return cmd + ["--", prompt]
@@ -91,8 +95,10 @@ def command(arm: dict, prompt: str, workspace: Path, run_dir: Path,
     if harness == "claude":
         cmd = [binary, "-p", prompt, "--model", model, "--effort", effort,
                "--output-format", "stream-json", "--verbose", "--restricted",
-               "--tools", "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion",
-               "--allowedTools", "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion",
+               "--tools", ("Read,Glob,Grep,Bash,Edit,Write,WebSearch,WebFetch,AskUserQuestion"
+                           if writable else "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion"),
+               "--allowedTools", ("Read,Glob,Grep,Bash,Edit,Write,WebSearch,WebFetch,AskUserQuestion"
+                                  if writable else "Read,Glob,Grep,WebSearch,WebFetch,AskUserQuestion"),
                "--permission-mode", "dontAsk",
                "--disallowedTools", "mcp__*"]
         if session:

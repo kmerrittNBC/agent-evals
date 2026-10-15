@@ -1,0 +1,55 @@
+{
+  "reference_answer": "The backend currently stores runs in a thread-safe InMemoryRunStore; a backend restart loses them. The desktop API resolves a local Tauri backend URL, starts a run, polls snapshots and opens an event stream; the Lit component holds its current run in instance state, which a desktop restart loses. A sound plan gives the backend authoritative durable run/event storage and a stable run ID, plus a desktop-side local pointer or discovery mechanism to reconnect. Compare storing an active run pointer in desktop state versus backend-side listing/discovery, define queued/running/succeeded/failed and clarification transitions, last-event replay, crash semantics and migration from in-memory runs. Validate with restart and duplicate-submission tests; roll back without fabricating completion.",
+  "sources": [
+    {
+      "title": "data-analysis-agent apps/backend/src/insight_specialist_backend/runs.py at f3f81aba0567",
+      "url": "repo://data-analysis-agent/f3f81aba0567f08ad4af681345d603496e80b679/apps/backend/src/insight_specialist_backend/runs.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "RunStatus queued/running/succeeded/failed; InMemoryRunStore keeps records/events/context in process memory."
+    },
+    {
+      "title": "data-analysis-agent apps/desktop/src/api/insight-specialist-api.ts at f3f81aba0567",
+      "url": "repo://data-analysis-agent/f3f81aba0567f08ad4af681345d603496e80b679/apps/desktop/src/api/insight-specialist-api.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Tauri API URL discovery; start run, get snapshot and submit clarification answers over local HTTP."
+    },
+    {
+      "title": "data-analysis-agent apps/desktop/src/components/insight-specialist-app/insight-specialist-app.ts at f3f81aba0567",
+      "url": "repo://data-analysis-agent/f3f81aba0567f08ad4af681345d603496e80b679/apps/desktop/src/components/insight-specialist-app/insight-specialist-app.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Lit component holds run and status in memory, opens event stream, then loads snapshot."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "data-analysis-agent",
+      "commit": "f3f81aba0567f08ad4af681345d603496e80b679",
+      "facts": [
+        "Neither desktop component state nor current backend store survives process restart.",
+        "Local backend URL may be rediscovered after restart."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "Recovering a pointer without backend persistence is insufficient.",
+    "An in-progress call may be unknown after a backend crash."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "backend ownership and durable IDs",
+      "desktop reconnection choice and alternatives",
+      "state/error/event replay semantics",
+      "migration, tests and rollback"
+    ],
+    "acceptable_alternatives": [
+      "A staged plan that first makes terminal results durable before live-run resume is acceptable."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Claiming current InMemoryRunStore is durable.",
+    "Treating a lost running process as succeeded without evidence."
+  ]
+}

@@ -25,6 +25,13 @@ def read_config(name: str) -> dict:
     return json.loads((ROOT / "config" / f"{name}.yaml").read_text())
 
 
+TASK_CONFIG = {"ig": "tasks", "du": "defined-updates", "ar": "architecture"}
+
+
+def read_tasks(column: str = "ig") -> list[dict]:
+    return read_config(TASK_CONFIG[column])["tasks"]
+
+
 def atomic_json(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temp = path.with_suffix(path.suffix + ".tmp")
@@ -36,8 +43,13 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def config_hashes() -> dict[str, str]:
-    return {name: sha256(ROOT / "config" / f"{name}.yaml") for name in ("arms", "tasks", "run-policy", "rubric")}
+def config_hashes(column: str = "ig") -> dict[str, str]:
+    names = ("arms", TASK_CONFIG[column], "run-policy", "rubric")
+    hashes = {name: sha256(ROOT / "config" / f"{name}.yaml") for name in names}
+    for task in read_tasks(column):
+        for item in task.get("setup_files", []):
+            hashes[f"setup:{item['source']}"] = sha256(ROOT / item["source"])
+    return hashes
 
 
 def utc_now() -> str:
@@ -57,8 +69,9 @@ def git(repo: Path, *args: str) -> str:
     return result.stdout.strip()
 
 
-def validate_repos(repo_args: list[str]) -> dict[str, dict]:
-    required = {name for task in read_config("tasks")["tasks"] for name in task["repos"]}
+def validate_repos(repo_args: list[str], column: str = "ig") -> dict[str, dict]:
+    tasks = read_tasks(column)
+    required = {name for task in tasks for name in task["repos"]}
     repos: dict[str, dict] = {}
     for item in repo_args:
         if "=" not in item:
@@ -69,11 +82,19 @@ def validate_repos(repo_args: list[str]) -> dict[str, dict]:
         path = Path(value).resolve()
         if not path.is_dir():
             raise ValueError(f"Repository not found: {path}")
-        commit = git(path, "rev-parse", "HEAD")
+        pins = {task["starting_commit"] for task in tasks
+                if name in task["repos"] and task.get("starting_commit")}
+        if len(pins) > 1:
+            raise ValueError(f"Conflicting frozen commits for {name}")
+        source_head = git(path, "rev-parse", "HEAD")
+        commit = next(iter(pins)) if pins else source_head
+        git(path, "cat-file", "-e", f"{commit}^{{commit}}")
         if not commit or len(commit) != 40:
             raise ValueError(f"Could not pin commit for {path}")
         repos[name] = {"path": str(path), "commit": commit,
                        "working_tree_dirty": bool(git(path, "status", "--porcelain"))}
+        if pins:
+            repos[name]["source_head"] = source_head
     return repos
 
 
@@ -112,7 +133,8 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
                                              for key in ("must_check", "acceptable_alternatives", "do_not_penalize")):
         return False, "judge evidence pack has incomplete grading guidance"
     if manifest is not None:
-        task = next(task for task in read_config("tasks")["tasks"] if task["id"] == task_id)
+        column = manifest.get("column", "ig")
+        task = next(task for task in read_tasks(column) if task["id"] == task_id)
         selected = task_repo_names(task, manifest)
         if task["repos"] and not selected:
             return False, "task has no pinned repositories"
@@ -137,7 +159,7 @@ def load_manifest(evaluation_id: str) -> dict:
     if not path.exists():
         raise ValueError(f"No manifest for {evaluation_id}; run preflight first")
     value = json.loads(path.read_text())
-    if value["config_hashes"] != config_hashes():
+    if value["config_hashes"] != config_hashes(value.get("column", "ig")):
         raise ValueError("Config changed since preflight; use a new evaluation ID")
     return value
 
@@ -306,78 +328,132 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
         return metrics
     if status != "ready":
         raise ValueError(f"Arm {arm['id']} has not passed live preflight")
+    from .workspace import task_workspace
     with tempfile.TemporaryDirectory(prefix="agent-eval-") as temporary:
-        workspace = Path(temporary) / "workspace"
-        prepare_workspace(manifest["repos"], {"repos": task_repo_names(task, manifest)}, workspace)
-        before = tree_digest(workspace)
-        env = adapters.environment(arm, workspace)
-        session = None
-        all_events: list[dict] = []
-        phase_results: list[dict] = []
-        asked = False
-        answer = ""
-        policy = read_config("run-policy")
-        prompts = [task["prompt"], policy["continuation_response"]]
-        for phase, prompt in enumerate(prompts):
-            if phase and not asked:
-                break
-            event_path = run_dir / f"phase-{phase}.jsonl"
-            cmd = adapters.command(arm, prompt, workspace, run_dir, session)
-            if arm["harness"] == "copilot" and phase == 0:
-                import uuid
-                cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
-            result = capture(cmd, workspace, env, timeout or policy["timeout_seconds"], event_path)
-            phase_results.append({key: value for key, value in result.items() if key != "events"})
-            offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
-            for entry in result["events"]:
-                entry["index"] = len(all_events)
-                entry["elapsed_seconds"] += offset
-                entry["phase"] = phase
-                all_events.append(entry)
-            answer = adapters.final_answer(arm["harness"], result["events"])
-            if phase == 0:
-                asked = adapters.asked_question(result["events"], answer)
-                session = adapters.session_id(arm["harness"], result["events"])
-                if arm["harness"] == "copilot":
-                    session = cmd[cmd.index("--session-id") + 1]
-                if arm["harness"] == "pi":
-                    session = str(run_dir / "pi-session.jsonl")
-            if result["exit_code"] != 0 or result["timed_out"]:
-                break
-            if phase == 0 and asked and not session:
-                break
-        with (run_dir / "events.jsonl").open("w") as f:
-            for entry in all_events:
-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-        after = tree_digest(workspace)
-        if before != after:
-            status = "failed"
-            reason = "Repository snapshot was modified"
-        elif phase_results[-1]["timed_out"]:
-            status, reason = "timeout", "Harness exceeded timeout"
-        elif phase_results[-1]["exit_code"] != 0:
-            status, reason = "failed", f"Harness exited {phase_results[-1]['exit_code']}"
-        elif asked and not session:
-            status, reason = "failed", "Clarification asked but session continuation was unavailable"
-        elif not answer:
-            status, reason = "failed", "No final answer parsed from events"
-        else:
-            status, reason = "completed", None
-        first_visible = next((entry["elapsed_seconds"] for entry in all_events
-                              if entry["channel"] == "stdout" and
-                              adapters.event_text(arm["harness"], entry["data"])), None)
-        usage = adapters.usage(arm["harness"], all_events, run_dir)
-        (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
-        metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
-                   "reason": reason, "started_at": phase_results[0]["started_at"],
-                   "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
-                   "answer": answer, "usage": usage, "asked_clarification": asked,
-                   "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
-                   "first_substantive_seconds": None, "snapshot_digest_before": before,
-                   "snapshot_digest_after": after, "phases": phase_results,
-                   "tool_activity": adapters.tool_activity(all_events)}
-        atomic_json(run_dir / "metrics.json", metrics)
-        return metrics
+        with task_workspace(task, manifest["repos"], Path(temporary) / "workspace") as (workspace, checkout):
+            return _run_in_workspace(arm, task, manifest, run_dir, workspace, checkout, timeout)
+
+
+def _run_in_workspace(arm: dict, task: dict, manifest: dict, run_dir: Path,
+                      workspace: Path, checkout: Path, timeout: int | None) -> dict:
+    writable = task.get("category", "ig") != "ig"
+    before = None if writable else tree_digest(workspace)
+    env = adapters.environment(arm, workspace, writable=writable)
+    session = None
+    all_events: list[dict] = []
+    phase_results: list[dict] = []
+    asked = False
+    answer = ""
+    policy = read_config("run-policy")
+    first_prompt = task["prompt"]
+    if writable:
+        first_prompt += (f"\n\nWork only in the disposable Git worktree at ./{task['repos'][0]}. "
+                         "The original source checkout is outside this workspace. "
+                         "Read the repository's AGENTS.md if present. This prompt is the assigned "
+                         "task record; no external issue lookup is required. "
+                         "Run relevant local checks and report what you changed or planned.")
+        if task.get("setup_files"):
+            first_prompt += (" Evaluator-provided checks are fixed for grading; "
+                             "add your own tests in separate files. The evaluator validates "
+                             "your changes with fresh copies of its checks.")
+    (run_dir / "effective-prompt.txt").write_text(first_prompt + "\n")
+    prompts = [first_prompt, policy["continuation_response"]]
+    for phase, prompt in enumerate(prompts):
+        if phase and not asked:
+            break
+        event_path = run_dir / f"phase-{phase}.jsonl"
+        cmd = adapters.command(arm, prompt, workspace, run_dir, session, writable=writable)
+        if writable:
+            from .workspace import sandbox_command
+            cmd = sandbox_command(cmd, workspace, run_dir,
+                                  [Path(info["path"]) for info in manifest["repos"].values()])
+        if arm["harness"] == "copilot" and phase == 0:
+            import uuid
+            cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
+        result = capture(cmd, workspace, env,
+                         timeout or task.get("timeout_seconds", policy["timeout_seconds"]),
+                         event_path)
+        phase_results.append({key: value for key, value in result.items() if key != "events"})
+        offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
+        for entry in result["events"]:
+            entry["index"] = len(all_events)
+            entry["elapsed_seconds"] += offset
+            entry["phase"] = phase
+            all_events.append(entry)
+        answer = adapters.final_answer(arm["harness"], result["events"])
+        if phase == 0:
+            asked = adapters.asked_question(result["events"], answer)
+            session = adapters.session_id(arm["harness"], result["events"])
+            if arm["harness"] == "copilot":
+                session = cmd[cmd.index("--session-id") + 1]
+            if arm["harness"] == "pi":
+                session = str(run_dir / "pi-session.jsonl")
+        if result["exit_code"] != 0 or result["timed_out"]:
+            break
+        if phase == 0 and asked and not session:
+            break
+    with (run_dir / "events.jsonl").open("w") as f:
+        for entry in all_events:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    after = None if writable else tree_digest(workspace)
+    if not writable and before != after:
+        status = "failed"
+        reason = "Repository snapshot was modified"
+    elif phase_results[-1]["timed_out"]:
+        status, reason = "timeout", "Harness exceeded timeout"
+    elif phase_results[-1]["exit_code"] != 0:
+        status, reason = "failed", f"Harness exited {phase_results[-1]['exit_code']}"
+    elif asked and not session:
+        status, reason = "failed", "Clarification asked but session continuation was unavailable"
+    elif not answer:
+        status, reason = "failed", "No final answer parsed from events"
+    else:
+        status, reason = "completed", None
+    changes = None
+    validation: list[dict] = []
+    if writable:
+        from .workspace import (collect_changes, replay_changes, run_check,
+                                sandbox_command, task_workspace)
+        changes = collect_changes(task, checkout, run_dir,
+                                  manifest["repos"][task["repos"][0]]["commit"])
+        commands = ([task["green_command"], *task.get("regression_commands", [])]
+                    if task.get("category") == "defined-update"
+                    else task.get("validation_commands", []))
+        try:
+            with task_workspace(task, manifest["repos"], workspace.parent / "validation") as (validation_workspace, validation_checkout):
+                replay_changes(validation_checkout, run_dir)
+                changes["validation_checks_intact"] = all(
+                    (validation_checkout / item["target"]).is_file() and
+                    (validation_checkout / item["target"]).read_bytes() ==
+                    (ROOT / item["source"]).read_bytes()
+                    for item in task.get("setup_files", [])
+                )
+                if not changes["validation_checks_intact"]:
+                    raise ValueError("Frozen check changed in validation checkout")
+                validation = [run_check(sandbox_command(command, validation_workspace, run_dir,
+                                                        [Path(info["path"]) for info in manifest["repos"].values()]),
+                                        validation_checkout) for command in commands]
+        except (OSError, ValueError, subprocess.SubprocessError) as exc:
+            status, reason = "failed", f"Validation replay failed: {exc}"
+        atomic_json(run_dir / "changes.json", changes)
+    first_visible = next((entry["elapsed_seconds"] for entry in all_events
+                          if entry["channel"] == "stdout" and
+                          adapters.event_text(arm["harness"], entry["data"])), None)
+    usage = adapters.usage(arm["harness"], all_events, run_dir)
+    (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
+    metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
+               "reason": reason, "started_at": phase_results[0]["started_at"],
+               "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
+               "answer": answer, "usage": usage, "asked_clarification": asked,
+               "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
+               "first_substantive_seconds": None, "snapshot_digest_before": before,
+               "snapshot_digest_after": after, "phases": phase_results,
+               "tool_activity": adapters.tool_activity(all_events)}
+    if writable:
+        metrics["changes"] = changes
+        metrics["validation"] = validation
+    atomic_json(run_dir / "metrics.json", metrics)
+    return metrics
 
 
 def randomized_slots(tasks: list[dict], arms: list[dict], seed: int) -> list[tuple[dict, dict]]:

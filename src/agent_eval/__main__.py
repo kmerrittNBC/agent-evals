@@ -5,7 +5,7 @@ import json
 import sys
 
 from .core import (RESULTS, load_manifest, pack_path, pack_status, randomized_slots,
-                   read_config, run_one, sha256, task_repo_names)
+                   read_config, read_tasks, run_one, sha256, task_repo_names)
 from .judge import judge_one
 from .preflight import preflight
 from .report import make_report
@@ -18,6 +18,7 @@ def main() -> int:
         part = sub.add_parser(name)
         part.add_argument("--evaluation-id", required=True)
         if name == "preflight":
+            part.add_argument("--column", choices=("ig", "du", "ar"), default="ig")
             part.add_argument("--cutoff")
             part.add_argument("--repo", action="append", default=[])
             part.add_argument("--live", action="store_true")
@@ -34,16 +35,17 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "preflight":
-            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.live)
+            result = preflight(args.evaluation_id, args.cutoff, args.repo, args.live, args.column)
             print(json.dumps({"manifest": str(RESULTS / args.evaluation_id / "manifest.json"),
                               "arms": {key: value["status"] for key, value in result["preflight"].items()},
                               "judge": result["judge_preflight"]["status"],
                               "evidence": {key: value["status"] for key, value in result["evidence"].items()},
+                              "tasks": {key: value["status"] for key, value in result["task_preflight"].items()},
                               "repos": result["repos"]}, indent=2))
             return 0
         manifest = load_manifest(args.evaluation_id)
         arms = read_config("arms")["arms"]
-        tasks = read_config("tasks")["tasks"]
+        tasks = read_tasks(manifest.get("column", "ig"))
         if args.command == "reconcile-credits":
             from .core import atomic_json
             if args.billing_credits < 0:
@@ -76,6 +78,9 @@ def main() -> int:
             if manifest["judge_preflight"]["status"] != "ready":
                 raise ValueError("Codex judge has not passed live preflight")
             for task in selected_tasks:
+                if (manifest.get("column", "ig") != "ig" and
+                        manifest.get("task_preflight", {}).get(task["id"], {}).get("status") != "ready"):
+                    raise ValueError(f"{task['id']}: task preflight is not ready")
                 okay, reason = pack_status(task["id"], manifest)
                 if not okay:
                     raise ValueError(f"{task['id']}: {reason}")

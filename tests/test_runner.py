@@ -1,16 +1,19 @@
 import json
+import shutil
 import subprocess
+import tarfile
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
 from src.agent_eval import adapters
-from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
+from src.agent_eval.core import (ROOT, pack_status, prepare_workspace, read_config, read_tasks, run_one,
                                  static_arm_check, tree_digest, validate_cutoff)
 from src.agent_eval.judge import anonymized_transcript, validate_judgment
 from src.agent_eval.preflight import live_arm_probe
 from src.agent_eval.report import _credit
+from src.agent_eval.workspace import sandbox_command, task_workspace
 
 
 class RunnerContractTests(unittest.TestCase):
@@ -34,6 +37,139 @@ class RunnerContractTests(unittest.TestCase):
             (workspace / "relayview/package.json").chmod(0o644)
             (workspace / "relayview/package.json").write_text("changed")
             self.assertNotEqual(before, tree_digest(workspace))
+
+    def test_writable_worktree_leaves_active_checkout_untouched(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo = Path(temp) / "source"
+            repo.mkdir()
+            subprocess.run(["git", "init", "-q", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "eval@example.test"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.name", "Eval"], check=True)
+            (repo / "file.txt").write_text("pinned")
+            subprocess.run(["git", "-C", str(repo), "add", "file.txt"], check=True)
+            subprocess.run(["git", "-C", str(repo), "commit", "-qm", "pin"], check=True)
+            commit = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+            (repo / "file.txt").write_text("active change")
+            checkout = Path(temp) / "workspace" / "source"
+            task = {"category": "defined-update", "repos": ["source"], "setup_files": []}
+            repos = {"source": {"path": str(repo), "commit": commit}}
+            with task_workspace(task, repos, checkout.parent) as (_, isolated):
+                self.assertEqual(isolated, checkout)
+                self.assertEqual((checkout / "file.txt").read_text(), "pinned")
+                (checkout / "file.txt").write_text("agent change")
+                if shutil.which("bwrap"):
+                    run_dir = Path(temp) / "run"
+                    run_dir.mkdir()
+                    code = (f"from pathlib import Path\n"
+                            f"source = Path({str(repo / 'file.txt')!r})\n"
+                            "try:\n    source.write_text('bad')\n"
+                            "except OSError:\n    print('blocked')\n"
+                            f"print('evidence-hidden' if not Path({str(ROOT / 'evidence/IG-01/pack.json')!r}).exists() else 'evidence-visible')\n"
+                            f"Path({str(checkout / 'file.txt')!r}).write_text('sandbox change')\n")
+                    command = sandbox_command(["python3", "-c", code], checkout.parent,
+                                              run_dir, [repo])
+                    result = subprocess.run(command, cwd=checkout.parent, text=True,
+                                            capture_output=True, check=True)
+                    self.assertIn("blocked", result.stdout)
+                    self.assertIn("evidence-hidden", result.stdout)
+            self.assertEqual((repo / "file.txt").read_text(), "active change")
+            self.assertFalse(checkout.exists())
+            listed = subprocess.check_output(["git", "-C", str(repo), "worktree", "list", "--porcelain"], text=True)
+            self.assertNotIn(str(checkout), listed)
+
+    def test_writable_run_preserves_patch_and_validates_before_cleanup(self):
+        with tempfile.TemporaryDirectory() as temp:
+            repo = Path(temp) / "source"
+            repo.mkdir()
+            subprocess.run(["git", "init", "-q", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "eval@example.test"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.name", "Eval"], check=True)
+            (repo / "file.txt").write_text("before")
+            subprocess.run(["git", "-C", str(repo), "add", "file.txt"], check=True)
+            subprocess.run(["git", "-C", str(repo), "commit", "-qm", "pin"], check=True)
+            commit = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+            task = {"id": "DU-test", "category": "defined-update", "deliverable": "code",
+                    "prompt": "Change file.txt", "repos": ["source"], "setup_files": [],
+                    "green_command": ["python3", "-c",
+                                      "from pathlib import Path; assert Path('file.txt').read_text() == 'after'"],
+                    "regression_commands": []}
+            manifest = {"repos": {"source": {"path": str(repo), "commit": commit}},
+                        "preflight": {"fake": {"status": "ready"}}}
+            arm = {"id": "fake", "harness": "pi"}
+
+            def fake_capture(_command, cwd, _env, _timeout, _events_path):
+                self.assertEqual(_command[0], "bwrap")
+                (cwd / "source" / "file.txt").write_text("after")
+                return {"events": [], "exit_code": 0, "timed_out": False,
+                        "elapsed_seconds": 1.0, "started_at": "2026-10-15T00:00:00Z"}
+
+            with patch("src.agent_eval.core.RESULTS", Path(temp) / "results"), \
+                 patch("src.agent_eval.adapters.command", return_value=["fake"]), \
+                 patch("src.agent_eval.adapters.environment", return_value={}), \
+                 patch("src.agent_eval.core.capture", side_effect=fake_capture), \
+                 patch("src.agent_eval.adapters.final_answer", return_value="done"), \
+                 patch("src.agent_eval.adapters.asked_question", return_value=False), \
+                 patch("src.agent_eval.adapters.usage", return_value={"classification": "unavailable", "raw": None}):
+                metrics = run_one(arm, task, manifest, "sample")
+            self.assertEqual(metrics["status"], "completed")
+            self.assertEqual(metrics["validation"][0]["exit_code"], 0)
+            self.assertGreater(metrics["changes"]["tracked_patch_bytes"], 0)
+            self.assertEqual((repo / "file.txt").read_text(), "before")
+            self.assertIn("+after", (Path(temp) / "results/sample/runs/DU-test/fake/patch.diff").read_text())
+
+    def test_writable_run_uses_frozen_check_after_agent_edits_it(self):
+        if not shutil.which("bwrap"):
+            self.skipTest("Bubblewrap is required for writable runs")
+        with tempfile.TemporaryDirectory() as temp:
+            repo = Path(temp) / "source"
+            repo.mkdir()
+            subprocess.run(["git", "init", "-q", str(repo)], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.email", "eval@example.test"], check=True)
+            subprocess.run(["git", "-C", str(repo), "config", "user.name", "Eval"], check=True)
+            (repo / "file.txt").write_text("before")
+            subprocess.run(["git", "-C", str(repo), "add", "file.txt"], check=True)
+            subprocess.run(["git", "-C", str(repo), "commit", "-qm", "pin"], check=True)
+            commit = subprocess.check_output(["git", "-C", str(repo), "rev-parse", "HEAD"], text=True).strip()
+            task = {"id": "DU-test", "category": "defined-update", "deliverable": "code",
+                    "prompt": "Change file.txt", "repos": ["source"],
+                    "setup_files": [{"source": "checks/DU-03/test_eval_du03.py",
+                                     "target": "tests/test_eval_du03.py"}],
+                    "green_command": ["python3", "-c",
+                                      "from pathlib import Path; "
+                                      "assert Path('file.txt').read_text() == 'after'; "
+                                      "assert 'agent edit' not in Path('tests/test_eval_du03.py').read_text()"],
+                    "regression_commands": []}
+            manifest = {"repos": {"source": {"path": str(repo), "commit": commit}},
+                        "preflight": {"fake": {"status": "ready"}}}
+            arm = {"id": "fake", "harness": "pi"}
+
+            def fake_capture(_command, cwd, _env, _timeout, _events_path):
+                checkout = cwd / "source"
+                (checkout / "file.txt").write_text("after")
+                check = checkout / "tests/test_eval_du03.py"
+                check.write_text(check.read_text() + "\n# agent edit\n")
+                return {"events": [], "exit_code": 0, "timed_out": False,
+                        "elapsed_seconds": 1.0, "started_at": "2026-10-15T00:00:00Z"}
+
+            with patch("src.agent_eval.core.RESULTS", Path(temp) / "results"), \
+                 patch("src.agent_eval.adapters.command", return_value=["fake"]), \
+                 patch("src.agent_eval.adapters.environment", return_value={}), \
+                 patch("src.agent_eval.core.capture", side_effect=fake_capture), \
+                 patch("src.agent_eval.adapters.final_answer", return_value="done"), \
+                 patch("src.agent_eval.adapters.asked_question", return_value=False), \
+                 patch("src.agent_eval.adapters.usage", return_value={"classification": "unavailable", "raw": None}):
+                metrics = run_one(arm, task, manifest, "sample")
+
+            self.assertEqual(metrics["status"], "completed")
+            self.assertEqual(metrics["validation"][0]["exit_code"], 0)
+            self.assertFalse(metrics["changes"]["setup_checks_intact"])
+            self.assertTrue(metrics["changes"]["validation_checks_intact"])
+            run_dir = Path(temp) / "results/sample/runs/DU-test/fake"
+            with tarfile.open(run_dir / "prepared-check-edits.tar") as archive:
+                member = archive.getmember("tests/test_eval_du03.py")
+                self.assertIn(b"agent edit", archive.extractfile(member).read())
+            self.assertIn("+after", (run_dir / "patch.diff").read_text())
+            self.assertEqual((repo / "file.txt").read_text(), "before")
 
     def test_no_usage_is_not_zero_credits(self):
         self.assertEqual(_credit({"classification": "unavailable", "raw": None}), (None, "unavailable"))
@@ -120,6 +256,19 @@ class RunnerContractTests(unittest.TestCase):
                 self.assertEqual(pack_status(task["id"]), (True, "ready"))
         self.assertEqual(tasks[2]["repos"], ["relayview", "agent-harness-evals"])
         self.assertEqual(tasks[4]["repos"], ["agent-harness-evals"])
+
+    def test_new_columns_have_five_pinned_tasks_and_complete_packs(self):
+        for column, prefix in (("du", "DU-"), ("ar", "AR-")):
+            tasks = read_tasks(column)
+            self.assertEqual(len(tasks), 5)
+            for task in tasks:
+                with self.subTest(task=task["id"]):
+                    self.assertTrue(task["id"].startswith(prefix))
+                    self.assertEqual(len(task["starting_commit"]), 40)
+                    self.assertEqual(pack_status(task["id"]), (True, "ready"))
+                    if column == "du":
+                        self.assertEqual(task["red_command"], task["green_command"])
+                        self.assertTrue(task["red_output_contains"])
 
     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
         arms = read_config("arms")["arms"]

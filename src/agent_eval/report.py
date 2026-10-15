@@ -5,7 +5,7 @@ import json
 import statistics
 from pathlib import Path
 
-from .core import RESULTS, atomic_json, read_config
+from .core import RESULTS, atomic_json, read_config, read_tasks
 
 
 def _number(value: object) -> float | None:
@@ -65,7 +65,7 @@ def _rating(judgments: list[dict], attempts: int) -> str:
 def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
     directory = RESULTS / evaluation_id
     arms = read_config("arms")["arms"]
-    tasks = read_config("tasks")["tasks"]
+    tasks = read_tasks(manifest.get("column", "ig"))
     rows: list[dict] = []
     for task in tasks:
         for arm in arms:
@@ -74,7 +74,10 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
             judgment = json.loads((run_dir / "judgment.json").read_text()) if (run_dir / "judgment.json").exists() else None
             reconciliation = json.loads((run_dir / "credit-reconciliation.json").read_text()) if (run_dir / "credit-reconciliation.json").exists() else None
             credit, classification = _credit(metrics.get("usage", {}), reconciliation)
-            rows.append({"task_id": task["id"], "arm_id": arm["id"],
+            validation = metrics.get("validation", [])
+            rows.append({"task_id": task["id"], "category": task.get("category", "ig"),
+                         "deliverable": task.get("deliverable", "answer"),
+                         "arm_id": arm["id"],
                          "harness": arm["harness"], "model": arm["model"],
                          "billing_family": arm["billing"],
                          "status": metrics.get("status", "not_run"),
@@ -87,6 +90,10 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
                          "completion_status": judgment["completion_status"] if judgment else "",
                          "overall_quality": judgment["overall_quality"] if judgment else "",
                          "critical_error_count": len(judgment["critical_errors"]) if judgment else "",
+                         "validation_passed": (all(item["exit_code"] == 0 for item in validation)
+                                               if validation else None),
+                         "prepared_checks_intact": metrics.get("changes", {}).get("setup_checks_intact"),
+                         "validation_checks_intact": metrics.get("changes", {}).get("validation_checks_intact"),
                          "copilot_credits": credit if arm["billing"] == "copilot" else None,
                          "copilot_nano_aiu": metrics.get("usage", {}).get("raw", {}).get("totalNanoAiu")
                          if arm["billing"] == "copilot" and isinstance(metrics.get("usage", {}).get("raw"), dict) else None,
@@ -95,21 +102,35 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
                          "search_calls": metrics.get("tool_activity", {}).get("search_calls"),
                          "fetch_calls": metrics.get("tool_activity", {}).get("fetch_calls"),
                          "answer_path": str((run_dir / "answer.md").relative_to(directory)) if metrics else "",
+                         "patch_path": str((run_dir / "patch.diff").relative_to(directory))
+                         if (run_dir / "patch.diff").exists() else "",
+                         "untracked_path": str((run_dir / "untracked.tar").relative_to(directory))
+                         if (run_dir / "untracked.tar").exists() else "",
                          "judgment_path": str((run_dir / "judgment.json").relative_to(directory)) if judgment else ""})
     csv_path = directory / "summary.csv"
     with csv_path.open("w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-    lines = [f"# Agent evaluation: {evaluation_id}", "", f"Information cutoff: {manifest['cutoff']}",
+    lines = [f"# Agent evaluation: {evaluation_id}", "",
+             f"Column: {manifest.get('column', 'ig')}", f"Information cutoff: {manifest['cutoff']}",
              "", "Five tasks per arm. Ratings and rankings are exploratory, not statistically conclusive.",
              "", "## Preflight", "", "| Arm | Status | Reason |", "|---|---|---|"]
     for arm in arms:
         state = manifest["preflight"][arm["id"]]
         lines.append(f"| {arm['id']} | {state['status']} | {state.get('reason') or '—'} |")
+    if manifest.get("column", "ig") != "ig":
+        lines += ["", "## Task preparation", "", "| Task | Status | Red exit | Reason |",
+                  "|---|---|---:|---|"]
+        for task in tasks:
+            state = manifest.get("task_preflight", {}).get(task["id"], {})
+            lines.append(f"| {task['id']} | {state.get('status', 'missing')} | "
+                         f"{state.get('red_exit_code', '—')} | {state.get('reason') or '—'} |")
+        lines += ["", "Validation runs the saved candidate changes in a fresh checkout with frozen prepared checks. "
+                  "Agent edits to those checks are archived separately and do not replace the evaluator's checks."]
     lines += ["", "## Arm summary", "",
-             "| Arm | Rating | Completed | Quality median | First visible seconds median (range) | First substantive seconds median (range) | Final seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |",
-             "|---|---|---:|---:|---|---|---|---:|---:|---|"]
+             "| Arm | Rating | Attempts complete | Tasks complete | Quality distribution (1–5) | Quality median | First visible seconds median (range) | First substantive seconds median (range) | Final seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |",
+             "|---|---|---:|---:|---|---:|---|---|---|---:|---:|---|"]
     for arm in arms:
         selected = [row for row in rows if row["arm_id"] == arm["id"]]
         judgments = []
@@ -123,7 +144,9 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
         credits = [_number(row["copilot_credits"]) for row in selected]
         quality = [j["overall_quality"] for j in judgments]
         rating = _rating(judgments, len(tasks))
+        distribution = "/".join(str(quality.count(score)) for score in range(1, 6))
         lines.append(f"| {arm['id']} | {rating} | {sum(row['status'] == 'completed' for row in selected)}/5 | "
+                     f"{sum(j['completion_status'] == 'complete' for j in judgments)}/5 | {distribution} | "
                      f"{statistics.median(quality) if quality else 'unavailable'} | "
                      f"{_fmt([x for x in visible if x is not None])} | "
                      f"{_fmt([x for x in substantive if x is not None])} | "
@@ -133,13 +156,16 @@ def make_report(evaluation_id: str, manifest: dict) -> tuple[Path, Path]:
                      f"{('~' if any(str(row['credit_classification']).startswith('estimated') for row in selected) else '') + _fmt([x for x in credits if x is not None]) if arm['billing'] == 'copilot' else 'separate native usage'} |")
     lines += ["", "## Task outcomes", ""]
     for task in tasks:
-        lines += [f"### {task['id']}", "", "| Arm | Status | Quality | Follow-up | Critical errors | Answer | Judgment |",
-                  "|---|---|---:|---|---:|---|---|"]
+        lines += [f"### {task['id']}", "",
+                  "| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |",
+                  "|---|---|---:|---|---|---:|---|---|---|"]
         for row in [r for r in rows if r["task_id"] == task["id"]]:
             answer = f"[answer]({row['answer_path']})" if row["answer_path"] else "—"
+            patch = f"[patch]({row['patch_path']})" if row["patch_path"] else "—"
             judgment = f"[judgment]({row['judgment_path']})" if row["judgment_path"] else "—"
             lines.append(f"| {row['arm_id']} | {row['status']} | {row['overall_quality'] or '—'} | "
-                         f"{row['follow_up_classification'] or '—'} | {row['critical_error_count'] if row['critical_error_count'] != '' else '—'} | {answer} | {judgment} |")
+                         f"{row['validation_passed'] if row['validation_passed'] is not None else '—'} | "
+                         f"{row['follow_up_classification'] or '—'} | {row['critical_error_count'] if row['critical_error_count'] != '' else '—'} | {answer} | {patch} | {judgment} |")
         lines.append("")
     pairs = []
     for task in tasks:

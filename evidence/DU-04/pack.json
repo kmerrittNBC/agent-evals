@@ -1,0 +1,48 @@
+{
+  "reference_answer": "tree_digest currently hashes each path and file bytes for paths where is_file is true. A broken symlink has no file bytes, so changing its target text leaves the digest unchanged. Hash the symlink target as a distinct entry (and preserve path and regular file hashing) so both broken and valid symlink retargeting change the digest. The prepared test fails red with equal digests at the pinned commit.",
+  "sources": [
+    {
+      "title": "agent-evals src/agent_eval/core.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/core.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "tree_digest walks sorted rglob paths, hashes relative path, then read_bytes only for is_file; symlink target text is not included."
+    },
+    {
+      "title": "agent-evals tests/test_runner.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/tests/test_runner.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Snapshot test changes a regular file and expects tree_digest to change."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "agent-evals",
+      "commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "facts": [
+        "Broken symlink target changes are invisible to the current digest.",
+        "The digest is used to detect modifications to read-only exported workspaces."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "A symlink to an existing file may be followed by is_file, but target text still needs explicit representation."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "symlink target included even when broken",
+      "regular file content and path checks preserved",
+      "focused and full unittest checks"
+    ],
+    "acceptable_alternatives": [
+      "Any unambiguous byte framing for file versus symlink entries is acceptable."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Ignoring broken symlinks.",
+    "Removing regular-file content hashing.",
+    "Concatenating symlink target text with followed file bytes without unambiguous framing."
+  ]
+}

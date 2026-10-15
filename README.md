@@ -1,8 +1,10 @@
-# Coding agent information-gathering evaluation
+# Coding agent capability evaluation
 
-Task-selection criteria for the two later matrix categories are in
-[`docs/repo-task-design.md`](docs/repo-task-design.md). They do not define
-prompts until suitable repositories are available.
+The three columns are information gathering (IG), defined repository updates
+(DU), and architectural planning/refactoring (AR). The task criteria are in
+[`docs/repo-task-design.md`](docs/repo-task-design.md). IG remains in
+`config/tasks.yaml`; the two new columns are in
+`config/defined-updates.yaml` and `config/architecture.yaml`.
 
 This repository runs the five prompts in `config/tasks.yaml` through four pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
@@ -19,6 +21,57 @@ The remaining three tasks hit the account's individual quota and are recorded
 as failures. These follow-up results are not pooled with the first run.
 Antigravity is inactive in the current configuration; its adapter and historical
 results remain available if it is added back later.
+
+## Repository task columns
+
+DU has five code tasks: two Go todo API changes and three runner validation or
+integrity fixes. Each has a prepared test that fails at the frozen commit, an
+exact red/green command, and a nearby regression command. AR has five tasks
+across RelayView, agent-harness-evals, data-analysis-agent, and this runner:
+four request a concrete architecture plan and one requests a bounded code
+refactor. Each task record freezes its prompt, deliverable, commit, tools,
+time limit, setup and acceptance context. Judge packs are under
+`evidence/DU-*/` and `evidence/AR-*/`.
+The verified red and green exit codes are recorded in
+`checks/baseline-results.json`; reference patches are not stored.
+
+Use a fresh evaluation ID for each column. For example, DU:
+
+```sh
+python3 -m agent_eval preflight --column du --evaluation-id du-pilot \
+  --cutoff 2026-10-15T00:00:00-04:00 \
+  --repo lit-go-todos=/home/anodyine/Projects/lit-go-todos \
+  --repo agent-evals=/home/anodyine/Projects/agent-evals
+python3 -m agent_eval preflight --column du --evaluation-id du-pilot --live
+python3 -m agent_eval run --evaluation-id du-pilot --arm pi-luna --task DU-01
+python3 -m agent_eval judge --evaluation-id du-pilot --arm pi-luna --task DU-01
+python3 -m agent_eval report --evaluation-id du-pilot
+```
+
+For AR, pass `--column ar` and `--repo` assignments for `relayview`,
+`agent-harness-evals`, `data-analysis-agent`, and `agent-evals`. A full
+column run uses `run --evaluation-id ID --full` after live preflight; it has
+20 arm/task slots. Do not reuse a pilot ID for a full run. The existing IG
+manifests and five IG prompts remain valid and separate.
+
+DU and AR tasks use a fresh detached Git worktree at the task's frozen commit,
+even if the source checkout has uncommitted work or has advanced to a newer
+HEAD. The runner never checks out or resets the active source tree. It copies
+prepared DU checks into the disposable worktree, runs the frozen red command
+before live work, grants editing tools for these columns, and runs green and
+regression checks after each attempt in a second detached worktree. It replays
+the saved code patch there with pristine prepared checks, so formatting or
+editing a prepared check cannot change the evaluator's tests. It saves the
+patch, untracked files, separately archived prepared-check edits, replayed
+check results, events, answer and metrics under `results/ID/runs/` before
+removing the worktrees. The judge sees the task pack, answer, code patch,
+candidate test edits and pristine-check results in a fresh blinded process.
+Bubblewrap is required for these columns: agent
+processes see the active project tree read-only, the disposable worktree and
+run output writable, and their normal home for CLI authentication. The live
+probe verifies file-writing access inside that boundary. This protects active
+project checkouts from writes by the agent process; it is not a general
+container isolation boundary for other writable home files.
 
 ## Requirements
 

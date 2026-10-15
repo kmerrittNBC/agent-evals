@@ -1,0 +1,48 @@
+{
+  "reference_answer": "pack_status checks top-level fields and sources but builds a repo fact map with item[repo] and item[commit] without validating shape. A malformed item raises KeyError/TypeError under a manifest. Validate repo_facts as a list of objects with nonempty repo and 40-hex commit and return a not-ready reason mentioning the bad repo fact. Preserve comparison to the manifest commit for well-formed packs. The prepared test fails red with KeyError commit.",
+  "sources": [
+    {
+      "title": "agent-evals src/agent_eval/core.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/core.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "pack_status validates source/guidance shape, then directly indexes repo_facts items to compare pinned commits."
+    },
+    {
+      "title": "agent-evals src/agent_eval/preflight.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/preflight.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "preflight calls pack_status for every task and should report evidence status rather than crash on malformed packs."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "agent-evals",
+      "commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "facts": [
+        "Malformed repo_facts can currently crash manifest-aware preflight.",
+        "The existing comparison allows a repo name or checkout basename."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "The prompt requires nonempty repo names and 40-character commit hashes; checking hex characters as well is sound."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "malformed fact returns not-ready reason",
+      "no KeyError or TypeError",
+      "well-formed pin comparison preserved",
+      "focused and full unittest checks"
+    ],
+    "acceptable_alternatives": [
+      "A stricter validation that rejects duplicate repo facts is acceptable."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Catching all exceptions and falsely returning ready.",
+    "Dropping the pinned-commit check."
+  ]
+}

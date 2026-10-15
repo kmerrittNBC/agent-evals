@@ -1,0 +1,53 @@
+{
+  "reference_answer": "At the pinned commit core.run_one handles run directory, read-only snapshot export, CLI session phases, event offsets, answer extraction, workspace digest, usage and metrics in one function. A sound code refactor moves workspace lifecycle into a small internal boundary while retaining run_one API and metrics/events paths, leaves adapter event decoding in adapters.py, and preserves the two-phase standardized continuation. A behavior-preserving alternative is a context manager or helper called by run_one. Tests should cover pinned snapshot cleanup on success and failure, unchanged event offsets and answer/status handling, and the existing 15 runner tests. Do not modify IG prompts or arm models.",
+  "sources": [
+    {
+      "title": "agent-evals src/agent_eval/core.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/core.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "run_one couples temporary exported workspace and harness capture; compares tree digests and writes events/answer/metrics."
+    },
+    {
+      "title": "agent-evals src/agent_eval/adapters.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/src/agent_eval/adapters.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Per-harness commands, event decoding and usage extraction live in adapters."
+    },
+    {
+      "title": "agent-evals tests/test_runner.py at 76d02969bd45",
+      "url": "repo://agent-evals/76d02969bd45f5892c638d61acf96f9a6d47aa57/tests/test_runner.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Runner contract tests cover pinned snapshot and event/usage behavior."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "agent-evals",
+      "commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "facts": [
+        "Workspace creation and conversation capture are distinct responsibilities but share run status reporting."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "A future writable workspace should not weaken current read-only IG integrity checks."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "coherent code seam across lifecycle and capture",
+      "unchanged public run artifacts and continuation",
+      "cleanup on errors",
+      "passing focused runner tests"
+    ],
+    "acceptable_alternatives": [
+      "A context manager, helper function or small class is acceptable if it lowers coupling and remains bounded."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Changing IG prompts or arm settings.",
+    "Losing event offsets, answer parsing or read-only integrity checking."
+  ]
+}

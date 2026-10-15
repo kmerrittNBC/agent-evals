@@ -1,0 +1,54 @@
+{
+  "reference_answer": "The current MCP host is a thin stdio bridge to a supervised Unix-socket sidecar. Trusted policy and Brave credential arrive on inherited descriptors 3 and 4, not argv, environment or MCP. The private socket is a session capability. Its README explicitly says accounting is volatile, a started marker blocks same-directory service restart, and sidecar loss ends the trial; a restart design needs durable accounting/provisioning and a new authorization boundary. A sound plan compares preserving fail-closed termination against a staged durable supervisor/ledger protocol and never treats deleting the marker or socket modes as sufficient. Test crash, reconnect, stale socket, budget exhaustion, credential leakage and rollback.",
+  "sources": [
+    {
+      "title": "relayview src/research/mcp/README.md at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/research/mcp/README.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Volatile accounting; started marker; bridge reconnect preserves live allowance; sidecar restart in same directory refused; stop trial on sidecar loss."
+    },
+    {
+      "title": "relayview src/research/mcp/main.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/research/mcp/main.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "MCP process entry and trusted sidecar startup boundary."
+    },
+    {
+      "title": "relayview src/research/mcp/bridge.ts at f7c03941cf32",
+      "url": "repo://relayview/f7c03941cf32b8e25720b5eb1aa91364a236b005/src/research/mcp/bridge.ts",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Client bridge communicates over private Unix socket."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "relayview",
+      "commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "facts": [
+        "The current design deliberately refuses restart after sidecar loss.",
+        "Trusted supervisor and filesystem isolation are part of the boundary."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "A durable restart changes the threat and accounting model, not just process supervision."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "accurate current boundary",
+      "two viable recovery choices",
+      "quota and credential invariants",
+      "staged validation and rollback"
+    ],
+    "acceptable_alternatives": [
+      "Recommend keeping fail-closed termination if durable restart cost is unjustified."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Deleting started marker to restart with fresh quota.",
+    "Passing credentials through MCP, argv or ordinary environment variables."
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "reference_answer": "The scheduler has a persistent locked ledger and exact frozen manifest/slot identities; current recovery docs prohibit silent replay of ambiguous native attempts and keep charges and reservations until reconciliation. The amended Stage A contract is a continuous 23-task, seven-arm cohort with one outcome per slot and a seal. A sound plan models reserved, running, terminal and ambiguous states, validates freeze/source/host/ownership receipts before resuming, distinguishes safe continuation from terminal failure or human reconciliation, and never creates a new attempt because a process disappeared. It should preserve original evidence and compare fail-closed versus authorized recovery paths with deterministic interruption tests and rollback.",
+  "sources": [
+    {
+      "title": "agent-harness-evals scripts/stage_scheduler.py at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/scripts/stage_scheduler.py",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "CLI initializes, validates, locks, reserves, finishes and reconciles scheduler state."
+    },
+    {
+      "title": "agent-harness-evals docs/contracts/staged-multilang-benchmark-v5.md at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/docs/contracts/staged-multilang-benchmark-v5.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Amended executable Stage A has 23 reviewed tasks, 161 slots, one continuous admitted cohort and sealed outcome identity."
+    },
+    {
+      "title": "agent-harness-evals docs/runbooks/inspect-recovery-and-shakedown.md at b0b31dda6916",
+      "url": "repo://agent-harness-evals/b0b31dda691620edae30db7127c1e1d8da907813/docs/runbooks/inspect-recovery-and-shakedown.md",
+      "retrieved_at": "2026-10-15",
+      "snapshot_or_excerpt": "Scoped cleanup retains receipts and charges; ambiguous attempts block and resume never silently creates replacement work."
+    }
+  ],
+  "repo_facts": [
+    {
+      "repo": "agent-harness-evals",
+      "commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "facts": [
+        "The qualification recovery guide and comparative Stage A contract are distinct.",
+        "Cleanup does not refund quota or change a score."
+      ]
+    }
+  ],
+  "ambiguities": [
+    "An interrupted attempt may have reached a provider even if local output is missing."
+  ],
+  "grading_guidance": {
+    "must_check": [
+      "freeze and slot identity preserved",
+      "ambiguous attempt handling",
+      "trusted receipt and charge reconciliation",
+      "tests and rollback"
+    ],
+    "acceptable_alternatives": [
+      "A fail-closed design with operator disposition can be preferable to automated resume."
+    ],
+    "do_not_penalize": [
+      "Reasonable implementation details not dictated by the prompt if behavior and invariants are preserved."
+    ]
+  },
+  "decision_changing_errors": [
+    "Silently rerunning ambiguous native work.",
+    "Changing the frozen task set or cohort identity after outcomes begin."
+  ]
+}
