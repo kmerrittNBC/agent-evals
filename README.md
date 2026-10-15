@@ -1,5 +1,9 @@
 # Coding agent information-gathering evaluation
 
+Task-selection criteria for the two later matrix categories are in
+[`docs/repo-task-design.md`](docs/repo-task-design.md). They do not define
+prompts until suitable repositories are available.
+
 This repository runs the five prompts in `config/tasks.yaml` through four pinned
 model/harness arms. It keeps the agent transcript, a fresh blinded Codex
 judgment, and a traceable report for every attempted run. The first full run is
