@@ -1,5 +1,11 @@
 # Frozen qualification protocol v1
 
+**The Codex-to-Copilot experiment was stopped on 2026-10-27.** Read the
+[stop decision](stop-decision-2026-10-27.md) for the operating rationale,
+recommendation, unresolved gate, and conditions for reopening. The frozen
+protocol below remains a historical record; no Copilot-backed Codex candidate
+was run.
+
 Frozen 2026-10-27, before candidate results. [The plan](plan.md) defines six
 gates; [protocol.json](protocol.json) locks the cases, controls, revisions,
 prompt hashes, and decision thresholds. This protocol has **no candidate
@@ -7,6 +13,11 @@ results**. Issue [#3](https://tea.kyle-merritt.com/anodyine/agent-evals/issues/3
 is the human authorization gate. Do not run a Copilot-backed Codex candidate
 or mark that gate passed until its route, account terms, and documented desktop
 configuration are confirmed.
+
+The 2026-10-27 [Gate 1 route review](gate-1-route-review.md) records the
+organization's approval, the documented generic desktop gateway setting, a
+disposable CLI fixture result, and the unresolved GitHub local route. The
+fixture is not a candidate run and does not change this frozen protocol.
 
 ## Cases and controls
 
