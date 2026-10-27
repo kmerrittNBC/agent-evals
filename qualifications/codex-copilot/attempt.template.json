@@ -1,0 +1,25 @@
+{
+  "case_id": null,
+  "arm_id": null,
+  "repetition": null,
+  "session_id": null,
+  "worktree_id": null,
+  "started_at": null,
+  "ended_at": null,
+  "outcome": "unresolved",
+  "completion": null,
+  "critical_error": null,
+  "time_to_first_substantive_response_ms": null,
+  "final_latency_ms": null,
+  "peak_context_tokens": null,
+  "compaction_count": null,
+  "prepared_checks": [],
+  "blind_quality_scores": null,
+  "measurement_status": "unavailable",
+  "artifacts": {
+    "events": "events.jsonl",
+    "answer": "answer.md",
+    "billing": "billing.json",
+    "screenshots": []
+  }
+}

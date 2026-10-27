@@ -1,0 +1,27 @@
+{
+  "run_id": null,
+  "protocol_id": "codex-copilot-v1",
+  "protocol_sha256": null,
+  "mcp_catalog_sha256": null,
+  "execution_status": "blocked",
+  "created_at": null,
+  "account_plan_category": null,
+  "organization_policy_reference": null,
+  "gate_1_reviewer": null,
+  "authorized_route_category": null,
+  "endpoint_category": null,
+  "clients": {
+    "codex_cli_version": null,
+    "codex_app_server_version": null,
+    "official_codex_desktop_version_and_build": null,
+    "pi_version": null,
+    "os_version_and_build": null
+  },
+  "arms": [],
+  "source_revisions": {},
+  "prompt_ids_and_hashes": {},
+  "network_policy": null,
+  "time_limit_seconds": 900,
+  "sanitized_configuration_sha256": null,
+  "deviations": []
+}
