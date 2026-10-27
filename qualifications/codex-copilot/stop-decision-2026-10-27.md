@@ -1,7 +1,9 @@
 # Decision: stop the local Codex–Copilot qualification
 
-**Decision date:** 2026-10-27  
-**Decision owner:** account holder and team sponsor, as stated in the issue discussion  
+**Decision date:** 2026-10-27
+
+**Decision owner:** account holder and team sponsor, as stated in the issue discussion
+
 **Outcome:** stop work on the local Codex-to-Copilot connection and do not recommend it for team rollout. Retain Pi with GPT-6 Luna as the recommended mixed-workload pilot/default, subject to the limitations below.
 
 ## Why the experiment stopped
