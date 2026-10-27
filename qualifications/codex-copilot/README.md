@@ -1,5 +1,11 @@
 # Frozen qualification protocol v1
 
+**The Codex-to-Copilot experiment was stopped on 2026-10-27.** Read the
+[stop decision](stop-decision-2026-10-27.md) for the operating rationale,
+recommendation, unresolved gate, and conditions for reopening. The frozen
+protocol below remains a historical record; no Copilot-backed Codex candidate
+was run.
+
 Frozen 2026-10-27, before candidate results. [The plan](plan.md) defines six
 gates; [protocol.json](protocol.json) locks the cases, controls, revisions,
 prompt hashes, and decision thresholds. This protocol has **no candidate
