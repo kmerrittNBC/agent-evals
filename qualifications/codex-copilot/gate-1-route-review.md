@@ -17,6 +17,19 @@ Reviewed 2026-10-27. **Disposition: unresolved.** The account holder reports tha
 
 The documentation above was checked on 2026-10-27. Where a live documentation page gives no version or effective date, that review date is the source snapshot date. The GitHub terms' stated effective date is given separately.
 
+## Published Codex-to-Copilot examples
+
+Reviewed 2026-10-27. These are examples and author claims, not independently reproduced candidate results or GitHub authorization for a local route.
+
+| Example | What it demonstrates | Boundary for this issue |
+| --- | --- | --- |
+| [GitHub Agentic Workflows Codex engine](https://github.github.com/gh-aw/reference/engines/codex/) | Official Copilot-hosted and billed Codex inference for Sol/Luna through Responses. | GitHub explicitly requires its AWF sandbox; it is not a local desktop recipe. |
+| [codex-code-router](https://github.com/dpearson2699/codex-code-router) | A narrow, loopback Responses adapter whose author documents both Codex CLI and desktop configuration. | Its documented token refresh calls `copilot_internal/v2/token` and it targets a Copilot service endpoint, so it does not resolve the public-route requirement. Desktop behavior is the author's claim, not our observed test. |
+| [copilot-proxy-api](https://github.com/voidsteed/copilot-proxy-api) | A broader local bridge with explicit Codex CLI `/v1/responses` configuration and streaming handling. | Its own README calls the project unofficial and reverse engineered; it cannot serve as vendor confirmation. |
+| [copilot-llm-proxy](https://github.com/justfordev123/copilot-llm-proxy) | A local proxy whose author lists Codex CLI and desktop and exposes `/v1/responses`. | Its documentation says it exchanges an OAuth credential through `copilot_internal/v2/token`; desktop support and billing remain unverified here. |
+
+These projects reduce uncertainty about *how* to build a Codex-facing proxy. Their shared upstream pattern strengthens the specific GitHub question below. Do not install them with the Business seat or treat their working reports as Gate 1 authorization under this issue's private/extracted endpoint boundary.
+
 ## Disposable local proof
 
 `responses_fixture.py` is a loopback-only, deterministic **non-Copilot** Responses server. `probe_responses_fixture.py` launches it in a temporary directory with an isolated Codex home, an inert placeholder key, and a provider pointing at `127.0.0.1`. It records only model, stream flag, tool count, and path; it does not record prompts or headers. On 2026-10-27, `codex-cli 0.158.0` completed one streamed text turn per alias. This verifies CLI provider configuration and basic streamed text handling, **not** Copilot authentication, a supported GitHub route, function-call translation, error behavior, desktop selection, billing, or the full [gateway compatibility checklist](https://learn.chatgpt.com/docs/enterprise/gateway-compatibility).
