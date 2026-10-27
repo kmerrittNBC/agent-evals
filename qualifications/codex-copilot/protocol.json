@@ -1,0 +1,275 @@
+{
+  "protocol_id": "codex-copilot-v1",
+  "frozen_on": "2026-10-27",
+  "state": "protocol-frozen; execution-blocked",
+  "gate_1_issue": "https://tea.kyle-merritt.com/anodyine/agent-evals/issues/3",
+  "source_sha256": {
+    "config/tasks.yaml": "f05d1988429a3c59f52164356fe03342da5fe8754bde5945ed439faa0b75f243",
+    "config/defined-updates.yaml": "b5102aaab9da23e9b4f249c260513af1427169573580121eed9d9e630fc3333a",
+    "config/architecture.yaml": "02b9bf4fa42e283d4e66f717e0d0eb0c782d229f77371e1eb3f71b21ad083b19",
+    "config/run-policy.yaml": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937"
+  },
+  "source_revisions": {
+    "relayview": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "agent-harness-evals": "b0b31dda691620edae30db7127c1e1d8da907813",
+    "lit-go-todos": "052ce21307c02f772619e4878b44949bd72f5e1b",
+    "data-analysis-agent": "f3f81aba0567f08ad4af681345d603496e80b679",
+    "agent-evals": "76d02969bd45f5892c638d61acf96f9a6d47aa57"
+  },
+  "ig_information_cutoff": "2026-10-15T00:00:00-04:00",
+  "cases": [
+    {
+      "id": "IG-01",
+      "category": "IG",
+      "source": "config/tasks.yaml",
+      "prompt_sha256": "0e6db0064a630ccfb4d3c8cc81e64a286b756ca288483625c99fa525484d818b",
+      "repos": [],
+      "starting_commit": null,
+      "timeout_seconds": 900
+    },
+    {
+      "id": "IG-02",
+      "category": "IG",
+      "source": "config/tasks.yaml",
+      "prompt_sha256": "86d2232caad2cee1eebd23b4adaf165bd94a6c1f51cbb2dd94c402f710eeea16",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": null,
+      "timeout_seconds": 900
+    },
+    {
+      "id": "IG-03",
+      "category": "IG",
+      "source": "config/tasks.yaml",
+      "prompt_sha256": "af567b45b9af0c7f28bc7193d7e265b196555a7966f6386d34fa6b6eebc429f5",
+      "repos": [
+        "relayview",
+        "agent-harness-evals"
+      ],
+      "starting_commit": null,
+      "timeout_seconds": 900
+    },
+    {
+      "id": "IG-04",
+      "category": "IG",
+      "source": "config/tasks.yaml",
+      "prompt_sha256": "d1a6018b1d38c07900f5ffc9f25547c67adba2a730493671345bf54c5fcae5d6",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": null,
+      "timeout_seconds": 900
+    },
+    {
+      "id": "IG-05",
+      "category": "IG",
+      "source": "config/tasks.yaml",
+      "prompt_sha256": "8260faa158605d18f061e8c180dfa48735a254755dfa0f16848be7e686975ae3",
+      "repos": [
+        "agent-harness-evals"
+      ],
+      "starting_commit": null,
+      "timeout_seconds": 900
+    },
+    {
+      "id": "DU-01",
+      "category": "DU",
+      "source": "config/defined-updates.yaml",
+      "prompt_sha256": "84587a3cbc7c1a448093c96913ff93843c89bda3b115cbd599b8c4108a406576",
+      "repos": [
+        "lit-go-todos"
+      ],
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "DU-02",
+      "category": "DU",
+      "source": "config/defined-updates.yaml",
+      "prompt_sha256": "15f0da339365b6d8f81052f7e4d76e04f32e9320d4b657c6ca7e991276c90e07",
+      "repos": [
+        "lit-go-todos"
+      ],
+      "starting_commit": "052ce21307c02f772619e4878b44949bd72f5e1b",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "DU-03",
+      "category": "DU",
+      "source": "config/defined-updates.yaml",
+      "prompt_sha256": "c8a8bd56568f0fe2186b75fe6eda1683627157792823ae1cecd6d2f3e60cbc1a",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "DU-04",
+      "category": "DU",
+      "source": "config/defined-updates.yaml",
+      "prompt_sha256": "80d82d4eed93cbcf78c1c4f78da07e715134aaea81ccda33979e44684d3d36d5",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "DU-05",
+      "category": "DU",
+      "source": "config/defined-updates.yaml",
+      "prompt_sha256": "cb572e1e56a4d7d10241ffb2c2a06e344c1f3bd0bc88fbdfd0b74e29b3dee3a0",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "AR-01",
+      "category": "AR",
+      "source": "config/architecture.yaml",
+      "prompt_sha256": "13687138615f55f2cf7f93b064b054a5be199e0292b10d38428b83890f3b933a",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "AR-02",
+      "category": "AR",
+      "source": "config/architecture.yaml",
+      "prompt_sha256": "089a94547a10bd08b9166749f8d869cd8c42c0bd3f07b64d655460d2ed47b519",
+      "repos": [
+        "relayview"
+      ],
+      "starting_commit": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "AR-03",
+      "category": "AR",
+      "source": "config/architecture.yaml",
+      "prompt_sha256": "cc821871544366052987e4c1b732fe20a717edecedbdd115f06c85297131e483",
+      "repos": [
+        "agent-harness-evals"
+      ],
+      "starting_commit": "b0b31dda691620edae30db7127c1e1d8da907813",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "AR-04",
+      "category": "AR",
+      "source": "config/architecture.yaml",
+      "prompt_sha256": "aeff0b3bc97c18db3c45a86cff0a96485e9cb930ff476549593601c0c395c5a2",
+      "repos": [
+        "data-analysis-agent"
+      ],
+      "starting_commit": "f3f81aba0567f08ad4af681345d603496e80b679",
+      "timeout_seconds": 900
+    },
+    {
+      "id": "AR-05",
+      "category": "AR",
+      "source": "config/architecture.yaml",
+      "prompt_sha256": "246deef592b1a8d5a875150235aebbac7d0e48dd618313a7884f81db167c17ee",
+      "repos": [
+        "agent-evals"
+      ],
+      "starting_commit": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+      "timeout_seconds": 900
+    }
+  ],
+  "pilot_case_ids": [
+    "IG-02",
+    "IG-04",
+    "DU-01",
+    "DU-03",
+    "AR-01",
+    "AR-05"
+  ],
+  "arms": [
+    {
+      "id": "codex-copilot-cli",
+      "harness": "official-codex-cli",
+      "inference": "authorized-copilot-route",
+      "model_lock": "required_before_run",
+      "reasoning": "medium"
+    },
+    {
+      "id": "codex-copilot-desktop",
+      "harness": "official-unmodified-codex-desktop",
+      "inference": "authorized-copilot-route",
+      "model_lock": "required_before_run",
+      "reasoning": "medium"
+    },
+    {
+      "id": "codex-chatgpt-cli",
+      "harness": "official-codex-cli",
+      "inference": "chatgpt-backed",
+      "model_lock": "matched-model-required_before_run",
+      "reasoning": "medium"
+    },
+    {
+      "id": "codex-chatgpt-desktop",
+      "harness": "official-unmodified-codex-desktop",
+      "inference": "chatgpt-backed",
+      "model_lock": "matched-model-required_before_run",
+      "reasoning": "medium"
+    },
+    {
+      "id": "pi-copilot",
+      "harness": "pi",
+      "inference": "github-copilot",
+      "model_lock": "same-as-candidate-required_before_run",
+      "reasoning": "medium"
+    }
+  ],
+  "observed_local_versions_not_run_pins": {
+    "codex_cli": "0.158.0",
+    "pi": "1.0.4",
+    "os": "macOS 26.7.1 build 25G241"
+  },
+  "required_run_pins": [
+    "authorized_route_and_account_plan",
+    "exact_copilot_model_id",
+    "exact_chatgpt_control_model_id",
+    "codex_cli_version",
+    "codex_app_server_version",
+    "official_codex_desktop_version_and_build",
+    "pi_version",
+    "os_version_and_build",
+    "mcp_catalog_sha256",
+    "network_policy",
+    "repository_revision_verification"
+  ],
+  "case_protocol": {
+    "fresh_sessions": true,
+    "isolated_worktrees": true,
+    "tool_and_web_canary_repetitions": 3,
+    "time_limit_seconds": 900,
+    "upgrade_policy": "new run ID and repeat all canaries before promotion"
+  },
+  "thresholds": {
+    "tool_call_success": "3 of 3 fresh runs per required case and client",
+    "irrelevant_tool_definitions": "must remain deferred; count initial vs discovered definitions",
+    "median_input_token_ratio_max": 1.25,
+    "native_web": "all native search, open, find, and failure canaries pass 3 of 3 in CLI and desktop with citations and attributable billing",
+    "critical_errors_max": 0,
+    "recurring_required_tool_failures_max": 0,
+    "quality": "completion and blinded judged quality at least Pi on matched model; report per task and uncertainty",
+    "latency_median_ratio_max_vs_pi": 1.25,
+    "operating_cost_median_ratio_max_vs_pi": 1.25,
+    "billing": "all candidate credits and OpenAI charges attributable or unresolved; no unexpected OpenAI inference charge",
+    "promotion": "all six hard gates pass; unresolved authorization or billing prevents promotion"
+  },
+  "results_namespace": "results/codex-copilot-<new-id>/",
+  "historical_results": [
+    "results/local-repos-20261015-122649/",
+    "results/du-2026-10-15-adjudicated/",
+    "results/ar-2026-10-15-full/"
+  ]
+}

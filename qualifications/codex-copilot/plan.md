@@ -2,6 +2,9 @@
 
 Status: proposed
 
+Protocol: [frozen qualification v1](README.md). Execution remains blocked by
+the authorization decision in issue #3 and the required run-specific pins.
+
 Created: 2026-10-27
 
 Decision owner: development team

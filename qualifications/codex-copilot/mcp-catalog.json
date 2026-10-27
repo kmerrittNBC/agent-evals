@@ -1,0 +1,1156 @@
+{
+  "catalog_id": "qualification-mcp-v1",
+  "transport": "stdio",
+  "tools": [
+    {
+      "name": "docs_search_pages",
+      "description": "Search and retrieve internal knowledge pages. Search pages in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "search_pages",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_get_page",
+      "description": "Search and retrieve internal knowledge pages. Get page in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "get_page",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_find_in_page",
+      "description": "Search and retrieve internal knowledge pages. Find in page in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "find_in_page",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_list_spaces",
+      "description": "Search and retrieve internal knowledge pages. List spaces in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "list_spaces",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_get_space",
+      "description": "Search and retrieve internal knowledge pages. Get space in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "get_space",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_list_pages",
+      "description": "Search and retrieve internal knowledge pages. List pages in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "list_pages",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_get_revision",
+      "description": "Search and retrieve internal knowledge pages. Get revision in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "get_revision",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_list_revisions",
+      "description": "Search and retrieve internal knowledge pages. List revisions in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "list_revisions",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_search_titles",
+      "description": "Search and retrieve internal knowledge pages. Search titles in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "search_titles",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "docs_get_attachment",
+      "description": "Search and retrieve internal knowledge pages. Get attachment in the docs service. Use only for docs records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "docs",
+        "operation": "get_attachment",
+        "record_key": "docs-fixture-001",
+        "text": "Release decision page: pilot may proceed only after the authorization review is recorded."
+      }
+    },
+    {
+      "name": "tickets_search_issues",
+      "description": "Search and retrieve issue tracker records. Search issues in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "search_issues",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_get_issue",
+      "description": "Search and retrieve issue tracker records. Get issue in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "get_issue",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_find_in_issue",
+      "description": "Search and retrieve issue tracker records. Find in issue in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "find_in_issue",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_list_projects",
+      "description": "Search and retrieve issue tracker records. List projects in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "list_projects",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_get_project",
+      "description": "Search and retrieve issue tracker records. Get project in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "get_project",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_list_comments",
+      "description": "Search and retrieve issue tracker records. List comments in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "list_comments",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_get_comment",
+      "description": "Search and retrieve issue tracker records. Get comment in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "get_comment",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_list_labels",
+      "description": "Search and retrieve issue tracker records. List labels in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "list_labels",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_get_status",
+      "description": "Search and retrieve issue tracker records. Get status in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "get_status",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "tickets_get_attachment",
+      "description": "Search and retrieve issue tracker records. Get attachment in the tickets service. Use only for tickets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "tickets",
+        "operation": "get_attachment",
+        "record_key": "tickets-fixture-001",
+        "text": "Release decision issue TICKET-001: status awaiting authorization review."
+      }
+    },
+    {
+      "name": "calendar_search_events",
+      "description": "Search and retrieve team calendar records. Search events in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "search_events",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_get_event",
+      "description": "Search and retrieve team calendar records. Get event in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "get_event",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_find_in_event",
+      "description": "Search and retrieve team calendar records. Find in event in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "find_in_event",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_list_calendars",
+      "description": "Search and retrieve team calendar records. List calendars in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "list_calendars",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_get_calendar",
+      "description": "Search and retrieve team calendar records. Get calendar in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "get_calendar",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_list_attendees",
+      "description": "Search and retrieve team calendar records. List attendees in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "list_attendees",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_get_attendee",
+      "description": "Search and retrieve team calendar records. Get attendee in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "get_attendee",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_get_availability",
+      "description": "Search and retrieve team calendar records. Get availability in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "get_availability",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_list_rooms",
+      "description": "Search and retrieve team calendar records. List rooms in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "list_rooms",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "calendar_get_room",
+      "description": "Search and retrieve team calendar records. Get room in the calendar service. Use only for calendar records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "calendar",
+        "operation": "get_room",
+        "record_key": "calendar-fixture-001",
+        "text": "Release decision review event: 2026-11-03 10:00 America/New_York."
+      }
+    },
+    {
+      "name": "assets_search_assets",
+      "description": "Search and retrieve asset inventory records. Search assets in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "search_assets",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_get_asset",
+      "description": "Search and retrieve asset inventory records. Get asset in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "get_asset",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_find_in_asset",
+      "description": "Search and retrieve asset inventory records. Find in asset in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "find_in_asset",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_list_groups",
+      "description": "Search and retrieve asset inventory records. List groups in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "list_groups",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_get_group",
+      "description": "Search and retrieve asset inventory records. Get group in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "get_group",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_list_owners",
+      "description": "Search and retrieve asset inventory records. List owners in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "list_owners",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_get_owner",
+      "description": "Search and retrieve asset inventory records. Get owner in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "get_owner",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_get_assignment",
+      "description": "Search and retrieve asset inventory records. Get assignment in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "get_assignment",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_list_locations",
+      "description": "Search and retrieve asset inventory records. List locations in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "list_locations",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "assets_get_location",
+      "description": "Search and retrieve asset inventory records. Get location in the assets service. Use only for assets records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "assets",
+        "operation": "get_location",
+        "record_key": "assets-fixture-001",
+        "text": "Asset ASSET-001 assigned to the release decision review: projector."
+      }
+    },
+    {
+      "name": "metrics_search_metrics",
+      "description": "Search and retrieve service metric records. Search metrics in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "search_metrics",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_get_metric",
+      "description": "Search and retrieve service metric records. Get metric in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "get_metric",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_find_in_metric",
+      "description": "Search and retrieve service metric records. Find in metric in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "find_in_metric",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_list_dashboards",
+      "description": "Search and retrieve service metric records. List dashboards in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "list_dashboards",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_get_dashboard",
+      "description": "Search and retrieve service metric records. Get dashboard in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "get_dashboard",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_list_series",
+      "description": "Search and retrieve service metric records. List series in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "list_series",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_get_series",
+      "description": "Search and retrieve service metric records. Get series in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "get_series",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_get_alert",
+      "description": "Search and retrieve service metric records. Get alert in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "get_alert",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_list_monitors",
+      "description": "Search and retrieve service metric records. List monitors in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "list_monitors",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    },
+    {
+      "name": "metrics_get_monitor",
+      "description": "Search and retrieve service metric records. Get monitor in the metrics service. Use only for metrics records; similarly named operations in other services are distinct. Returns a deterministic fixture record and service marker.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Fixture search phrase or record key"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "fixture_result": {
+        "service": "metrics",
+        "operation": "get_monitor",
+        "record_key": "metrics-fixture-001",
+        "text": "Release decision dashboard: fixture error rate 0.0 percent."
+      }
+    }
+  ]
+}
