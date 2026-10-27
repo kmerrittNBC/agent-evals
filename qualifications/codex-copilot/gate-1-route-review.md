@@ -30,6 +30,14 @@ Reviewed 2026-10-27. These are examples and author claims, not independently rep
 
 These projects reduce uncertainty about *how* to build a Codex-facing proxy. Their shared upstream pattern strengthens the specific GitHub question below. Do not install them with the Business seat or treat their working reports as Gate 1 authorization under this issue's private/extracted endpoint boundary.
 
+## Team rollout and maintenance disposition
+
+The account holder states that a recommendation for the whole development team must remain usable across routine Codex updates without one specialist owning emergency gateway repairs. This is a deployment requirement, not a claim that the local fixture is defective. The third-party proxies above do not supply a vendor-backed compatibility or support commitment, and their internal-token dependency could change outside the team's control.
+
+For a team recommendation, require a GitHub-supported upstream contract and an OpenAI-documented client configuration, with a named support owner, compatibility and update policy, staged rollout/canary across CLI and desktop builds, incident response path, and fallback client that developers can use without the gateway. OpenAI's [gateway rollout guidance](https://learn.chatgpt.com/docs/enterprise/roll-out-a-gateway) calls for testing each client/gateway/model combination and distributing verified settings; its [compatibility checklist](https://learn.chatgpt.com/docs/enterprise/gateway-compatibility) covers streaming, continuation, tools, attribution, and errors. A passing loopback fixture or community proxy report cannot meet this operational requirement.
+
+Current recommendation: do not roll a self-maintained Copilot bridge to the team. Continue with the already approved, working Pi/Copilot route or the authorized ChatGPT-backed Codex setup while the vendor-supported local Codex/Copilot route is unresolved. Revisit only if GitHub supplies a supported contract and the team can assign ownership and a tested fallback. This does not change the frozen qualification protocol or claim that either alternative has passed the new candidate gates.
+
 ## Disposable local proof
 
 `responses_fixture.py` is a loopback-only, deterministic **non-Copilot** Responses server. `probe_responses_fixture.py` launches it in a temporary directory with an isolated Codex home, an inert placeholder key, and a provider pointing at `127.0.0.1`. It records only model, stream flag, tool count, and path; it does not record prompts or headers. On 2026-10-27, `codex-cli 0.158.0` completed one streamed text turn per alias. This verifies CLI provider configuration and basic streamed text handling, **not** Copilot authentication, a supported GitHub route, function-call translation, error behavior, desktop selection, billing, or the full [gateway compatibility checklist](https://learn.chatgpt.com/docs/enterprise/gateway-compatibility).
