@@ -8,6 +8,11 @@ is the human authorization gate. Do not run a Copilot-backed Codex candidate
 or mark that gate passed until its route, account terms, and documented desktop
 configuration are confirmed.
 
+The 2026-10-27 [Gate 1 route review](gate-1-route-review.md) records the
+organization's approval, the documented generic desktop gateway setting, a
+disposable CLI fixture result, and the unresolved GitHub local route. The
+fixture is not a candidate run and does not change this frozen protocol.
+
 ## Cases and controls
 
 All 15 existing prompts are referenced by ID and SHA-256 in `protocol.json`.
