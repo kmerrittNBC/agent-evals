@@ -1,0 +1,9 @@
+{
+  "seed": 20261014,
+  "slots": [
+    {
+      "task_id": "IG-01",
+      "arm_id": "pi-local-qwen"
+    }
+  ]
+}

@@ -132,7 +132,7 @@ def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
 
 
 def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
-              live: bool, column: str = "ig") -> dict:
+              live: bool, column: str = "ig", selected_arms: list[str] | None = None) -> dict:
     def same_pin(left: dict, right: dict) -> bool:
         return left["path"] == right["path"] and left["commit"] == right["commit"]
 
@@ -162,6 +162,8 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
         if column != "ig":
             manifest["column"] = column
     arms = read_config("arms")["arms"]
+    if selected_arms and (unknown := set(selected_arms) - {arm["id"] for arm in arms}):
+        raise ValueError(f"Unknown arm(s): {', '.join(sorted(unknown))}")
     tasks = read_tasks(column)
     manifest["task_preflight"] = {}
     for task in tasks:
@@ -194,7 +196,7 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
         state = static_arm_check(arm)
         if column != "ig" and not shutil.which("bwrap"):
             state.update(status="unavailable", reason="Bubblewrap is required for writable task isolation")
-        if live and state["status"] == "needs_live_probe":
+        if live and (not selected_arms or arm["id"] in selected_arms) and state["status"] == "needs_live_probe":
             state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"],
                                         writable=column != "ig"))
         manifest["preflight"][arm["id"]] = state

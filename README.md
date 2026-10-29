@@ -8,9 +8,23 @@ This repository compares **model plus harness pairs** on the work a development 
 | Defined repository updates (DU) | Changes code against a prepared failing check and nearby regression checks. | 5 |
 | Architectural planning and refactoring (AR) | Produces a concrete implementation plan (four tasks) or makes a bounded refactor (one task). | 5 |
 
-The four configured pairs are **Pi + GPT-6 Luna**, **Pi + GPT-6 Sol**, **OpenCode + GPT-6 Luna**, and **Claude Code + Opus 5.5**. Each pair receives the same prompt and repository revision for a task, in a fresh session with a 15-minute limit. A full run is **15 tasks × 4 pairs = 60 initial attempts**. The study measures those first attempts; it does not measure improvement after follow-up prompts or graphical-interface usability.
+The original comparison used **Pi + GPT-6 Luna**, **Pi + GPT-6 Sol**, **OpenCode + GPT-6 Luna**, and **Claude Code + Opus 5.5**: **15 tasks × 4 pairs = 60 initial attempts**. The additional `pi-local-qwen` arm supports a separate pilot. Each pair receives the same prompt and repository revision for a task, in a fresh session with a 15-minute limit. The study measures those first attempts; it does not measure improvement after follow-up prompts or graphical-interface usability.
 
 The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-10-15.md) discusses the account-level Sol/Luna usage comparison and its limits.
+
+### Local Qwen IG-01 pilot
+
+The optional `pi-local-qwen` arm uses Pi with `omlx-local/Qwen3.8-27B-oQ6e-mtp` for the task. Its `pi-web-search` extension uses Copilot Luna as a dedicated search model, so searches consume Copilot usage; `pi-web-fetch` fetches pages locally. The local oMLX server must be running on port 8001 with the 6-bit checkpoint installed. This pilot has its own result ID and does not change the earlier comparisons.
+
+```sh
+python3 scripts/configure_pi_local_ig.py
+../local-llm-setup/scripts/start_ssd_100k_8gb_36g.sh  # keep running in another terminal
+python3 -m agent_eval preflight --column ig --evaluation-id ig-local-qwen-pilot \
+  --cutoff 2026-10-15T00:00:00-04:00 --live --arm pi-local-qwen
+python3 -m agent_eval run --evaluation-id ig-local-qwen-pilot --task IG-01 --arm pi-local-qwen
+```
+
+`configure_pi_local_ig.py` pins both Pi extensions, selects local Qwen for new Pi sessions, and writes `~/.pi/agent/web-search.json` for Copilot Luna search. It backs up Pi settings before changes and refuses to replace a different existing search-model choice. The preflight must observe both web tool calls before the task can run. The default 15-minute task limit still applies; an incomplete local run remains an observed outcome.
 
 **Read the results:** [Executive report](docs/executive-report-2026-10-15.md) · [IG run](results/local-repos-20261015-122649/report.md) · [adjudicated DU run](results/du-2026-10-15-adjudicated/report.md) · [AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain what each category is meant to represent. Earlier pilots and excluded-arm probes remain under `results/`; do not pool their scores with these three runs.
 

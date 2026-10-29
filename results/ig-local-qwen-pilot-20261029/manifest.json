@@ -1,0 +1,134 @@
+{
+  "evaluation_id": "ig-local-qwen-pilot-20261029",
+  "created_at": "2026-10-29T17:53:04.232693+00:00",
+  "cutoff": "2026-10-15T00:00:00-04:00",
+  "config_hashes": {
+    "arms": "5ea1eab1c0573f31a516f62f10007f6d31f26b99375b0709c60c868059eedadb",
+    "tasks": "f05d1988429a3c59f52164356fe03342da5fe8754bde5945ed439faa0b75f243",
+    "run-policy": "754e76e2052880ee94a115d94fb7a61bacdc010cc7b233a6aa6e27ec1c624937",
+    "rubric": "d58391bd59a0da2be6e02f911461a355cf2ede630fb074ffdabc00ec111d8265"
+  },
+  "repos": {},
+  "preflight": {
+    "pi-luna": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "1.4.0",
+      "model": "github-copilot/gpt-6-luna",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search@1.7.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch@1.1.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-fetch"
+      ]
+    },
+    "pi-sol": {
+      "status": "needs_live_probe",
+      "reason": null,
+      "version": "1.4.0",
+      "model": "github-copilot/gpt-6-sol",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": "unverified",
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search@1.7.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch@1.1.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-fetch"
+      ]
+    },
+    "pi-local-qwen": {
+      "status": "ready",
+      "reason": null,
+      "version": "1.4.0",
+      "model": "omlx-local/Qwen3.8-27B-oQ6e-mtp",
+      "reasoning": "medium",
+      "search_provider": null,
+      "usage_fields": [
+        "cacheRead",
+        "cacheWrite",
+        "cost",
+        "input",
+        "output",
+        "reasoning",
+        "totalTokens"
+      ],
+      "extensions": [
+        "User packages:",
+        "  npm:pi-web-search@1.7.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-search",
+        "  npm:pi-web-fetch@1.1.0",
+        "    /Users/kyle.merritt/.pi/agent/npm/node_modules/pi-web-fetch"
+      ],
+      "probe_tool_names": [
+        "web_search",
+        "web_fetch"
+      ],
+      "usage_classification": "measured"
+    },
+    "opencode-luna": {
+      "status": "unavailable",
+      "reason": "opencode not found in PATH",
+      "version": null
+    },
+    "claude-opus": {
+      "status": "unavailable",
+      "reason": "claude not found in PATH",
+      "version": null
+    }
+  },
+  "judge_preflight": {
+    "status": "ready",
+    "reason": null,
+    "version": "codex-cli 0.165.0"
+  },
+  "task_preflight": {
+    "IG-01": {
+      "status": "ready",
+      "reason": null
+    },
+    "IG-02": {
+      "status": "unavailable",
+      "reason": "Missing repository: relayview"
+    },
+    "IG-03": {
+      "status": "unavailable",
+      "reason": "Missing repository: relayview, agent-harness-evals"
+    },
+    "IG-04": {
+      "status": "unavailable",
+      "reason": "Missing repository: relayview"
+    },
+    "IG-05": {
+      "status": "unavailable",
+      "reason": "Missing repository: agent-harness-evals"
+    }
+  },
+  "evidence": {
+    "IG-01": {
+      "status": "ready",
+      "sha256": "d583fedfe31dd7db16a12174e8797541fb778f153a017977191c86befc36954c"
+    },
+    "IG-02": {
+      "status": "missing pinned repo relayview",
+      "sha256": null
+    },
+    "IG-03": {
+      "status": "missing pinned repo relayview",
+      "sha256": null
+    },
+    "IG-04": {
+      "status": "missing pinned repo relayview",
+      "sha256": null
+    },
+    "IG-05": {
+      "status": "missing pinned repo agent-harness-evals",
+      "sha256": null
+    }
+  }
+}
