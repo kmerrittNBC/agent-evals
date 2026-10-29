@@ -23,6 +23,10 @@ fi
 pi install npm:pi-web-search@1.7.0
 pi install npm:pi-web-fetch@1.1.0
 
+# npm may skip Puppeteer's postinstall script, leaving web_fetch without Chrome.
+agent_dir="${PI_CODING_AGENT_DIR:-$HOME/.pi/agent}"
+"$agent_dir/npm/node_modules/.bin/puppeteer" browsers install chrome
+
 if [[ ! -d /Applications/pi-gui.app && ! -d "$HOME/Applications/pi-gui.app" ]]; then
   brew tap minghinmatthewlam/tap
   brew trust minghinmatthewlam/tap

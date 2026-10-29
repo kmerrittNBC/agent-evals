@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 // Set the shared Pi CLI/pi-gui defaults without replacing other Pi settings.
-import { existsSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, lstatSync, mkdirSync, readFileSync, renameSync, statSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 
 const agentDir = process.env.PI_CODING_AGENT_DIR || join(homedir(), ".pi", "agent");
 const settingsPath = join(agentDir, "settings.json");
 const exists = existsSync(settingsPath);
+if (exists && lstatSync(settingsPath).isSymbolicLink()) {
+  throw new Error(`${settingsPath} is a symlink; update its managed source instead`);
+}
 let settings = {};
 
 if (exists) {
