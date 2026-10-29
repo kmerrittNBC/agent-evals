@@ -1,0 +1,47 @@
+{
+  "task_id": "IG-01",
+  "arm_id": "pi-local-qwen",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-10-29T17:54:05.297690+00:00",
+  "elapsed_seconds": 472.458544,
+  "answer": "I now have sourced data for all ten cells. Here's the matrix.\n\n# Terminal-Bench 2.1 × DeepSWE v1.1 — Attribution Matrix\n\n**Benchmark variants (for reference):**\n- **Terminal-Bench 2.1**: 89 terminal tasks, pass@1. Revision of 2.0 fixing 28 tasks (tbench.ai).\n- **DeepSWE v1.1**: 113 original tasks, 91 repos, 5 languages, hand-written verifiers; standard harness is **mini-swe-agent** (arXiv 2607.07946, deepswe.datacurve.ai).\n\n## Terminal-Bench 2.1\n\n| Model | Score | Reported by | Harness / settings |\n|---|---|---|---|\n| **GPT-6 Luna** | 73.03% | Vals AI (independent) | Terminus 2; reasoning effort **max** |\n| | 79.8% | Fidian (independent) | Terminus-2 in Daytona sandboxes; pass@1, max effort |\n| **GPT-6 Sol** | 83.15% | Vals AI (independent) | Terminus 2; effort setting not stated in source |\n| | 88.0% | Fidian (independent) | Terminus-2 in Daytona sandboxes; pass@1, max effort |\n| | 85.4% | Mercor (independent) | 89 tasks, pass@1; **harness not specified** on leaderboard page |\n| **Qwen3.8-27B** | 73.0% | Qwen (vendor, model card, 2026-08-14) | \"Terminus\" harness; **no other settings disclosed** (temp, context, timeout unspecified) |\n| **GLM-5.3** | 88.2% | Z.ai (vendor, model card) | **Claude Code 2.1.207**; temp 1.0, top-p 1, max output 65,536, 6 h timeout; reasoning effort default `max` |\n| **DeepSeek V4.1 Flash** | 90.6% | DeepSeek (vendor, model card) | **DeepSeek Harness Minimal**; reasoning effort 100, temp 1.0, top_p 0.95, 1M context, Linux containers, max_steps 500, **no network**, 3 samples/task |\n| | 90.3% | DeepSeek (vendor, model card) | **mini-SWE harness**, same settings as above |\n\n## DeepSWE v1.1\n\n| Model | Score | Reported by | Harness / settings |\n|---|---|---|---|\n| **GPT-6 Luna** | 66.6% | OpenAI (vendor) | mini-swe-agent; reasoning effort **max**; other settings not disclosed |\n| **GPT-6 Sol** | 68.8% | OpenAI (vendor) | mini-swe-agent; reasoning effort **max**; other settings not disclosed |\n| **Qwen3.8-27B** | 42.2% | Qwen (vendor, model card) | **Claude Code**; temp 1.0, 256K context |\n| **GLM-5.3** | 66.9% | Z.ai (vendor, model card) | mini-swe-agent; temp 0.95, top_p 1.0, 400K context, 6 h timeout, reasoning `max` |\n| | 69% ±3% | DeepSWE leaderboard (deepswe.datacurve.ai) | mini-swe-agent; **separate run from Z.ai's** — settings not fully documented |\n| **DeepSeek V4.1 Flash** | 74.2% | DeepSeek (vendor, model card) | **mini-SWE harness**; reasoning effort 100, temp 1.0, top_p 0.95, 1M context, max_steps 500, 8 samples/task |\n| | 72.6% | DeepSeek (vendor, model card) | **DeepSeek Harness Minimal**, same settings |\n\n**Unverified cells:** none — every cell has at least one sourced score. However, several *details* are unverified: Vals' effort setting for GPT-6 Sol, Mercor's harness, and OpenAI's exact DeepSWE run settings beyond \"max effort.\"\n\n## Disagreements between sources\n\n- **GPT-6 Luna TB 2.1**: Vals 73.03% vs Fidian 79.8% — a 6.8 pp gap. Both use Terminus 2, so the gap likely reflects sandbox/effort configuration differences (Fidian: Daytona, max effort) rather than a data error.\n- **GPT-6 Sol TB 2.1**: three different numbers — Vals 83.15%, Mercor 85.4%, Fidian 88.0%.\n- **GLM-5.3 DeepSWE**: Z.ai 66.9% vs leaderboard 69% ±3% — different runs; within each other's error bars.\n- **DeepSeek V4.1 Flash**: 90.6% (own harness) vs 90.3% (mini-SWE) on TB; 74.2% (mini-SWE) vs 72.6% (own harness) on DeepSWE — same vendor, different scaffolds.\n\n## What the evidence actually supports\n\n**Directly comparable (same harness, same evaluator):**\n1. **Sol vs Luna on TB 2.1 at Fidian**: 88.0% vs 79.8% — same Terminus-2/Daytona setup, both max effort. This is the cleanest head-to-head in the matrix.\n2. **Sol vs Luna on TB 2.1 at Vals**: 83.15% vs 73.03% — same Terminus 2 harness, but Luna's run is documented as max effort while Sol's effort setting isn't stated, so treat the gap with mild caution.\n3. **Sol vs Luna on DeepSWE**: 68.8% vs 66.6% — both OpenAI-reported, mini-swe-agent, max effort. Comparable, but vendor-reported and not independently reproduced.\n\n**Roughly comparable (same standard harness, different undisclosed settings):**\n4. **DeepSWE mini-swe-agent cluster**: DeepSeek 74.2% > GPT-6 Sol 68.8% > GLM-5.3 66.9% ≈ GPT-6 Luna 66.6%. All use the standard mini-swe-agent, but temperature (0.95 vs 1.0), context (400K vs 1M vs unknown), and reasoning-effort semantics differ, and three of four are vendor-reported. The ranking is plausible but the margins (especially Sol vs GLM vs Luna, all within ~2 pp) are **not** statistically resolvable from the evidence.\n\n**Not directly comparable — do not rank these against the above:**\n5. **Qwen3.8-27B's DeepSWE 42.2%** used **Claude Code**, not mini-swe-agent. It cannot be placed on the same scale as the 66–74% cluster; the gap may be substantially harness-driven.\n6. **GLM-5.3's TB 2.1 88.2%** used **Claude Code**, and **DeepSeek's 90.6%** used its own harness — neither is comparable to the Terminus 2 numbers (73–88%). DeepSeek's 90.3% mini-SWE figure is the only TB number in that row that sits near the standard-harness cluster, and even it used 1M context and no-network conditions.\n7. **Qwen's TB 73.0%** says only \"Terminus\" with no version or settings — nominally close to Vals' Terminus 2 numbers (Luna 73.03%, Sol 83.15%), but the missing metadata means it's a weak comparison at best.\n8. **Mercor's 85.4% for GPT-6 Sol** has no documented harness — usable only as a cross-check, not for ranking.\n\n**Bottom line:** the only comparisons the evidence fully supports are the intra-evaluator ones (Fidian's and Vals' Sol-vs-Luna gaps, and OpenAI's own Sol-vs-Luna DeepSWE delta). Any cross-vendor ranking on either benchmark is confounded by harness choice — the single largest source of variance visible in this data (e.g., DeepSeek's 90.6 vs 90.3, and the 42.2 vs 66.9+ spread on DeepSWE).",
+  "usage": {
+    "classification": "measured",
+    "source": "provider event",
+    "raw": {
+      "input": 4547,
+      "output": 3379,
+      "cacheRead": 32768,
+      "cacheWrite": 0,
+      "reasoning": 0,
+      "totalTokens": 40694,
+      "cost": {
+        "input": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "total": 0
+      }
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 5.455907,
+  "first_substantive_seconds": 365.717255,
+  "snapshot_digest_before": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "snapshot_digest_after": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 472.458544,
+      "started_at": "2026-10-29T17:54:05.297690+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 17,
+    "fetch_calls": 2,
+    "other_tool_calls": 0
+  }
+}
