@@ -1,5 +1,7 @@
 # Coding agent capability evaluation
 
+For the small team installer and onboarding steps, use [coding-agent-setup](https://github.com/kmerrittNBC/coding-agent-setup). This repository retains the evaluation evidence and runner.
+
 This repository compares **model plus harness pairs** on the work a development team might assign an agent. It evaluates three task categories:
 
 | Category | What the agent does | Tasks |
