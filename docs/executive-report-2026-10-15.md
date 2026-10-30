@@ -169,6 +169,12 @@ The evaluated pairs were Pi with GPT-6 Luna, Pi with GPT-6 Sol, OpenCode with GP
 
 The goal was **one setup capable of all three task types**. We excluded the standalone GitHub Copilot CLI because its noninteractive web-search probe could not search the web, which the research tasks require. That decision does not measure Copilot CLI's ability on code updates or architecture work. We also excluded Google's Antigravity CLI: an earlier run had command-permission problems, and a follow-up that allowed commands hit the account's usage quota. Those are access and execution limits, not comparative quality results. Neither excluded setup contributed to the four-pair scores above.
 
+#### Why Codex with Copilot was not a scored pair — later scope note
+
+Codex CLI was used as the **judge** in this study, but Codex using Copilot models was not one of the four **candidate pairs** and has no score in the 60 attempts. A separate qualification was planned after the October comparison for Codex CLI and the official, unmodified desktop with the organization's Copilot Business seat. The organization approved that use, but the team did not establish a publicly documented, supported **local** Copilot inference route for both clients. A local Responses fixture proved only that Codex CLI could be configured for a gateway; it made no Copilot request. GitHub's documented Codex/Copilot integration was scoped to its Agentic Workflows sandbox, while the community local bridges examined depended on internal or token-derived Copilot interfaces. The team also declined to own an adapter that might require emergency repair after client or provider updates.
+
+On 27 October 2026, the account holder [stopped that separate experiment](../qualifications/codex-copilot/stop-decision-2026-10-27.md). Its connection gate remained unresolved and its candidate runs were never started. This later decision does not change the October scores or establish how Codex with Copilot would have performed. Pi + GPT-6 Luna remains the report's provisional mixed-workload choice, with blind human review of consequential errors and Copilot Business-seat cost checks still pending.
+
 ### Web search and page fetch by pair
 
 The evaluated setups reached online information through different providers and page-reading tools. All could search and fetch pages in a preliminary probe, but that does not mean they received the same results, page content, response time, or source coverage.
