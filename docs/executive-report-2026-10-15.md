@@ -208,7 +208,7 @@ This is an exploratory comparison of five tasks per category, with one attempt p
 
 ## Later local Qwen follow-up
 
-We ran Pi with the local `Qwen3.8-27B-oQ6e-mtp` checkpoint served by oMLX on a Mac. Pi and the test repositories ran on Linux, with model requests sent through an SSH tunnel. Pi's `web_search` extension used Copilot Luna; page fetching ran on Linux. The [combined local results](../results/local-qwen-linux-combined-20261030.md) retain the original IG attempts from October 29 and fresh DU and AR attempts from October 30. They are separate runs, not a fifth arm in the original continuous comparison.
+We ran Pi with the local [`Qwen3.8-27B-oQ6e-mtp`](https://huggingface.co/Jundot/Qwen3.8-27B-oQ6e-mtp) checkpoint served by oMLX on a Mac. Pi and the test repositories ran on Linux, with model requests sent through an SSH tunnel. Pi's `web_search` extension used Copilot Luna; page fetching ran on Linux. The [combined local results](../results/local-qwen-linux-combined-20261030.md) retain the original IG attempts from October 29 and fresh DU and AR attempts from October 30. They are separate runs, not a fifth arm in the original continuous comparison.
 
 | Category | Answers produced | Judged complete | Mean quality of judged answers | Median time for answers |
 |---|---:|---:|---:|---:|
