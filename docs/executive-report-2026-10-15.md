@@ -24,6 +24,8 @@ Across the 15 tasks, no pair led on every measure:
 
 These results apply to each **model plus coding agent**, not to a model in isolation. Different search tools and configurations may explain some differences. Five tasks per category and one attempt per pair and task make this an exploratory comparison.
 
+A later Pi + local Qwen follow-up used the same task set but separate run IDs. Its results are [summarized at the end of this report](#later-local-qwen-follow-up). They are not part of the four-pair, 60-attempt comparison below.
+
 | Model + coding agent | IG: complete; rating | DU: complete; rating | AR: complete; rating | All complete | Mean quality / 5 | Median final time | Critical errors |
 |---|---|---|---|---:|---:|---:|---:|
 | GPT-6 Luna + Pi | 4/5; Good | 4/5; Good | 5/5; Excellent | 13/15 | 4.47 | 75.7 s | 2 |
@@ -203,3 +205,30 @@ The original defined-update run marked five attempts failed because agents edite
 ### Limits
 
 This is an exploratory comparison of five tasks per category, with one attempt per pair and task. Four of the five architecture tasks asked for plans; these results say more about planning than about executing deep refactors. Ratings use a scoring rule fixed before the runs and are not statistically precise rankings. Scores are ordinal and depend on an automated judge; code checks can miss defects. Missing cost or timing fields mean unavailable, never zero. Initial-output times are also less comparable across tools than final-deliverable times because their event streams differ. A final recommendation should follow blind human review of consequential errors, representative architecture plans, and code changes.
+
+## Later local Qwen follow-up
+
+We ran Pi with the local `Qwen3.8-27B-oQ6e-mtp` checkpoint served by oMLX on a Mac. Pi and the test repositories ran on Linux, with model requests sent through an SSH tunnel. Pi's `web_search` extension used Copilot Luna; page fetching ran on Linux. The [combined local results](../results/local-qwen-linux-combined-20261030.md) retain the original IG attempts from October 29 and fresh DU and AR attempts from October 30. They are separate runs, not a fifth arm in the original continuous comparison.
+
+| Category | Answers produced | Judged complete | Mean quality of judged answers | Median time for answers |
+|---|---:|---:|---:|---:|
+| IG | 3/5 | 1/5 | 3.33/5 | 5.5 min |
+| DU | 5/5 | 3/5 | 4.20/5 | 4.4 min |
+| AR | 0/5 | 0/5 | unavailable | unavailable |
+
+The two IG failures and all five AR failures ended when oMLX's memory guard rejected a prompt. No AR task produced a final answer, including AR-05, the code refactor. These failures measure the current local serving setup; they do not establish that the checkpoint could never perform the tasks under different memory or context settings. Quality means above exclude attempts with no judgeable answer; failed slots remain in the completion denominator.
+
+The DU tasks show a narrower opportunity for local use, with three judged complete updates. They also took substantially longer than the adjudicated Pi + Luna DU attempts:
+
+| DU task | Pi + Luna | Pi + local Qwen | Local time / Luna time |
+|---|---:|---:|---:|
+| DU-01 | 1.3 min | 3.4 min | 2.7× |
+| DU-02 | 1.1 min | 4.4 min | 3.9× |
+| DU-03 | 1.1 min | 4.3 min | 4.1× |
+| DU-04 | 0.7 min | 5.9 min | 8.0× |
+| DU-05 | 0.9 min | 4.7 min | 5.5× |
+| **Median** | **1.1 min** | **4.4 min** | **4.2×** |
+
+Across the five DU tasks, local Qwen took 22.9 minutes versus Luna's 5.1 minutes. Luna had four judged complete updates, compared with three for local Qwen. The two runs used different Pi versions (0.85.0 for local Qwen, 1.2.0 for Luna) and dates, so the time ratio describes these observed setups rather than an isolated model-speed difference.
+
+**Current decision:** Rule out this local setup as the team's general agent for the mixed workload. Several minutes of added wait per directed update and zero deliverables across the architecture and refactor tasks outweigh its limited DU success. A split setup remains worth exploring for small, well-defined updates after memory and reliability work, with a hosted model handling architectural tasks. The present results do not yet justify routing DU work to local Qwen by default.
