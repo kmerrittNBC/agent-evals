@@ -36,6 +36,8 @@ If we have 1,900 credits per person per month, cost become a major factor. The b
 
 My recommendation is a pilot of Pi with GPT-6 Luna as the default for mixed work escalating to GPT-6 Sol when needed. Luna is the sensible default inside the pool, with Sol reserved for cases where its speed or quality advantage may justify the extra draw.
 
+To make that recommendation easy to try, I built a companion [coding-agent-setup](https://github.com/kmerrittNBC/coding-agent-setup) repo. On an Apple Silicon Mac, its installer sets up Pi and pi-gui, adds web search and fetch, and makes Copilot’s GPT-6 Luna the default for new terminal sessions and GUI threads. The repo has a preflight, quick-start commands, a pi-gui preview, and a guide for the interactive Copilot sign-in and verification. The link is on the slide; I can open it now to show how a developer gets started.
+
 
 
 ## Source notes (not spoken)
@@ -46,4 +48,5 @@ My recommendation is a pilot of Pi with GPT-6 Luna as the default for mixed work
 - [Copilot CLI reprobe](../results/copilot-search-reprobe-2026-11-02/README.md): November headless search diagnostic.
 - [Codex–Copilot stop decision](../qualifications/codex-copilot/stop-decision-2026-10-27.md): later qualification and maintenance decision.
 - [Local Qwen follow-up](../results/local-qwen-linux-combined-20261030.md): separate pilot results.
+- [Coding agent setup](https://github.com/kmerrittNBC/coding-agent-setup): installer, pi-gui preview, and developer setup guide.
 - The 1,900-credit monthly allowance was supplied by the presenter; it is not a measurement in the October report.
