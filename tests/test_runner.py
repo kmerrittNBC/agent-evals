@@ -295,6 +295,37 @@ class RunnerContractTests(unittest.TestCase):
         self.assertEqual(allowed, {"read", "glob", "grep", "websearch", "webfetch", "question"})
         self.assertTrue(all(rule["effect"] == "allow" for rule in rules[1:]))
 
+    def test_opencode_writable_tasks_allow_v2_shell_action(self):
+        arm = {"harness": "opencode", "search_provider": "tinyfish"}
+        config = json.loads(adapters.environment(arm, Path("/w"), writable=True)
+                            ["OPENCODE_CONFIG_CONTENT"])
+        allowed = {rule["action"] for rule in config["permissions"]
+                   if rule["effect"] == "allow"}
+        self.assertIn("shell", allowed)
+        self.assertNotIn("bash", allowed)
+
+    def test_opencode_writable_preflight_rejects_missing_shell_execution(self):
+        arm = {"harness": "opencode", "binary": "opencode",
+               "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
+               "search_provider": "tinyfish"}
+
+        def fake_capture(command, cwd, env, timeout, event_path):
+            if "web_search" in command[-1]:
+                events = [{"data": {"type": "tool_use", "part": {"tool": name}}}
+                          for name in ("websearch", "webfetch")]
+                events.append({"data": {"type": "text", "part": {"text": "pathlib docs"}}})
+            else:
+                (cwd / "write-probe.txt").write_text("agent-eval-write-probe\n")
+                events = [{"data": {"type": "text", "part": {"text": "done"}}}]
+            return {"events": events, "exit_code": 0, "timed_out": False}
+
+        with patch("src.agent_eval.preflight.capture", side_effect=fake_capture), \
+                patch("src.agent_eval.preflight.sandbox_command",
+                      side_effect=lambda command, *_: command):
+            probe = live_arm_probe(arm, 180, writable=True)
+        self.assertEqual(probe["status"], "unavailable")
+        self.assertIn("shell", probe["reason"].lower())
+
     def test_opencode_events_decode_answer_tools_session_and_usage(self):
         events = [
             {"data": {"type": "step_start", "sessionID": "sess-9", "part": {}}},

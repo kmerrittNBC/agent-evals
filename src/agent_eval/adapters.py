@@ -47,7 +47,7 @@ def environment(arm: dict, workspace: Path, writable: bool = False) -> dict[str,
                 {"action": "webfetch", "resource": "*", "effect": "allow"},
                 {"action": "question", "resource": "*", "effect": "allow"},
                 *([{"action": action, "resource": "*", "effect": "allow"}
-                   for action in ("bash", "edit", "write", "apply_patch")] if writable else []),
+                   for action in ("shell", "edit")] if writable else []),
             ],
             "websearch": {"provider": arm.get("search_provider", "tinyfish")},
         })

@@ -126,9 +126,40 @@ def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
                 return {"status": "unavailable",
                         "reason": "Writable tool probe failed in isolated directory",
                         "probe_tool_names": names}
-        return {"status": "ready", "reason": None, "probe_tool_names": names,
-                "usage_fields": sorted(usage["raw"].keys()) if isinstance(usage["raw"], dict) else [],
-                "usage_classification": usage["classification"]}
+            if arm["harness"] == "opencode":
+                shell_dir = directory / "shell"
+                shell_dir.mkdir()
+                shell_run_dir = directory / "shell-run"
+                shell_run_dir.mkdir()
+                shell_target = shell_dir / "shell-probe.txt"
+                shell_prompt = ("Use the shell tool to run exactly this command in the "
+                                "current directory: printf agent-eval-shell-probe > shell-probe.txt. "
+                                "Report whether it succeeded.")
+                shell_cmd = adapters.command(arm, shell_prompt, shell_dir, shell_run_dir,
+                                             writable=True)
+                shell_cmd = sandbox_command(shell_cmd, shell_dir, shell_run_dir, [])
+                shell_result = capture(shell_cmd, shell_dir,
+                                       adapters.environment(arm, shell_dir, writable=True),
+                                       timeout, directory / "shell-events.jsonl")
+                shell_events = shell_result["events"]
+                shell_completed = any(
+                    entry.get("data", {}).get("type") == "tool_use"
+                    and entry["data"].get("part", {}).get("tool") == "shell"
+                    and entry["data"]["part"].get("state", {}).get("status") == "completed"
+                    for entry in shell_events)
+                if (shell_result["exit_code"] != 0 or shell_result["timed_out"] or
+                        not shell_completed or not shell_target.exists() or
+                        shell_target.read_text() != "agent-eval-shell-probe"):
+                    return {"status": "unavailable",
+                            "reason": "Shell command probe failed in isolated directory",
+                            "probe_tool_names": names,
+                            "shell_probe_tool_names": adapters.tool_names(shell_events)}
+        ready = {"status": "ready", "reason": None, "probe_tool_names": names,
+                 "usage_fields": sorted(usage["raw"].keys()) if isinstance(usage["raw"], dict) else [],
+                 "usage_classification": usage["classification"]}
+        if writable and arm["harness"] == "opencode":
+            ready["shell_probe_tool_names"] = adapters.tool_names(shell_events)
+        return ready
 
 
 def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
