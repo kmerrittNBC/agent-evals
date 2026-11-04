@@ -64,7 +64,9 @@ used the original IG prompts, the same two pinned source commits, GPT-6 Luna
 at medium reasoning, and the original 15 October information cutoff. All five
 attempts completed as processes. IG-02 through IG-05 directly read the
 appropriate pinned files; no new attempt accessed a judge pack or previous
-answer. The judge assessed four tasks complete. Search route and source
+answer. The attempts ran with runner commit `fcc6154`; the subsequent
+commit tightened preflight and documentation without changing the task
+invocation. The judge assessed four tasks complete. Search route and source
 visibility changed together, and fresh model outputs were produced on a later
 date. The score gain cannot be assigned to Copilot search alone.
 
