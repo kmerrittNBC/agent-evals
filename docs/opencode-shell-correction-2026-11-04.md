@@ -1,7 +1,7 @@
 # OpenCode shell permission correction — 4 November 2026
 
 For revised cross-pair conclusions, see the
-[updated executive report](executive-report-2026-11-04.md).
+[updated executive report](executive-report-2026-11-04-copilot-search.md).
 
 The October 15 OpenCode V2 runner used a deny-all permission rule followed by
 an allow rule for `bash`. OpenCode V2 names its command permission `shell`, so
@@ -36,4 +36,5 @@ because the arm lacked a task capability that the runner intended to provide.
 
 IG was intentionally read-only for every arm and received no command
 permission. Its earlier OpenCode result is not affected by this writable-task
-permission mismatch.
+permission mismatch. The [later IG correction](executive-report-2026-11-04-copilot-search.md)
+addresses a separate misplaced workspace and search-route change.

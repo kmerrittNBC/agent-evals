@@ -1,15 +1,17 @@
 # Executive report — 15 October 2026 (superseeded)
 
-The [updated 4 November report](executive-report-2026-11-04.md) uses the
-shell-enabled OpenCode DU and AR reruns. This file preserves the original
-analysis and recommendation as a historical record.
+The [current 4 November report](executive-report-2026-11-04-copilot-search.md)
+uses corrected OpenCode IG, DU, and AR reruns. This file preserves the
+original analysis and recommendation as a historical record.
 
 > **4 November 2026 correction:** The OpenCode V2 arm in the original DU and AR
 > runs could not execute commands because the runner used the V1 `bash`
 > permission name instead of V2 `shell`. Its original DU and AR scores and the
 > resulting mixed-workload exclusion below are not sound operational rankings.
 > See the [shell-enabled DU and AR reruns](opencode-shell-correction-2026-11-04.md).
-> IG was intentionally read-only for every arm.
+> IG was intentionally read-only for every arm, but OpenCode's original IG
+> source workspace was also mislocated. See the current report for that
+> separate correction.
 
 ## Executive summary
 

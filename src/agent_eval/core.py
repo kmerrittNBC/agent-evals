@@ -183,7 +183,9 @@ def static_arm_check(arm: dict) -> dict:
         return {"status": "unavailable", "reason": f"{binary} not found in PATH", "version": None}
     details: dict[str, Any] = {"status": "needs_live_probe", "reason": None, "version": version,
                                "model": arm["model"], "reasoning": arm["reasoning"],
-                               "search_provider": arm.get("search_provider"), "usage_fields": "unverified"}
+                               "search_provider": arm.get("search_provider"),
+                               "search_plugin": arm.get("search_plugin"),
+                               "usage_fields": "unverified"}
     if arm["harness"] == "pi":
         try:
             output = subprocess.run([binary, "--list-models", arm["model"].split("/")[-1]],

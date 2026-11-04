@@ -1,0 +1,44 @@
+{
+  "task_id": "IG-02",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T15:34:00.565461+00:00",
+  "elapsed_seconds": 93.458573,
+  "answer": "## Short answer\n\n**In `PullRequestMergeCoordinator`, a retry of the same candidate does not dispatch a second merge.** Once an effect is recorded, retries read the pull request and either confirm the original merge or leave the effect unresolved. They do not call the merge endpoint again.\n\nThere is an important scope caveat: **the pinned source does not wire this coordinator into an owner API merge operation.** `src/api/application.ts` uses the Gitea PR adapter for probing, inspection, and draft creation, but has no merge-coordinator call. The coordinator is referenced in its tests, not in production call sites. So this is a guarantee of the coordinator implementation, not evidence that the current owner exposes an end-to-end approved-PR-merge flow.\n\n## Trace and durable states\n\n- The coordinator first calls `verifyAuthority(candidate)`. That trusted owner callback is responsible for validating the current candidate, Human decision, and binding; the coordinator does not establish that authority itself. It then admits an effect keyed by binding, PR ID, and head revision. See `src/pr/mergeCoordinator.ts:32–37` and `src/pr/mergeStore.ts:28–43`.\n- Migration 77 creates `pr_merge_effect` with a unique constraint on `(binding_id, native_pr_id, head_revision)`. The record also pins the binding revision, repository, base ref and revision, decision ID, and actor ID. Its states are `pending`, `unknown`, and `confirmed`. See `src/storage/migrations.ts:3029–3047`.\n- The first admission is persisted as `pending` before the provider preflight and possible write. Dispatch then goes through `requestExactMerge`, which reads and checks the current PR before calling the adapter. If that path does not return a confirmed result, the coordinator marks the effect `unknown`. A qualifying read can move it to `confirmed`. See `src/pr/mergeCoordinator.ts:36–61`.\n- A retry finds the existing candidate record. It reads the PR; if that read does not prove the exact merge, it leaves the effect `unknown` and returns `merge_outcome_unknown`—it does not dispatch again. See `src/pr/mergeCoordinator.ts:34–48`.\n\nOne conservative detail: failures from `requestExactMerge`, including preflight failures that may have occurred before any write, are also marked `unknown`. This code has no “definitively not dispatched, safe to retry” effect state.\n\n## What confirms success—and what dispatch asks the provider to do\n\nSuccess is not inferred from a successful HTTP response or from a timeout resolving. The accepted observation must identify the same repository and PR and report the PR as **merged**, with the approved head still present and `mergedRevision` equal to that head. `requestExactMerge` applies this check after dispatch; the coordinator applies it during retry reconciliation. See `src/pr/contract.ts:104–113` and `src/pr/mergeCoordinator.ts:39–45`.\n\nThe request path checks the observed head and base, mergeability, required checks, and current attributed Human approvals before dispatch. The Gitea adapter sends `fast-forward-only`, the exact `head_commit_id`, `force_merge: false`, and `merge_when_checks_succeed: false`. See `src/pr/contract.ts:68–104` and `src/pr/gitea.ts:158–164`.\n\nThose are **RelayView’s checks and request parameters**. They are not an independent proof of Gitea’s behavior: correctness still assumes the provider honors those parameters and returns accurate, sufficiently current merge observations. RelayView’s success decision is based on the authenticated provider readback.\n\n## Conflicting and concurrent admission\n\nFor the same binding/PR/head key:\n\n- A repeat with the same pinned intent coalesces to the existing effect, even if the retry proposed a different effect ID.\n- A repeat that changes pinned intent—such as the binding revision, base revision, decision ID, or actor—fails with `pr_merge_identity_conflict`; it does not create another candidate effect.\n- If another admission already won, the losing coordinator sees an existing effect ID and takes the read-only reconciliation path rather than dispatching.\n\nThe store performs the lookup and insert transactionally, with the database uniqueness constraint backing the candidate key. See `src/pr/mergeStore.ts:28–43, 95–101` and `src/storage/migrations.ts:3045`.\n\n## What the repository tests establish\n\n- `src/pr/mergeCoordinator.test.ts` simulates a provider-call timeout, verifies the effect was `pending` at dispatch and becomes `unknown`, then verifies an open-PR retry does not increase the dispatch count. It simulates an exact merged observation and verifies confirmation, still with only one dispatch.\n- The concurrent-admission test injects a “winner” admission before the tested admission and verifies the loser does not call the provider merge. **That is a controlled admission collision, not a genuinely parallel multi-process or cross-database test.**\n- `src/pr/mergeStore.test.ts` covers same-intent coalescing, conflicting decision/base identity, state changes, and rejection of a mismatched merged revision.\n- `src/pr/contract.test.ts` exercises pre-dispatch checks and ambiguous outcomes with a fake adapter. `src/pr/gitea.test.ts` checks the merge request body using a fake fetcher.\n- `src/pr/gitea.real.test.ts` is an opt-in Gitea smoke test, skipped without its configured disposable repository and credentials. It calls the adapter directly, and the documentation notes that it does **not** prove Human-review authorization.\n\nThese tests support the coordinator’s no-blind-redispatch logic and its exact-observation rule. They do **not** establish provider-side exactly-once semantics, behavior across independent owner databases, or that a production owner route currently invokes this coordinator. I inspected the pinned source read-only; I did not run the tests.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 6428,
+        "output": 32,
+        "reasoning": 1341,
+        "cache": {
+          "read": 66267,
+          "write": 0
+        }
+      },
+      "cost": 0.0019919700000000005
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 93.271519,
+  "first_substantive_seconds": 93.271519,
+  "snapshot_digest_before": "9579d5d68b66901a73d64c1c9a7868bf83d963450cc0f9b3e50101a8397087cd",
+  "snapshot_digest_after": "9579d5d68b66901a73d64c1c9a7868bf83d963450cc0f9b3e50101a8397087cd",
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 93.458573,
+      "started_at": "2026-11-04T15:34:00.565461+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 38
+  }
+}

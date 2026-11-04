@@ -1,0 +1,26 @@
+task_id,category,deliverable,arm_id,harness,model,billing_family,status,reason,time_first_visible_seconds,time_first_substantive_seconds,time_final_seconds,asked_clarification,follow_up_classification,completion_status,overall_quality,critical_error_count,validation_passed,prepared_checks_intact,validation_checks_intact,copilot_credits,copilot_nano_aiu,credit_classification,native_usage_json,search_calls,fetch_calls,answer_path,patch_path,untracked_path,judgment_path
+IG-01,ig,answer,pi-luna,pi,github-copilot/gpt-6-luna,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-01,ig,answer,pi-sol,pi,github-copilot/gpt-6-sol,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-01,ig,answer,pi-local-qwen,pi,omlx-local/Qwen3.8-27B-oQ6e-mtp,local-inference-copilot-search,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-01,ig,answer,opencode-luna,opencode,github-copilot/gpt-6-luna,copilot,completed,,306.938182,306.938182,307.206412,False,none,partial,3,2,,,,,,unavailable,"{""cost"": 0.00452467, ""tokens"": {""cache"": {""read"": 105427, ""write"": 0}, ""input"": 29464, ""output"": 204, ""reasoning"": 844}}",29,22,runs/IG-01/opencode-luna/answer.md,,,runs/IG-01/opencode-luna/judgment.json
+IG-01,ig,answer,claude-opus,claude,claude-opus-5-5,anthropic,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-02,ig,answer,pi-luna,pi,github-copilot/gpt-6-luna,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-02,ig,answer,pi-sol,pi,github-copilot/gpt-6-sol,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-02,ig,answer,pi-local-qwen,pi,omlx-local/Qwen3.8-27B-oQ6e-mtp,local-inference-copilot-search,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-02,ig,answer,opencode-luna,opencode,github-copilot/gpt-6-luna,copilot,completed,,93.271519,93.271519,93.458573,False,none,complete,5,0,,,,,,unavailable,"{""cost"": 0.0019919700000000005, ""tokens"": {""cache"": {""read"": 66267, ""write"": 0}, ""input"": 6428, ""output"": 32, ""reasoning"": 1341}}",0,0,runs/IG-02/opencode-luna/answer.md,,,runs/IG-02/opencode-luna/judgment.json
+IG-02,ig,answer,claude-opus,claude,claude-opus-5-5,anthropic,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-03,ig,answer,pi-luna,pi,github-copilot/gpt-6-luna,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-03,ig,answer,pi-sol,pi,github-copilot/gpt-6-sol,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-03,ig,answer,pi-local-qwen,pi,omlx-local/Qwen3.8-27B-oQ6e-mtp,local-inference-copilot-search,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-03,ig,answer,opencode-luna,opencode,github-copilot/gpt-6-luna,copilot,completed,,74.634988,74.634988,74.748534,False,none,complete,5,0,,,,,,unavailable,"{""cost"": 0.00093551, ""tokens"": {""cache"": {""read"": 43921, ""write"": 0}, ""input"": 2108, ""output"": 107, ""reasoning"": 464}}",0,0,runs/IG-03/opencode-luna/answer.md,,,runs/IG-03/opencode-luna/judgment.json
+IG-03,ig,answer,claude-opus,claude,claude-opus-5-5,anthropic,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-04,ig,answer,pi-luna,pi,github-copilot/gpt-6-luna,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-04,ig,answer,pi-sol,pi,github-copilot/gpt-6-sol,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-04,ig,answer,pi-local-qwen,pi,omlx-local/Qwen3.8-27B-oQ6e-mtp,local-inference-copilot-search,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-04,ig,answer,opencode-luna,opencode,github-copilot/gpt-6-luna,copilot,completed,,99.904544,99.904544,100.074469,False,none,complete,5,0,,,,,,unavailable,"{""cost"": 0.00253337, ""tokens"": {""cache"": {""read"": 34297, ""write"": 0}, ""input"": 20469, ""output"": 176, ""reasoning"": 111}}",9,6,runs/IG-04/opencode-luna/answer.md,,,runs/IG-04/opencode-luna/judgment.json
+IG-04,ig,answer,claude-opus,claude,claude-opus-5-5,anthropic,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-05,ig,answer,pi-luna,pi,github-copilot/gpt-6-luna,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-05,ig,answer,pi-sol,pi,github-copilot/gpt-6-sol,copilot,not_run,,,,,,,,,,,,,,,unavailable,null,,,,,,
+IG-05,ig,answer,pi-local-qwen,pi,omlx-local/Qwen3.8-27B-oQ6e-mtp,local-inference-copilot-search,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,
+IG-05,ig,answer,opencode-luna,opencode,github-copilot/gpt-6-luna,copilot,completed,,70.978591,70.978591,71.188424,False,none,complete,5,0,,,,,,unavailable,"{""cost"": 0.00226146, ""tokens"": {""cache"": {""read"": 83966, ""write"": 0}, ""input"": 13253, ""output"": 59, ""reasoning"": 134}}",0,0,runs/IG-05/opencode-luna/answer.md,,,runs/IG-05/opencode-luna/judgment.json
+IG-05,ig,answer,claude-opus,claude,claude-opus-5-5,anthropic,not_run,,,,,,,,,,,,,,,not_applicable,null,,,,,,

@@ -1,5 +1,5 @@
 ---
-status: accepted
+status: superseded by 0003-use-copilot-search-for-opencode
 supersedes: 0001-drop-opencode-arm
 ---
 

@@ -1,6 +1,11 @@
-# Coding agent evaluation — updated executive report
+# Coding agent evaluation — updated executive report (superseeded)
 
-**4 November 2026.** This report replaces the [15 October report (superseeded)](<executive-report-2026-10-15 (superseeded).md>) for current decisions. It uses the original information-gathering (IG) results and original Pi and Claude Code results, with the [shell-enabled OpenCode defined-update (DU)](../results/du-opencode-shell-20261104/report.md) and [architecture (AR)](../results/ar-opencode-shell-20261104/report.md) reruns. The original attempts remain available for audit.
+The [current report](executive-report-2026-11-04-copilot-search.md) adds the
+corrected OpenCode IG rerun with Copilot-backed search and the repaired source
+workspace. This file preserves the earlier 4 November analysis as a historical
+record.
+
+**4 November 2026.** At publication, this report replaced the [15 October report (superseeded)](<executive-report-2026-10-15 (superseeded).md>). It uses the original information-gathering (IG) results and original Pi and Claude Code results, with the [shell-enabled OpenCode defined-update (DU)](../results/du-opencode-shell-20261104/report.md) and [architecture (AR)](../results/ar-opencode-shell-20261104/report.md) reruns. The original attempts remain available for audit.
 
 ## Executive summary
 

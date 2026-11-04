@@ -87,6 +87,8 @@ def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
             probe_prompt += (" Also use the read tool to read probe-source-marker.txt "
                              "in the current directory and report its contents.")
         command = adapters.command(arm, probe_prompt, directory, run_dir)
+        if arm["harness"] == "opencode":
+            command = sandbox_command(command, directory, run_dir, [], hide_sources=True)
         if arm["harness"] == "copilot":
             import uuid
             command[command.index("--session-id") + 1] = str(uuid.uuid4())
@@ -244,8 +246,8 @@ def preflight(evaluation_id: str, cutoff: str | None, repo_args: list[str],
             "red_output_excerpt": output[-1000:]}
     for arm in arms:
         state = static_arm_check(arm)
-        if column != "ig" and not shutil.which("bwrap"):
-            state.update(status="unavailable", reason="Bubblewrap is required for writable task isolation")
+        if (column != "ig" or arm["harness"] == "opencode") and not shutil.which("bwrap"):
+            state.update(status="unavailable", reason="Bubblewrap is required for this arm's isolation")
         if live and (not selected_arms or arm["id"] in selected_arms) and state["status"] == "needs_live_probe":
             state.update(live_arm_probe(arm, read_config("run-policy")["probe_timeout_seconds"],
                                         writable=column != "ig"))

@@ -77,6 +77,29 @@ class RunnerContractTests(unittest.TestCase):
             listed = subprocess.check_output(["git", "-C", str(repo), "worktree", "list", "--porcelain"], text=True)
             self.assertNotIn(str(checkout), listed)
 
+    def test_opencode_ig_sandbox_hides_active_source_and_judge_evidence(self):
+        if not shutil.which("bwrap"):
+            self.skipTest("Bubblewrap is required for isolated IG runs")
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            source = root / "source"
+            source.mkdir()
+            (source / "private.txt").write_text("active checkout")
+            workspace = root / "snapshot"
+            workspace.mkdir()
+            (workspace / "pinned.txt").write_text("pinned snapshot")
+            run_dir = root / "run"
+            run_dir.mkdir()
+            script = ("from pathlib import Path\n"
+                      f"print(Path({str(workspace / 'pinned.txt')!r}).read_text())\n"
+                      f"print(Path({str(source / 'private.txt')!r}).exists())\n"
+                      f"print(Path({str(ROOT / 'evidence/IG-01/pack.json')!r}).exists())\n")
+            command = sandbox_command(["python3", "-c", script], workspace, run_dir,
+                                      [source], hide_sources=True)
+            result = subprocess.run(command, cwd=workspace, text=True,
+                                    capture_output=True, check=True)
+            self.assertEqual(result.stdout.splitlines(), ["pinned snapshot", "False", "False"])
+
     def test_writable_run_preserves_patch_and_validates_before_cleanup(self):
         with tempfile.TemporaryDirectory() as temp:
             repo = Path(temp) / "source"
@@ -330,7 +353,7 @@ class RunnerContractTests(unittest.TestCase):
 
         with patch("src.agent_eval.preflight.capture", side_effect=fake_capture), \
                 patch("src.agent_eval.preflight.sandbox_command",
-                      side_effect=lambda command, *_: command):
+                      side_effect=lambda command, *_args, **_kwargs: command):
             probe = live_arm_probe(arm, 180, writable=True)
         self.assertEqual(probe["status"], "unavailable")
         self.assertIn("shell", probe["reason"].lower())
@@ -347,7 +370,9 @@ class RunnerContractTests(unittest.TestCase):
             events.append({"data": {"type": "text", "part": {"text": "pathlib docs"}}})
             return {"events": events, "exit_code": 0, "timed_out": False}
 
-        with patch("src.agent_eval.preflight.capture", side_effect=fake_capture):
+        with patch("src.agent_eval.preflight.capture", side_effect=fake_capture), \
+                patch("src.agent_eval.preflight.sandbox_command",
+                      side_effect=lambda command, *_args, **_kwargs: command):
             probe = live_arm_probe(arm, 180)
         self.assertEqual(probe["status"], "unavailable")
         self.assertIn("snapshot", probe["reason"].lower())

@@ -1,7 +1,7 @@
 # Coding agent evaluation: 10-minute presentation script
 
 > **Historical script:** This script predates the OpenCode shell permission
-> correction. Use the [updated executive report](executive-report-2026-11-04.md)
+> correction. Use the [updated executive report](executive-report-2026-11-04-copilot-search.md)
 > for current results and conclusions.
 
 Use with the seven-slide “Coding agent evaluation — 10-minute results and recommendation” presentation. Timing is approximate; the slide numbers match the deck. The bracketed text is a cue, not spoken copy.

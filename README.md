@@ -1,10 +1,13 @@
 # Coding agent capability evaluation
 
 **4 November 2026 update:** The original OpenCode DU and AR runs lacked command
-access because the OpenCode V2 runner allowed `bash` instead of `shell`. The
-[updated executive report](docs/executive-report-2026-11-04.md) uses the
-shell-enabled reruns; the [October report (superseeded)](<docs/executive-report-2026-10-15 (superseeded).md>)
-is retained for the historical record. IG was intentionally read-only.
+access because the OpenCode V2 runner allowed `bash` instead of `shell`. Its IG
+runs also searched the evaluator checkout instead of the pinned source
+snapshot. The [updated executive report](docs/executive-report-2026-11-04-copilot-search.md)
+uses corrected OpenCode attempts in all three categories; the
+[October report (superseeded)](<docs/executive-report-2026-10-15 (superseeded).md>)
+and [intermediate report (superseeded)](<docs/executive-report-2026-11-04 (superseeded).md>)
+are retained for the historical record.
 
 For the small team installer and onboarding steps, use [coding-agent-setup](https://github.com/kmerrittNBC/coding-agent-setup). This repository retains the evaluation evidence and runner.
 
@@ -18,7 +21,7 @@ This repository compares **model plus harness pairs** on the work a development 
 
 The original comparison used **Pi + GPT-6 Luna**, **Pi + GPT-6 Sol**, **OpenCode + GPT-6 Luna**, and **Claude Code + Opus 5.5**: **15 tasks × 4 pairs = 60 initial attempts**. The additional `pi-local-qwen` arm supports a separate pilot. Each pair receives the same prompt and repository revision for a task, in a fresh session with a 15-minute limit. The study measures those first attempts; it does not measure improvement after follow-up prompts or graphical-interface usability.
 
-The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-11-04.md) discusses the account-level Sol/Luna usage comparison and its limits.
+The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-11-04-copilot-search.md) discusses the usage limits.
 
 ### Local Qwen IG-01 pilot
 
@@ -34,11 +37,11 @@ python3 -m agent_eval run --evaluation-id ig-local-qwen-pilot --task IG-01 --arm
 
 `configure_pi_local_ig.py` pins both Pi extensions, selects local Qwen for new Pi sessions, and writes `~/.pi/agent/web-search.json` for Copilot Luna search. It backs up Pi settings before changes and refuses to replace a different existing search-model choice. The preflight must observe both web tool calls before the task can run. The default 15-minute task limit still applies; an incomplete local run remains an observed outcome.
 
-**Read the results:** [Updated executive report](docs/executive-report-2026-11-04.md) · [IG run](results/local-repos-20261015-122649/report.md) · [shell-enabled OpenCode DU run](results/du-opencode-shell-20261104/report.md) · [shell-enabled OpenCode AR run](results/ar-opencode-shell-20261104/report.md) · [original Pi and Claude DU adjudication](results/du-2026-10-15-adjudicated/report.md) · [original Pi and Claude AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain the categories. The new report explains how these dated runs are combined.
+**Read the results:** [Updated executive report](docs/executive-report-2026-11-04-copilot-search.md) · [Copilot-search OpenCode IG run](results/ig-opencode-copilot-20261104/report.md) · [shell-enabled OpenCode DU run](results/du-opencode-shell-20261104/report.md) · [shell-enabled OpenCode AR run](results/ar-opencode-shell-20261104/report.md) · [original IG run](results/local-repos-20261015-122649/report.md) · [original Pi and Claude DU adjudication](results/du-2026-10-15-adjudicated/report.md) · [original Pi and Claude AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain the categories. The new report explains how these dated runs are combined.
 
 ## Run all 15 tasks
 
-Run the commands below from this repository's root. **Use three new evaluation IDs**, one per category: `--full` runs five tasks against all four configured pairs, or 20 slots per ID. Replace the example absolute repository paths with your local checkouts. The checkouts must contain the frozen commits named in the DU and AR task files; they do not need to be checked out at those commits. IG pins the source checkouts' current `HEAD`, which must agree with its judge packs. Choose a timezone-qualified information cutoff appropriate to the evidence you will judge.
+Run the commands below from this repository's root. **Use three new evaluation IDs**, one per category: `--full` runs five tasks against all five configured arms, including the optional local Qwen pilot, or 25 slots per ID. Use `--arm` to run a selected arm instead. Replace the example absolute repository paths with your local checkouts. The checkouts must contain the frozen commits named in the DU and AR task files; they do not need to be checked out at those commits. IG pins the source checkouts' current `HEAD`, which must agree with its judge packs. Choose a timezone-qualified information cutoff appropriate to the evidence you will judge.
 
 ```sh
 RELAYVIEW_REPO=/absolute/path/to/relayview
@@ -98,9 +101,9 @@ Each report is written to `results/ID/report.md`, with a CSV summary, manifest, 
 
 - Python 3.11 or newer and Git. The Python runner uses the standard library; repository-specific checks also need their declared toolchains and dependencies (for example, Go for the todo API tasks).
 - Authenticated `pi`, `opencode`, `claude`, and `codex` CLIs with access to the exact models in [`config/arms.yaml`](config/arms.yaml). The judge uses `codex exec` with GPT-6 Sol. [`SETUP_AGENT_PROMPT.md`](SETUP_AGENT_PROMPT.md) is a separate installation/sign-in handoff prompt.
-- **Linux with Bubblewrap (`bwrap`) for DU and AR.** Their writable agent processes run in disposable Git worktrees behind a Bubblewrap boundary. The current runner marks those arms unavailable when `bwrap` is missing; a macOS host cannot complete the DU/AR commands above as written. IG uses read-only repository exports and does not require `bwrap`.
+- **Linux with Bubblewrap (`bwrap`) for DU, AR, and OpenCode IG.** Writable agent processes run in disposable Git worktrees behind a Bubblewrap boundary. OpenCode IG runs in a Bubblewrap view that hides judge evidence and active source checkouts while exposing pinned repository exports. The current runner cannot complete those commands without `bwrap`; the other IG arms do not require it.
 - Complete judge-only [`evidence/IG-*`, `evidence/DU-*`, and `evidence/AR-*`](evidence/README.md) packs. The runner checks them against pinned commits and refuses changed packs after live preflight. Keep source excerpts and timestamps consistent with the chosen cutoff.
-- Working web search and page fetch for each headless agent. Pi uses `pi-web-search` through GitHub Copilot and `pi-web-fetch`; OpenCode uses its pinned `tinyfish` search route and `webfetch`; Claude Code uses `WebSearch` and `WebFetch`. The live probe verifies that both tools were actually called. The standalone Copilot CLI and Antigravity CLI are not among the current four pairs; the executive report explains their exclusion.
+- Working web search and page fetch for each headless agent. Pi uses `pi-web-search` through GitHub Copilot and `pi-web-fetch`; OpenCode pins `opencode-websearch@0.7.1` and its `native` provider to search through the existing Copilot connection, then uses `webfetch`; Claude Code uses `WebSearch` and `WebFetch`. OpenCode preflight also requires a direct read of its disposable source workspace. The [search-route decision](docs/authoritative/adr/0003-use-copilot-search-for-opencode.md) records the change. The standalone Copilot CLI and Antigravity CLI are not among the current four pairs; the executive report explains their exclusion.
 
 DU and AR use detached worktrees at their frozen commits, leaving active checkouts untouched. DU preflight confirms that the prepared check is red. After each code attempt, the runner replays the saved patch in another clean worktree and runs the prepared and regression checks with pristine evaluator files. It saves patches, untracked files, prepared-check edits, check results, events, answers, and metrics before removing the worktrees. Bubblewrap protects the active project tree from agent writes; it is not a general isolation boundary for all home-directory files. IG exports pinned repository trees read-only. Uncommitted changes in a source checkout are not exported.
 
