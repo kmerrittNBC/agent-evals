@@ -272,23 +272,27 @@ class RunnerContractTests(unittest.TestCase):
 
     def test_active_arms_exclude_copilot_cli_and_antigravity(self):
         arms = read_config("arms")["arms"]
-        self.assertEqual(len(arms), 4)
+        self.assertEqual(len(arms), 5)
         self.assertEqual({arm["id"] for arm in arms},
-                         {"pi-luna", "pi-sol", "opencode-luna", "claude-opus"})
+                         {"pi-luna", "pi-sol", "pi-local-qwen", "opencode-luna", "claude-opus"})
         opencode = next(arm for arm in arms if arm["harness"] == "opencode")
-        self.assertEqual(opencode["search_provider"], "tinyfish")
+        self.assertEqual(opencode["search_provider"], "native")
+        self.assertEqual(opencode["search_plugin"], "opencode-websearch@0.7.1")
 
-    def test_opencode_run_is_hermetic_and_pins_keyless_search(self):
+    def test_opencode_run_is_hermetic_and_pins_copilot_search(self):
         arm = {"id": "opencode-luna", "harness": "opencode", "binary": "opencode",
                "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
-               "search_provider": "tinyfish"}
+               "search_provider": "native", "search_plugin": "opencode-websearch@0.7.1"}
         cmd = adapters.command(arm, "probe prompt", Path("/w"), Path("/r"), "sess-1")
         self.assertIn("--standalone", cmd)
         self.assertEqual(cmd[cmd.index("--model") + 1], "github-copilot/gpt-6-luna#medium")
         self.assertEqual(cmd[cmd.index("--session") + 1], "sess-1")
         self.assertEqual(cmd[-1], "probe prompt")
         config = json.loads(adapters.environment(arm, Path("/w"))["OPENCODE_CONFIG_CONTENT"])
-        self.assertEqual(config["websearch"], {"provider": "tinyfish"})
+        self.assertEqual(config["websearch"], {"provider": "native"})
+        self.assertEqual(config["plugins"], ["opencode-websearch@0.7.1"])
+        self.assertEqual(config["model"], "github-copilot/gpt-6-luna")
+        self.assertEqual(adapters.environment(arm, Path("/w"))["PWD"], "/w")
         rules = config["permissions"]
         self.assertEqual(rules[0], {"action": "*", "resource": "*", "effect": "deny"})
         allowed = {rule["action"] for rule in rules[1:]}
@@ -296,7 +300,8 @@ class RunnerContractTests(unittest.TestCase):
         self.assertTrue(all(rule["effect"] == "allow" for rule in rules[1:]))
 
     def test_opencode_writable_tasks_allow_v2_shell_action(self):
-        arm = {"harness": "opencode", "search_provider": "tinyfish"}
+        arm = {"harness": "opencode", "search_provider": "native",
+               "search_plugin": "opencode-websearch@0.7.1", "model": "github-copilot/gpt-6-luna"}
         config = json.loads(adapters.environment(arm, Path("/w"), writable=True)
                             ["OPENCODE_CONFIG_CONTENT"])
         allowed = {rule["action"] for rule in config["permissions"]
@@ -307,12 +312,16 @@ class RunnerContractTests(unittest.TestCase):
     def test_opencode_writable_preflight_rejects_missing_shell_execution(self):
         arm = {"harness": "opencode", "binary": "opencode",
                "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
-               "search_provider": "tinyfish"}
+               "search_provider": "native", "search_plugin": "opencode-websearch@0.7.1"}
 
         def fake_capture(command, cwd, env, timeout, event_path):
             if "web_search" in command[-1]:
                 events = [{"data": {"type": "tool_use", "part": {"tool": name}}}
                           for name in ("websearch", "webfetch")]
+                events.append({"data": {"type": "tool_use", "part": {
+                    "tool": "read", "state": {"status": "completed",
+                    "input": {"path": "probe-source-marker.txt"},
+                    "output": "agent-eval-source-probe"}}}})
                 events.append({"data": {"type": "text", "part": {"text": "pathlib docs"}}})
             else:
                 (cwd / "write-probe.txt").write_text("agent-eval-write-probe\n")
@@ -325,6 +334,23 @@ class RunnerContractTests(unittest.TestCase):
             probe = live_arm_probe(arm, 180, writable=True)
         self.assertEqual(probe["status"], "unavailable")
         self.assertIn("shell", probe["reason"].lower())
+
+    def test_opencode_preflight_rejects_missing_snapshot_read(self):
+        arm = {"harness": "opencode", "binary": "opencode",
+               "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
+               "search_provider": "native", "search_plugin": "opencode-websearch@0.7.1"}
+
+        def fake_capture(command, cwd, env, timeout, event_path):
+            self.assertEqual(env["PWD"], str(cwd))
+            events = [{"data": {"type": "tool_use", "part": {"tool": name}}}
+                      for name in ("websearch", "webfetch")]
+            events.append({"data": {"type": "text", "part": {"text": "pathlib docs"}}})
+            return {"events": events, "exit_code": 0, "timed_out": False}
+
+        with patch("src.agent_eval.preflight.capture", side_effect=fake_capture):
+            probe = live_arm_probe(arm, 180)
+        self.assertEqual(probe["status"], "unavailable")
+        self.assertIn("snapshot", probe["reason"].lower())
 
     def test_opencode_events_decode_answer_tools_session_and_usage(self):
         events = [
@@ -353,14 +379,14 @@ class RunnerContractTests(unittest.TestCase):
         self.assertIn("websearch", transcript)
         self.assertIn("docs.python.org", transcript)
 
-    def test_opencode_arm_without_keyless_provider_is_unavailable(self):
+    def test_opencode_arm_without_pinned_native_provider_is_unavailable(self):
         arm = {"id": "opencode-luna", "harness": "opencode", "binary": "opencode",
                "model": "github-copilot/gpt-6-luna", "reasoning": "medium",
-               "search_provider": "tavily"}
+               "search_provider": "tavily", "search_plugin": "opencode-websearch@0.7.1"}
         with patch("src.agent_eval.core._version", return_value="opencode 2.0"):
             details = static_arm_check(arm)
         self.assertEqual(details["status"], "unavailable")
-        self.assertIn("tinyfish", details["reason"])
+        self.assertIn("native", details["reason"])
 
     def test_judgment_rejects_missing_evidence(self):
         names = ["factual_accuracy", "task_completion", "source_quality", "synthesis_and_judgment",

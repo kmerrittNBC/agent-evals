@@ -35,9 +35,14 @@ def environment(arm: dict, workspace: Path, writable: bool = False) -> dict[str,
         # OpenCode v2's server process reads OPENCODE_CONFIG_CONTENT, keeping this
         # per-process and independent from the user's global config. Permissions
         # are deny-by-default (last matching rule wins; unmatched actions "ask",
-        # which headless runs auto-reject). tinyfish is the vendor-hosted keyless
-        # search provider: no account, key, or billing.
+        # which headless runs auto-reject). The pinned plugin registers a native
+        # websearch provider using OpenCode's active Copilot connection.
+        # OpenCode uses PWD when locating its project; Popen(cwd=...) alone does
+        # not update inherited PWD, which previously pointed at the evaluator.
+        env["PWD"] = str(workspace)
         env["OPENCODE_CONFIG_CONTENT"] = json.dumps({
+            "model": arm["model"],
+            "plugins": [arm["search_plugin"]],
             "permissions": [
                 {"action": "*", "resource": "*", "effect": "deny"},
                 {"action": "read", "resource": "*", "effect": "allow"},
@@ -49,7 +54,7 @@ def environment(arm: dict, workspace: Path, writable: bool = False) -> dict[str,
                 *([{"action": action, "resource": "*", "effect": "allow"}
                    for action in ("shell", "edit")] if writable else []),
             ],
-            "websearch": {"provider": arm.get("search_provider", "tinyfish")},
+            "websearch": {"provider": arm["search_provider"]},
         })
     env["AGENT_EVAL_WORKSPACE"] = str(workspace)
     return env

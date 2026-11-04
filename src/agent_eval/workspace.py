@@ -66,8 +66,8 @@ def run_check(command: list[str], cwd: Path, timeout: int = 180) -> dict:
 
 
 def sandbox_command(command: list[str], workspace: Path, run_dir: Path,
-                    source_paths: list[Path]) -> list[str]:
-    """Give CLIs normal home/network access, but make active project trees read-only."""
+                    source_paths: list[Path], hide_sources: bool = False) -> list[str]:
+    """Give CLIs normal home/network access, but hide evaluator and active sources."""
     if not shutil.which("bwrap"):
         raise ValueError("Bubblewrap is required for writable task isolation")
     args = ["bwrap", "--ro-bind", "/", "/",
@@ -80,7 +80,9 @@ def sandbox_command(command: list[str], workspace: Path, run_dir: Path,
             "--bind", "/tmp", "/tmp"]
     for path in source_paths:
         resolved = str(path.resolve())
-        if not Path(resolved).is_relative_to(ROOT.parent):
+        if hide_sources:
+            args += ["--tmpfs", resolved]
+        elif not Path(resolved).is_relative_to(ROOT.parent):
             args += ["--ro-bind", resolved, resolved]
     args += ["--bind", str(workspace), str(workspace),
              "--bind", str(run_dir), str(run_dir),

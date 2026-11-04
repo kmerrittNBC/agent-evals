@@ -81,7 +81,12 @@ def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
         directory = Path(temporary)
         run_dir = directory / "run"
         run_dir.mkdir()
-        command = adapters.command(arm, PROBE, directory, run_dir)
+        probe_prompt = PROBE
+        if arm["harness"] == "opencode":
+            (directory / "probe-source-marker.txt").write_text("agent-eval-source-probe\n")
+            probe_prompt += (" Also use the read tool to read probe-source-marker.txt "
+                             "in the current directory and report its contents.")
+        command = adapters.command(arm, probe_prompt, directory, run_dir)
         if arm["harness"] == "copilot":
             import uuid
             command[command.index("--session-id") + 1] = str(uuid.uuid4())
@@ -105,6 +110,20 @@ def live_arm_probe(arm: dict, timeout: int, writable: bool = False) -> dict:
         if not (search and fetch):
             return {"status": "unavailable", "reason": "Search and page fetch were not both observed in headless events",
                     "probe_tool_names": names}
+        if arm["harness"] == "opencode":
+            snapshot_read = any(
+                entry.get("data", {}).get("type") == "tool_use"
+                and entry["data"].get("part", {}).get("tool") == "read"
+                and entry["data"]["part"].get("state", {}).get("status") == "completed"
+                and str(entry["data"]["part"]["state"].get("input", {}).get("path", ""))
+                    .endswith("probe-source-marker.txt")
+                and "agent-eval-source-probe" in str(
+                    entry["data"]["part"]["state"].get("output", ""))
+                for entry in result["events"])
+            if not snapshot_read:
+                return {"status": "unavailable",
+                        "reason": "OpenCode could not read the isolated source snapshot",
+                        "probe_tool_names": names}
         usage = adapters.usage(arm["harness"], result["events"], run_dir)
         if writable:
             write_dir = directory / "write"

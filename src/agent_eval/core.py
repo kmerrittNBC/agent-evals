@@ -197,12 +197,14 @@ def static_arm_check(arm: dict) -> dict:
                 details.update(status="unavailable", reason="Pi web search/fetch extensions are missing")
         except (OSError, subprocess.SubprocessError):
             details.update(status="unavailable", reason="Could not list Pi models")
-    if arm["harness"] == "opencode" and arm.get("search_provider") != "tinyfish":
-        # Only the keyless vendor-hosted provider is permitted: it needs no
-        # account, key, or billing (ADR 0002). A keyed provider would reintroduce
-        # the organizational dependency the OpenCode arm must not have.
+    if arm["harness"] == "opencode" and (
+        arm.get("search_provider") != "native" or
+        arm.get("search_plugin") != "opencode-websearch@0.7.1"
+    ):
+        # A pinned plugin routes search through the same Copilot entitlement as
+        # the task model; reject silent fallback to another search provider.
         details.update(status="unavailable",
-                       reason="OpenCode arm must pin the keyless tinyfish search provider")
+                       reason="OpenCode arm must pin native Copilot search plugin 0.7.1")
     return details
 
 
@@ -363,10 +365,11 @@ def _run_in_workspace(arm: dict, task: dict, manifest: dict, run_dir: Path,
             break
         event_path = run_dir / f"phase-{phase}.jsonl"
         cmd = adapters.command(arm, prompt, workspace, run_dir, session, writable=writable)
-        if writable:
+        if writable or arm["harness"] == "opencode":
             from .workspace import sandbox_command
             cmd = sandbox_command(cmd, workspace, run_dir,
-                                  [Path(info["path"]) for info in manifest["repos"].values()])
+                                  [Path(info["path"]) for info in manifest["repos"].values()],
+                                  hide_sources=not writable)
         if arm["harness"] == "copilot" and phase == 0:
             import uuid
             cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
