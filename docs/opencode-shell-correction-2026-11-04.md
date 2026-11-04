@@ -1,5 +1,8 @@
 # OpenCode shell permission correction — 4 November 2026
 
+For revised cross-pair conclusions, see the
+[updated executive report](executive-report-2026-11-04.md).
+
 The October 15 OpenCode V2 runner used a deny-all permission rule followed by
 an allow rule for `bash`. OpenCode V2 names its command permission `shell`, so
 the allow rule did not match. The saved OpenCode IG, DU, and AR task traces

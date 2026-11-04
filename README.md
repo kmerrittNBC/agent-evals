@@ -1,9 +1,10 @@
 # Coding agent capability evaluation
 
-**4 November 2026 correction:** The original OpenCode DU and AR runs lacked
-command access because the OpenCode V2 runner allowed `bash` instead of
-`shell`. See the [shell permission correction and reruns](docs/opencode-shell-correction-2026-11-04.md)
-before using the historical comparisons below. IG was intentionally read-only.
+**4 November 2026 update:** The original OpenCode DU and AR runs lacked command
+access because the OpenCode V2 runner allowed `bash` instead of `shell`. The
+[updated executive report](docs/executive-report-2026-11-04.md) uses the
+shell-enabled reruns; the [October report (superseeded)](<docs/executive-report-2026-10-15 (superseeded).md>)
+is retained for the historical record. IG was intentionally read-only.
 
 For the small team installer and onboarding steps, use [coding-agent-setup](https://github.com/kmerrittNBC/coding-agent-setup). This repository retains the evaluation evidence and runner.
 
@@ -17,7 +18,7 @@ This repository compares **model plus harness pairs** on the work a development 
 
 The original comparison used **Pi + GPT-6 Luna**, **Pi + GPT-6 Sol**, **OpenCode + GPT-6 Luna**, and **Claude Code + Opus 5.5**: **15 tasks × 4 pairs = 60 initial attempts**. The additional `pi-local-qwen` arm supports a separate pilot. Each pair receives the same prompt and repository revision for a task, in a fresh session with a 15-minute limit. The study measures those first attempts; it does not measure improvement after follow-up prompts or graphical-interface usability.
 
-The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-10-15.md) discusses the account-level Sol/Luna usage comparison and its limits.
+The runner saves each answer, agent events, timing, code changes, available usage fields, and code-check results. A separate GPT-6 Sol judge scores each completed attempt in a fresh context without the pair's identity or other attempts. The report separates measured time and check results from judged quality, completion, critical errors, and whether clarification would have helped. Copilot credits per attempt are unavailable unless an attributable billing record is supplied; the [executive report](docs/executive-report-2026-11-04.md) discusses the account-level Sol/Luna usage comparison and its limits.
 
 ### Local Qwen IG-01 pilot
 
@@ -33,7 +34,7 @@ python3 -m agent_eval run --evaluation-id ig-local-qwen-pilot --task IG-01 --arm
 
 `configure_pi_local_ig.py` pins both Pi extensions, selects local Qwen for new Pi sessions, and writes `~/.pi/agent/web-search.json` for Copilot Luna search. It backs up Pi settings before changes and refuses to replace a different existing search-model choice. The preflight must observe both web tool calls before the task can run. The default 15-minute task limit still applies; an incomplete local run remains an observed outcome.
 
-**Read the results:** [Executive report](docs/executive-report-2026-10-15.md) · [IG run](results/local-repos-20261015-122649/report.md) · [adjudicated DU run](results/du-2026-10-15-adjudicated/report.md) · [AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain what each category is meant to represent. Earlier pilots and excluded-arm probes remain under `results/`; do not pool their scores with these three runs.
+**Read the results:** [Updated executive report](docs/executive-report-2026-11-04.md) · [IG run](results/local-repos-20261015-122649/report.md) · [shell-enabled OpenCode DU run](results/du-opencode-shell-20261104/report.md) · [shell-enabled OpenCode AR run](results/ar-opencode-shell-20261104/report.md) · [original Pi and Claude DU adjudication](results/du-2026-10-15-adjudicated/report.md) · [original Pi and Claude AR run](results/ar-2026-10-15-full/report.md). The [task-design criteria](docs/repo-task-design.md) explain the categories. The new report explains how these dated runs are combined.
 
 ## Run all 15 tasks
 

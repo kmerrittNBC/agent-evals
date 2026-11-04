@@ -1,3 +1,9 @@
+# Executive report — 15 October 2026 (superseeded)
+
+The [updated 4 November report](executive-report-2026-11-04.md) uses the
+shell-enabled OpenCode DU and AR reruns. This file preserves the original
+analysis and recommendation as a historical record.
+
 > **4 November 2026 correction:** The OpenCode V2 arm in the original DU and AR
 > runs could not execute commands because the runner used the V1 `bash`
 > permission name instead of V2 `shell`. Its original DU and AR scores and the

@@ -1,5 +1,9 @@
 # Coding agent evaluation: 10-minute presentation script
 
+> **Historical script:** This script predates the OpenCode shell permission
+> correction. Use the [updated executive report](executive-report-2026-11-04.md)
+> for current results and conclusions.
+
 Use with the seven-slide “Coding agent evaluation — 10-minute results and recommendation” presentation. Timing is approximate; the slide numbers match the deck. The bracketed text is a cue, not spoken copy.
 
 ## Slide 1 — Coding agent evaluation (0:00–0:30)
@@ -42,7 +46,7 @@ To make that recommendation easy to try, I built a companion [coding-agent-setup
 
 ## Source notes (not spoken)
 
-- [Executive report](executive-report-2026-10-15.md): research questions, design, scored results, judging method, credit limits, and recommendation.
+- [Original executive report (superseeded)](<executive-report-2026-10-15 (superseeded).md>): research questions, design, original scored results, judging method, credit limits, and historical recommendation.
 - [Rubric](../config/rubric.yaml): quality dimensions and category rating thresholds.
 - [Copilot usage snapshot](../results/copilot-ai-usage-2026-10-15/README.md): personal-account model totals and attribution limits.
 - [Copilot CLI reprobe](../results/copilot-search-reprobe-2026-11-02/README.md): November headless search diagnostic.
