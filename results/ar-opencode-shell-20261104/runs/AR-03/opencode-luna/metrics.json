@@ -1,0 +1,55 @@
+{
+  "task_id": "AR-03",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:31:39.761964+00:00",
+  "elapsed_seconds": 541.685718,
+  "answer": "Added **`docs/runbooks/stage-a-host-interruption-recovery-plan.md`** in the disposable worktree. It is explicitly marked as a proposal—not implemented behavior or execution authorization.\n\nThe plan traces the existing freeze, stable slot plan, dispatch/completion path, block-progress catch-up, cohort audit and outcome seal. It preserves the **23-task, seven-arm, 161-slot** contract and recommends:\n\n- **No replay** of a native coding attempt.\n- **Resume the cohort** at pending work only after the existing trust checks pass; do not resume a native process without a proven checkpoint protocol.\n- For an interrupted reserved slot, either record-only settle a complete, validated result for its existing lease, or—after proving quiescence and obtaining the required acknowledgment—settle that same lease as infrastructure-missing. If proof is incomplete, leave it unresolved and stop.\n\nIt also specifies proposed state transitions, trust and durability checks, tests, audit/seal requirements, and rollback. No runtime code was changed.\n\n**Checks:** 240 focused Stage A, scheduler and outcome tests passed. The first test invocation hit the repository’s pinned-`uv` version mismatch; rerunning with pinned `uv` and a worktree-local cache succeeded. Relative documentation links and whitespace checks passed.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 700,
+        "output": 356,
+        "reasoning": 516,
+        "cache": {
+          "read": 103912,
+          "write": 0
+        }
+      },
+      "cost": 0.00154512
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.809666,
+  "first_substantive_seconds": 80.130491,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 541.685718,
+      "started_at": "2026-11-04T14:31:39.761964+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 58
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [
+      "docs/runbooks/stage-a-host-interruption-recovery-plan.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "b0b31dda691620edae30db7127c1e1d8da907813",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

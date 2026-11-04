@@ -1,0 +1,34 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The three flows, distinct states, authority checks, identity requirements, and read-only recovery after uncertain writes match the inspected source."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "Delivers a bounded plan with two seams, a recommendation, migration order, rollback, and no-duplicate-effect tests."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "Grounded in the coordinators, stores, authoritative PR documentation, and named existing tests inspected in the transcript."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "Shares lifecycle control while retaining effect-specific authority, provider checks, and persisted state machines."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Treats uncertain provider outcomes conservatively and avoids an unnecessary persistence migration."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "Gives a concrete implementation sequence, rollback path, and specific regression scenarios."
+    }
+  },
+  "overall_quality": 5,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [],
+  "first_substantive_event_index": 37
+}

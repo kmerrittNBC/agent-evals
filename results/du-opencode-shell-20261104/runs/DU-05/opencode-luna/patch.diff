@@ -1,0 +1,27 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..a9cdda3 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -106,6 +106,13 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+            not all(source.get(key) for key in ("title", "url", "retrieved_at", "snapshot_or_excerpt"))
+            for source in pack["sources"]):
+         return False, "judge evidence pack has an incomplete source"
++    repo_facts = pack["repo_facts"]
++    if not isinstance(repo_facts, list) or any(
++            not isinstance(fact, dict) or
++            not isinstance(fact.get("repo"), str) or not fact["repo"].strip() or
++            not isinstance(fact.get("commit"), str) or len(fact["commit"]) != 40
++            for fact in repo_facts):
++        return False, "judge evidence pack has an invalid repo fact"
+     guidance = pack["grading_guidance"]
+     if not isinstance(guidance, dict) or any(not isinstance(guidance.get(key), list) or
+                                              not all(isinstance(item, str) and item for item in guidance[key])
+@@ -116,7 +123,7 @@ def pack_status(task_id: str, manifest: dict | None = None) -> tuple[bool, str]:
+         selected = task_repo_names(task, manifest)
+         if task["repos"] and not selected:
+             return False, "task has no pinned repositories"
+-        facts = {item["repo"]: item["commit"] for item in pack["repo_facts"]}
++        facts = {item["repo"]: item["commit"] for item in repo_facts}
+         for name in selected:
+             info = manifest["repos"].get(name)
+             if info is None:

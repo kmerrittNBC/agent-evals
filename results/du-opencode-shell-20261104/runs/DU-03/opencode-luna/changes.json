@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 647,
+  "untracked_paths": [
+    "tests/test_duplicate_repo_assignments.py"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+  "validation_checks_intact": true
+}

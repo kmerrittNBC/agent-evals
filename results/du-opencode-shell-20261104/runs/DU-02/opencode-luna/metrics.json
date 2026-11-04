@@ -1,0 +1,153 @@
+{
+  "task_id": "DU-02",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:22:02.400268+00:00",
+  "elapsed_seconds": 88.057807,
+  "answer": "Implemented optional `completed=true` and `completed=false` filtering for `GET /api/todos`. Requests without the filter retain the existing ID ordering; invalid or repeated values return 400. Filtering only affects the response, not stored todos or other endpoints.\n\nUpdated API documentation in `README.md` and added focused backend coverage in `api_filter_test.go`. Left the untracked `eval_filter_test.go` untouched.\n\nChecks passed: `make test`, `make build`, and `git diff --check`.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 109,
+        "output": 153,
+        "reasoning": 0,
+        "cache": {
+          "read": 15992,
+          "write": 0
+        }
+      },
+      "cost": 0.00024732000000000004
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 4.307197,
+  "first_substantive_seconds": 27.90976,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 88.057807,
+      "started_at": "2026-11-04T14:22:02.400268+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 26
+  },
+  "changes": {
+    "tracked_patch_bytes": 2258,
+    "untracked_paths": [
+      "api_filter_test.go"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "052ce21307c02f772619e4878b44949bd72f5e1b",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-63f8c27i/validation",
+        "/tmp/agent-eval-63f8c27i/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-02/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-02/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./...",
+        "-run",
+        "TestEvalFilterTodos",
+        "-count=1"
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.004s\n",
+      "stderr": "",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-63f8c27i/validation",
+        "/tmp/agent-eval-63f8c27i/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-02/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-02/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "go",
+        "test",
+        "./..."
+      ],
+      "exit_code": 0,
+      "stdout": "ok  \tcode.example/lit-go-todos\t0.007s\n",
+      "stderr": "",
+      "timed_out": false
+    }
+  ]
+}

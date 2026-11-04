@@ -1,0 +1,158 @@
+{
+  "task_id": "DU-04",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:24:17.151449+00:00",
+  "elapsed_seconds": 50.544921,
+  "answer": "Updated `src/agent_eval/core.py` so `tree_digest` includes symlink target text—even for broken links—using a marker and length prefix to avoid ambiguous hash concatenation. Existing path and file-content hashing remains in place.\n\nAdded focused coverage in `tests/test_tree_digest_symlinks.py` for broken links and valid links whose targets have identical contents. No `AGENTS.md` was present.\n\n**Checks:** `python3 -m unittest discover -s tests -v` passed all 19 tests; `git diff --check` passed.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 728,
+        "output": 118,
+        "reasoning": 67,
+        "cache": {
+          "read": 15421,
+          "write": 0
+        }
+      },
+      "cost": 0.00031951
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.63684,
+  "first_substantive_seconds": 25.47143,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 50.544921,
+      "started_at": "2026-11-04T14:24:17.151449+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 18
+  },
+  "changes": {
+    "tracked_patch_bytes": 666,
+    "untracked_paths": [
+      "tests/test_tree_digest_symlinks.py"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-h7p4ck3p/validation",
+        "/tmp/agent-eval-h7p4ck3p/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-04/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-04/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du04.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..\n----------------------------------------------------------------------\nRan 2 tests in 0.001s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-h7p4ck3p/validation",
+        "/tmp/agent-eval-h7p4ck3p/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-04/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-04/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "...................\n----------------------------------------------------------------------\nRan 19 tests in 0.017s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

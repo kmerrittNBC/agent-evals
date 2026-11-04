@@ -1,0 +1,158 @@
+{
+  "task_id": "DU-05",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:25:07.876414+00:00",
+  "elapsed_seconds": 53.892008,
+  "answer": "Updated `src/agent_eval/core.py` to reject malformed `repo_facts` with the clear reason **“judge evidence pack has an invalid repo fact.”** Each fact must be an object with a nonblank repo name and a 40-character string commit. Well-formed facts still use the existing pinned-commit comparison.\n\nAdded focused coverage in `tests/test_pack_status_repo_facts.py` for malformed facts and matching/mismatching pins.\n\n**Checks passed:** `python -m unittest discover -s tests` (18 tests) and `git diff --check`. The pre-existing untracked `tests/test_eval_du05.py` was left untouched.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 175,
+        "output": 133,
+        "reasoning": 58,
+        "cache": {
+          "read": 16626,
+          "write": 0
+        }
+      },
+      "cost": 0.00027926
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.544972,
+  "first_substantive_seconds": 28.171929,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 53.892008,
+      "started_at": "2026-11-04T14:25:07.876414+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 19
+  },
+  "changes": {
+    "tracked_patch_bytes": 1629,
+    "untracked_paths": [
+      "tests/test_pack_status_repo_facts.py"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-lzw2rnvv/validation",
+        "/tmp/agent-eval-lzw2rnvv/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-05/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-05/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests",
+        "-p",
+        "test_eval_du05.py"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ".\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nOK\n",
+      "timed_out": false
+    },
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-lzw2rnvv/validation",
+        "/tmp/agent-eval-lzw2rnvv/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-05/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/du-opencode-shell-20261104/runs/DU-05/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.016s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

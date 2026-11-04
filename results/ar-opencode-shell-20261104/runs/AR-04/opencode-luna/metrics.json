@@ -1,0 +1,53 @@
+{
+  "task_id": "AR-04",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:40:41.764487+00:00",
+  "elapsed_seconds": 118.919792,
+  "answer": "## Outcome\n\nNo files were changed. The recommendation is to make the **local FastAPI backend the authoritative owner of question-run state and persistence**, using SQLite in the user’s local application-data directory. Keep Lit responsible for restoring the selected run and presenting it, and keep Tauri responsible only for giving the sidecar a stable data-directory path.\n\nThis addresses a real restart gap: the backend currently stores runs in `InMemoryRunStore` (`apps/backend/src/insight_specialist_backend/runs.py`), while Tauri kills a sidecar it started on app exit (`apps/desktop/src-tauri/src/backend_sidecar.rs`). The API already supports fetching a run by ID and replaying SSE events, but the Lit component’s current run, snapshot, events, and submitted question live only in component memory. Only notification preferences currently use `localStorage`.\n\n## Ownership options\n\n1. **Backend-owned SQLite — recommended.** FastAPI already owns the run lifecycle, snapshots, context ledger, and event sequence. Persisting them together lets the existing `GET /runs/{run_id}` and SSE contract survive WebView and backend restarts. SQLite is available through Python’s standard library. The tradeoffs are schema migrations, local data retention, and restart recovery for work that was executing at shutdown.\n\n2. **Desktop-owned persistence** (for example, Tauri-managed storage or IndexedDB). This would require the desktop to preserve backend state or reconstruct it after restart, splitting ownership of snapshots and events. It also risks different behavior between browser development and Tauri. Persisting only a run ID here would not help if the backend still returns 404.\n\n3. **Keep the in-memory backend and persist only a UI pointer.** This is a smaller change, but cannot restore a run after the backend process exits. It is not sufficient for the requested boundary.\n\n## Proposed contract and lifecycle\n\n- Keep `run_id` as an opaque, stable identifier. The current backend creates UUID-hex IDs; standardize new IDs on UUIDv4 without requiring the UI to interpret them.\n- Use monotonically increasing, **per-run** integer event and context-entry IDs, persisted with the run. Preserve existing `events_url` and `run_url` fields and existing GET/SSE routes.\n- Add a list endpoint such as `GET /runs?status=active&limit=…` so the desktop can recover even if its local pointer is missing. Return enough metadata for a run picker/reconnect screen; `GET /runs/{run_id}` remains the source of the full snapshot.\n- Add an optional unique `client_request_id` to run creation so a timed-out POST can be retried without accidentally creating a duplicate run.\n\nUse explicit run-level statuses:\n\n```text\nqueued → running → awaiting_clarification → running → succeeded\n                  ↘ failed                 ↘ failed\n```\n\n`awaiting_clarification` is nonterminal: the current implementation marks the clarification stage `succeeded` even though the same run may still be waiting for answers and interpretation. Clarification answers should be accepted only in the appropriate state; invalid state changes should return a conflict rather than silently starting duplicate work.\n\nFor a backend restart, scan persisted runs before accepting work. Requeue a run recorded as `queued`; for a run recorded as `running`, resume from its persisted stage checkpoint and append a recovery event. An interrupted model request cannot be continued mid-response, so retry that stage under the **same run ID**, increment an attempt counter, and document that the model call may execute again. Persist stage results and context changes transactionally to avoid duplicate ledger entries. Runs awaiting clarification and terminal runs should be restored as-is.\n\nOn desktop reconnect, restore the active run ID, load its snapshot, and then resume the event stream. Rebuild the question and answers from the snapshot/context, not component memory. Deduplicate replayed events by run ID and event ID. The current file name is UI-only; if it is needed after restart, persist the display name, but do not persist the CSV contents or path as part of this change.\n\n## Errors and privacy\n\n- Keep the active run ID when the backend is temporarily unreachable. Show a reconnecting/unavailable state and retry; do not mark the persisted run `failed` because the client could not fetch it.\n- Treat an unknown run (`404`) as stale/missing history, invalid transition or duplicate answer submission as a conflict, invalid answers as a client error, and persisted model/stage failures as `failed` snapshots.\n- On SSE disconnect, fetch the snapshot and reconnect from the last seen event ID; do not rely solely on EventSource’s automatic reconnect.\n- If the database cannot open or is corrupt, report a local storage error. **Do not silently fall back to in-memory storage**, which would make durable runs appear lost.\n- Run inputs contain user questions and dataset profiles. Keep the database in the OS application-data directory with user-only permissions, define retention/deletion policy, and avoid storing API keys or raw CSV contents. Do not treat CORS as protection for the local API.\n\n## Migration and rollback\n\nUse SQLite tables for runs, events, context entries, and schema versioning. Use short transactions, foreign keys, WAL mode, and a busy timeout. Pass the application-data path to the spawned sidecar through an explicit environment variable; use an explicit local development path and temporary database paths in tests.\n\nThere is no existing durable run database to migrate from—the current store is in memory. Start with a versioned initial schema, then use transactional forward migrations and back up the database before schema upgrades. Keep API changes additive where possible. Retain the database during rollback; do not delete it or imply an older in-memory-only version can read it. An explicit in-memory mode may be useful for tests or development, but should not be the silent desktop fallback.\n\n## Tests to add with implementation\n\n- Backend store tests for persistence across store/process recreation, event ordering, context ordering, migrations, transaction rollback, and concurrent access.\n- Recovery tests for queued, running, awaiting-clarification, and terminal runs, including a simulated restart during a model call and verification that recovery preserves the run ID without duplicating context entries.\n- API tests using a temporary SQLite database and a fake model: create, snapshot after recreation, list/reconnect, SSE replay from a cursor, clarification answers after recreation, idempotent create retry, unknown IDs, and invalid state transitions. No live model endpoint is required.\n- Frontend tests for restoring a run, replay/deduplication, reconnect after a transient backend failure, stale IDs, and ensuring a fetch/SSE outage does not render a persisted run as failed.\n- Tauri/manual checks for a stable per-user data path, closing and reopening the app during a long run, reopening while awaiting clarification, and reopening a completed run.\n\n## Local checks and scope\n\nI worked only in `./data-analysis-agent`; `git status` showed a clean worktree. No external service or cloud credentials were used.\n\n- **Passed:** focused backend run tests: 7 tests.\n- **Passed:** dependency-independent backend unit tests excluding the FastAPI-dependent module: 28 tests.\n- **Blocked:** full backend unit discovery could not import `fastapi` in the system Python; the backend virtual environment is absent.\n- **Blocked:** desktop tests and build could not start because `pnpm` is unavailable. The repository wrapper found Node `v22.19.0`, but `pnpm` is not installed.\n- Live-model and Tauri/WebDriver checks were not run; they are not needed to validate this planning task.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 1626,
+        "output": 92,
+        "reasoning": 3810,
+        "cache": {
+          "read": 62953,
+          "write": 0
+        }
+      },
+      "cost": 0.0027431300000000003
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.681717,
+  "first_substantive_seconds": 39.203466,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 118.919792,
+      "started_at": "2026-11-04T14:40:41.764487+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 37
+  },
+  "changes": {
+    "tracked_patch_bytes": 0,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f3f81aba0567f08ad4af681345d603496e80b679",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

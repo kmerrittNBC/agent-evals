@@ -1,0 +1,101 @@
+# Agent evaluation: du-opencode-shell-20261104
+
+Column: du
+Information cutoff: 2026-10-15T14:00:00-04:00
+
+Five tasks per arm. Ratings and rankings are exploratory, not statistically conclusive.
+
+## Preflight
+
+| Arm | Status | Reason |
+|---|---|---|
+| pi-luna | needs_live_probe | — |
+| pi-sol | needs_live_probe | — |
+| pi-local-qwen | needs_live_probe | — |
+| opencode-luna | ready | — |
+| claude-opus | needs_live_probe | — |
+
+## Task preparation
+
+| Task | Status | Red exit | Reason |
+|---|---|---:|---|
+| DU-01 | ready | 1 | — |
+| DU-02 | ready | 1 | — |
+| DU-03 | ready | 1 | — |
+| DU-04 | ready | 1 | — |
+| DU-05 | ready | 1 | — |
+
+Validation runs the saved candidate changes in a fresh checkout with frozen prepared checks. Agent edits to those checks are archived separately and do not replace the evaluator's checks.
+
+## Arm summary
+
+| Arm | Rating | Attempts complete | Tasks complete | Quality distribution (1–5) | Quality median | First visible seconds median (range) | First substantive seconds median (range) | Final seconds median (range) | Follow-ups | Critical errors | Copilot credits median (range) |
+|---|---|---:|---:|---|---:|---|---|---|---:|---:|---|
+| pi-luna | Unrated | 0/5 | 0/5 | 0/0/0/0/0 | unavailable | unavailable | unavailable | unavailable | 0 | 0 | unavailable |
+| pi-sol | Unrated | 0/5 | 0/5 | 0/0/0/0/0 | unavailable | unavailable | unavailable | unavailable | 0 | 0 | unavailable |
+| pi-local-qwen | Unrated | 0/5 | 0/5 | 0/0/0/0/0 | unavailable | unavailable | unavailable | unavailable | 0 | 0 | separate native usage |
+| opencode-luna | Excellent | 5/5 | 5/5 | 0/0/0/0/5 | 5 | 4.13 (3.54–45.70) | 27.91 (15.16–45.70) | 53.89 (45.86–88.06) | 0 | 0 | unavailable |
+| claude-opus | Unrated | 0/5 | 0/5 | 0/0/0/0/0 | unavailable | unavailable | unavailable | unavailable | 0 | 0 | separate native usage |
+
+## Task outcomes
+
+### DU-01
+
+| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |
+|---|---|---:|---|---|---:|---|---|---|
+| pi-luna | not_run | — | — | — | — | — | — | — |
+| pi-sol | not_run | — | — | — | — | — | — | — |
+| pi-local-qwen | not_run | — | — | — | — | — | — | — |
+| opencode-luna | completed | 5 | True | none | 0 | [answer](runs/DU-01/opencode-luna/answer.md) | [patch](runs/DU-01/opencode-luna/patch.diff) | [judgment](runs/DU-01/opencode-luna/judgment.json) |
+| claude-opus | not_run | — | — | — | — | — | — | — |
+
+### DU-02
+
+| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |
+|---|---|---:|---|---|---:|---|---|---|
+| pi-luna | not_run | — | — | — | — | — | — | — |
+| pi-sol | not_run | — | — | — | — | — | — | — |
+| pi-local-qwen | not_run | — | — | — | — | — | — | — |
+| opencode-luna | completed | 5 | True | none | 0 | [answer](runs/DU-02/opencode-luna/answer.md) | [patch](runs/DU-02/opencode-luna/patch.diff) | [judgment](runs/DU-02/opencode-luna/judgment.json) |
+| claude-opus | not_run | — | — | — | — | — | — | — |
+
+### DU-03
+
+| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |
+|---|---|---:|---|---|---:|---|---|---|
+| pi-luna | not_run | — | — | — | — | — | — | — |
+| pi-sol | not_run | — | — | — | — | — | — | — |
+| pi-local-qwen | not_run | — | — | — | — | — | — | — |
+| opencode-luna | completed | 5 | True | none | 0 | [answer](runs/DU-03/opencode-luna/answer.md) | [patch](runs/DU-03/opencode-luna/patch.diff) | [judgment](runs/DU-03/opencode-luna/judgment.json) |
+| claude-opus | not_run | — | — | — | — | — | — | — |
+
+### DU-04
+
+| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |
+|---|---|---:|---|---|---:|---|---|---|
+| pi-luna | not_run | — | — | — | — | — | — | — |
+| pi-sol | not_run | — | — | — | — | — | — | — |
+| pi-local-qwen | not_run | — | — | — | — | — | — | — |
+| opencode-luna | completed | 5 | True | none | 0 | [answer](runs/DU-04/opencode-luna/answer.md) | [patch](runs/DU-04/opencode-luna/patch.diff) | [judgment](runs/DU-04/opencode-luna/judgment.json) |
+| claude-opus | not_run | — | — | — | — | — | — | — |
+
+### DU-05
+
+| Arm | Status | Quality | Validation | Follow-up | Critical errors | Answer | Patch | Judgment |
+|---|---|---:|---|---|---:|---|---|---|
+| pi-luna | not_run | — | — | — | — | — | — | — |
+| pi-sol | not_run | — | — | — | — | — | — | — |
+| pi-local-qwen | not_run | — | — | — | — | — | — | — |
+| opencode-luna | completed | 5 | True | none | 0 | [answer](runs/DU-05/opencode-luna/answer.md) | [patch](runs/DU-05/opencode-luna/patch.diff) | [judgment](runs/DU-05/opencode-luna/judgment.json) |
+| claude-opus | not_run | — | — | — | — | — | — | — |
+
+## Sol versus Luna Copilot credits
+
+Unavailable: provider-reported credits are not present for paired Pi runs.
+
+Non-Copilot usage remains in native units in `summary.csv`; it is not converted to Copilot credits.
+Copilot values derived from `totalNanoAiu / 1e9` are approximate until reconciled with GitHub billing. See each row's `credit_classification`.
+
+Judge scores are opinions. Times and native usage come from the runner and provider events. A missing value means unavailable, never zero.
+
+Every critical-error judgment should receive blind human review before acting on rankings.

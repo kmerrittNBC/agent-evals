@@ -1,0 +1,41 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "The final description matches the diff: workspace lifecycle moved to SnapshotWorkspace, conversation capture moved to a helper, and the artifact and continuation logic remains intact."
+    },
+    "task_completion": {
+      "score": 4,
+      "reason": "A coherent, bounded code change and tests were delivered. The frozen validation passed all 18 tests, but the new tests do not exercise cleanup when workspace preparation or capture raises."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "The work was grounded in the repository code, runner tests, schema, and actual diff; frozen validation independently passed."
+    },
+    "synthesis_and_judgment": {
+      "score": 4,
+      "reason": "The workspace protocol gives a viable seam for writable worktrees while keeping the current snapshot integrity policy. Error-path test coverage is the main gap."
+    },
+    "ambiguity_handling": {
+      "score": 4,
+      "reason": "The answer correctly treats writable-worktree integrity as a future policy choice and does not claim it is implemented."
+    },
+    "actionability_and_clarity": {
+      "score": 5,
+      "reason": "The final answer identifies the changed components, the future extension point, and the checks performed."
+    }
+  },
+  "overall_quality": 4,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "task_completion",
+      "answer_passage": "Added tests for workspace cleanup and integrity reporting",
+      "evidence": "The added lifecycle test covers normal exit, and the integrity test covers a modified workspace. Neither injects an exception into preparation or conversation capture. The initial failing run was caused by an incorrect test assertion, then corrected; it was not a behavioral red test.",
+      "reason": "Cleanup on errors is an explicit evaluation criterion. The implementation has cleanup guards, but that path lacks direct regression coverage."
+    }
+  ],
+  "first_substantive_event_index": 16
+}

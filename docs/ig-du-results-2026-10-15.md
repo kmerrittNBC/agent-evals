@@ -1,5 +1,11 @@
 # IG and DU results so far — 15 October 2026
 
+> **4 November 2026 correction:** The original OpenCode DU arm had no command
+> access because the V2 runner allowed `bash` instead of `shell`. Its DU
+> comparison and conclusions below are superseded by the
+> [shell-enabled rerun](opencode-shell-correction-2026-11-04.md), which completed
+> 5/5 DU tasks. IG was intentionally read-only for every arm.
+
 This compares the five information-gathering (IG) tasks in the [IG run](../results/local-repos-20261015-122649/report.md) with the five defined-update (DU) tasks in the [adjudicated DU run](../results/du-2026-10-15-adjudicated/report.md). The [DU adjudication](../results/du-2026-10-15-adjudicated/ADJUDICATION.md) replays five attempts that the original runner rejected for edits to prepared checks and rejudges Claude Opus on DU-04 with a symlink-collision test. The [original DU report](../results/du-2026-10-15-full/report.md) remains available. All four pairs used medium reasoning effort. No AR results are included yet.
 
 ## Outcomes

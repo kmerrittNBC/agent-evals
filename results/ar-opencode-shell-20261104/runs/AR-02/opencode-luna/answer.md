@@ -1,0 +1,9 @@
+**Decision: fail closed.** When the standalone research MCP sidecar disappears during a trial, interrupt that trial and do not restart it under the same identity, directory, socket path, or client configuration. A same-trial restart is only a possible future design after durable accounting and client-generation fencing are implemented together.
+
+I added the proposed decision and staged plan in [`docs/speculative/research-mcp-sidecar-recovery.md`](docs/speculative/research-mcp-sidecar-recovery.md), and linked it from [`docs/authoritative/research-mcp.md`](docs/authoritative/research-mcp.md). No code was changed.
+
+The decision follows the actual contracts: the standalone `main.ts` creates a `VolatileWorkLedger`, consumes setup and credential descriptors once, and relies on an exclusive `started` marker to refuse relaunch in the same directory. The bridge connects once and has no reconnect or generation-authentication mechanism. By contrast, the separate owner-trial path has durable SQLite reservations, with uncertain work charged at its reserved maximum; that does not make the standalone sidecar restart-safe.
+
+The plan stages are: retain the current fail-closed behavior; make interruption observable and test it; require an owner decision before pursuing restart; and, only if approved, bind restarts to durable accounting, a new private socket generation, explicit client lifecycle coordination, frozen trial/artifact identity, and fresh credential delivery through a protected descriptor. It also specifies verification and rollback, including preserving markers and accounting rather than resetting quota.
+
+**Checks:** `git diff --check` and local Markdown-link validation passed. Focused Vitest, `verify:research-mcp`, and `docs:references` could not run: dependencies are unavailable in this worktree (`vitest`, `tsc`, and `tsx` missing); the Vitest invocation also encountered the environment’s read-only npm cache.

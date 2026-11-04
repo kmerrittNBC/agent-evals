@@ -1,0 +1,371 @@
+diff --git a/src/agent_eval/core.py b/src/agent_eval/core.py
+index 7fdb9d7..95e7cb6 100644
+--- a/src/agent_eval/core.py
++++ b/src/agent_eval/core.py
+@@ -13,7 +13,7 @@ import tempfile
+ import threading
+ import time
+ from pathlib import Path
+-from typing import Any
++from typing import Any, Callable, Protocol
+ 
+ from . import adapters
+ 
+@@ -239,6 +239,64 @@ def tree_digest(root: Path) -> str:
+     return digest.hexdigest()
+ 
+ 
++class Workspace(Protocol):
++    """A run-scoped filesystem, independent of harness conversation capture."""
++
++    path: Path
++    digest_before: str
++    digest_after: str | None
++
++    def __enter__(self) -> Workspace: ...
++    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None: ...
++
++    @property
++    def integrity_error(self) -> str | None: ...
++
++
++class SnapshotWorkspace:
++    """Temporary read-only export of the repositories pinned in the manifest."""
++
++    def __init__(self, repos: dict[str, dict], task: dict):
++        self.repos = repos
++        self.task = task
++        self._temporary: tempfile.TemporaryDirectory[str] | None = None
++        self.path: Path
++        self.digest_before = ""
++        self.digest_after: str | None = None
++
++    def __enter__(self) -> SnapshotWorkspace:
++        self._temporary = tempfile.TemporaryDirectory(prefix="agent-eval-")
++        self.path = Path(self._temporary.name) / "workspace"
++        try:
++            prepare_workspace(self.repos, self.task, self.path)
++            self.digest_before = tree_digest(self.path)
++        except BaseException:
++            self._temporary.cleanup()
++            self._temporary = None
++            raise
++        return self
++
++    def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
++        try:
++            if self.path.exists():
++                self.digest_after = tree_digest(self.path)
++        finally:
++            if self._temporary is not None:
++                self._temporary.cleanup()
++                self._temporary = None
++
++    @property
++    def integrity_error(self) -> str | None:
++        if self.digest_after != self.digest_before:
++            return "Repository snapshot was modified"
++        return None
++
++
++def create_workspace(repos: dict[str, dict], task: dict) -> Workspace:
++    """Create the default run workspace; alternative implementations can use this seam."""
++    return SnapshotWorkspace(repos, task)
++
++
+ def capture(command: list[str], cwd: Path, env: dict[str, str], timeout: int,
+             events_path: Path) -> dict:
+     """Capture stdout/stderr as received with monotonic offsets and no shell."""
+@@ -287,8 +345,54 @@ def capture(command: list[str], cwd: Path, env: dict[str, str], timeout: int,
+             "elapsed_seconds": round(time.monotonic() - start, 6), "started_at": started_at}
+ 
+ 
++def _capture_conversation(arm: dict, task: dict, workspace: Path, run_dir: Path,
++                          timeout: int | None, policy: dict) -> dict:
++    """Run harness phases and normalize their events without owning workspace lifetime."""
++    env = adapters.environment(arm, workspace)
++    session = None
++    all_events: list[dict] = []
++    phase_results: list[dict] = []
++    asked = False
++    answer = ""
++    prompts = [task["prompt"], policy["continuation_response"]]
++    for phase, prompt in enumerate(prompts):
++        if phase and not asked:
++            break
++        event_path = run_dir / f"phase-{phase}.jsonl"
++        cmd = adapters.command(arm, prompt, workspace, run_dir, session)
++        if arm["harness"] == "copilot" and phase == 0:
++            import uuid
++            cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
++        result = capture(cmd, workspace, env, timeout or policy["timeout_seconds"], event_path)
++        phase_results.append({key: value for key, value in result.items() if key != "events"})
++        offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
++        for entry in result["events"]:
++            entry["index"] = len(all_events)
++            entry["elapsed_seconds"] += offset
++            entry["phase"] = phase
++            all_events.append(entry)
++        answer = adapters.final_answer(arm["harness"], result["events"])
++        if phase == 0:
++            asked = adapters.asked_question(result["events"], answer)
++            session = adapters.session_id(arm["harness"], result["events"])
++            if arm["harness"] == "copilot":
++                session = cmd[cmd.index("--session-id") + 1]
++            if arm["harness"] == "pi":
++                session = str(run_dir / "pi-session.jsonl")
++        if result["exit_code"] != 0 or result["timed_out"]:
++            break
++        if phase == 0 and asked and not session:
++            break
++    with (run_dir / "events.jsonl").open("w") as f:
++        for entry in all_events:
++            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
++    return {"events": all_events, "phases": phase_results, "answer": answer,
++            "asked": asked, "session": session}
++
++
+ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+-            timeout: int | None = None) -> dict:
++            timeout: int | None = None,
++            workspace_factory: Callable[[dict[str, dict], dict], Workspace] = create_workspace) -> dict:
+     run_dir = RESULTS / evaluation_id / "runs" / task["id"] / arm["id"]
+     if run_dir.exists():
+         raise ValueError(f"Run already exists: {run_dir}; use a new evaluation ID")
+@@ -306,78 +410,44 @@ def run_one(arm: dict, task: dict, manifest: dict, evaluation_id: str,
+         return metrics
+     if status != "ready":
+         raise ValueError(f"Arm {arm['id']} has not passed live preflight")
+-    with tempfile.TemporaryDirectory(prefix="agent-eval-") as temporary:
+-        workspace = Path(temporary) / "workspace"
+-        prepare_workspace(manifest["repos"], {"repos": task_repo_names(task, manifest)}, workspace)
+-        before = tree_digest(workspace)
+-        env = adapters.environment(arm, workspace)
+-        session = None
+-        all_events: list[dict] = []
+-        phase_results: list[dict] = []
+-        asked = False
+-        answer = ""
+-        policy = read_config("run-policy")
+-        prompts = [task["prompt"], policy["continuation_response"]]
+-        for phase, prompt in enumerate(prompts):
+-            if phase and not asked:
+-                break
+-            event_path = run_dir / f"phase-{phase}.jsonl"
+-            cmd = adapters.command(arm, prompt, workspace, run_dir, session)
+-            if arm["harness"] == "copilot" and phase == 0:
+-                import uuid
+-                cmd[cmd.index("--session-id") + 1] = str(uuid.uuid4())
+-            result = capture(cmd, workspace, env, timeout or policy["timeout_seconds"], event_path)
+-            phase_results.append({key: value for key, value in result.items() if key != "events"})
+-            offset = sum(item["elapsed_seconds"] for item in phase_results[:-1])
+-            for entry in result["events"]:
+-                entry["index"] = len(all_events)
+-                entry["elapsed_seconds"] += offset
+-                entry["phase"] = phase
+-                all_events.append(entry)
+-            answer = adapters.final_answer(arm["harness"], result["events"])
+-            if phase == 0:
+-                asked = adapters.asked_question(result["events"], answer)
+-                session = adapters.session_id(arm["harness"], result["events"])
+-                if arm["harness"] == "copilot":
+-                    session = cmd[cmd.index("--session-id") + 1]
+-                if arm["harness"] == "pi":
+-                    session = str(run_dir / "pi-session.jsonl")
+-            if result["exit_code"] != 0 or result["timed_out"]:
+-                break
+-            if phase == 0 and asked and not session:
+-                break
+-        with (run_dir / "events.jsonl").open("w") as f:
+-            for entry in all_events:
+-                f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+-        after = tree_digest(workspace)
+-        if before != after:
+-            status = "failed"
+-            reason = "Repository snapshot was modified"
+-        elif phase_results[-1]["timed_out"]:
+-            status, reason = "timeout", "Harness exceeded timeout"
+-        elif phase_results[-1]["exit_code"] != 0:
+-            status, reason = "failed", f"Harness exited {phase_results[-1]['exit_code']}"
+-        elif asked and not session:
+-            status, reason = "failed", "Clarification asked but session continuation was unavailable"
+-        elif not answer:
+-            status, reason = "failed", "No final answer parsed from events"
+-        else:
+-            status, reason = "completed", None
+-        first_visible = next((entry["elapsed_seconds"] for entry in all_events
+-                              if entry["channel"] == "stdout" and
+-                              adapters.event_text(arm["harness"], entry["data"])), None)
+-        usage = adapters.usage(arm["harness"], all_events, run_dir)
+-        (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
+-        metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
+-                   "reason": reason, "started_at": phase_results[0]["started_at"],
+-                   "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
+-                   "answer": answer, "usage": usage, "asked_clarification": asked,
+-                   "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
+-                   "first_substantive_seconds": None, "snapshot_digest_before": before,
+-                   "snapshot_digest_after": after, "phases": phase_results,
+-                   "tool_activity": adapters.tool_activity(all_events)}
+-        atomic_json(run_dir / "metrics.json", metrics)
+-        return metrics
++    policy = read_config("run-policy")
++    with workspace_factory(manifest["repos"],
++                           {"repos": task_repo_names(task, manifest)}) as workspace:
++        before = workspace.digest_before
++        conversation = _capture_conversation(arm, task, workspace.path, run_dir, timeout, policy)
++    after = workspace.digest_after
++    all_events = conversation["events"]
++    phase_results = conversation["phases"]
++    answer = conversation["answer"]
++    asked = conversation["asked"]
++    if workspace.integrity_error:
++        status = "failed"
++        reason = workspace.integrity_error
++    elif phase_results[-1]["timed_out"]:
++        status, reason = "timeout", "Harness exceeded timeout"
++    elif phase_results[-1]["exit_code"] != 0:
++        status, reason = "failed", f"Harness exited {phase_results[-1]['exit_code']}"
++    elif asked and not conversation["session"]:
++        status, reason = "failed", "Clarification asked but session continuation was unavailable"
++    elif not answer:
++        status, reason = "failed", "No final answer parsed from events"
++    else:
++        status, reason = "completed", None
++    first_visible = next((entry["elapsed_seconds"] for entry in all_events
++                          if entry["channel"] == "stdout" and
++                          adapters.event_text(arm["harness"], entry["data"])), None)
++    usage = adapters.usage(arm["harness"], all_events, run_dir)
++    (run_dir / "answer.md").write_text(answer + ("\n" if answer else ""))
++    metrics = {"task_id": task["id"], "arm_id": arm["id"], "status": status,
++               "reason": reason, "started_at": phase_results[0]["started_at"],
++               "elapsed_seconds": sum(x["elapsed_seconds"] for x in phase_results),
++               "answer": answer, "usage": usage, "asked_clarification": asked,
++               "continuations": len(phase_results) - 1, "first_visible_seconds": first_visible,
++               "first_substantive_seconds": None, "snapshot_digest_before": before,
++               "snapshot_digest_after": after, "phases": phase_results,
++               "tool_activity": adapters.tool_activity(all_events)}
++    atomic_json(run_dir / "metrics.json", metrics)
++    return metrics
+ 
+ 
+ def randomized_slots(tasks: list[dict], arms: list[dict], seed: int) -> list[tuple[dict, dict]]:
+diff --git a/tests/test_runner.py b/tests/test_runner.py
+index d677662..1ccf8cb 100644
+--- a/tests/test_runner.py
++++ b/tests/test_runner.py
+@@ -6,14 +6,113 @@ from pathlib import Path
+ from unittest.mock import patch
+ 
+ from src.agent_eval import adapters
+-from src.agent_eval.core import (pack_status, prepare_workspace, read_config,
+-                                 static_arm_check, tree_digest, validate_cutoff)
++from src.agent_eval.core import (SnapshotWorkspace, pack_status, prepare_workspace,
++                                 read_config, run_one, static_arm_check, tree_digest,
++                                 validate_cutoff)
+ from src.agent_eval.judge import anonymized_transcript, validate_judgment
+ from src.agent_eval.preflight import live_arm_probe
+ from src.agent_eval.report import _credit
+ 
+ 
+ class RunnerContractTests(unittest.TestCase):
++    def test_snapshot_workspace_owns_temporary_directory_lifecycle(self):
++        workspace = SnapshotWorkspace({}, {"repos": []})
++        with workspace:
++            path = workspace.path
++            self.assertTrue(path.is_dir())
++            self.assertEqual(workspace.digest_before, tree_digest(path))
++        self.assertFalse(path.exists())
++        self.assertEqual(workspace.digest_after, workspace.digest_before)
++        self.assertIsNone(workspace.integrity_error)
++
++    def test_snapshot_workspace_reports_changes_after_conversation(self):
++        workspace = SnapshotWorkspace({}, {"repos": []})
++        with workspace:
++            workspace.path.chmod(0o755)
++            (workspace.path / "changed.txt").write_text("changed")
++        self.assertEqual(workspace.integrity_error, "Repository snapshot was modified")
++
++    def test_run_uses_workspace_seam_without_changing_conversation_contract(self):
++        class FakeWorkspace:
++            def __init__(self):
++                self.temporary = None
++                self.path = None
++                self.digest_before = "snapshot"
++                self.digest_after = None
++
++            def __enter__(self):
++                self.temporary = tempfile.TemporaryDirectory()
++                self.path = Path(self.temporary.name)
++                return self
++
++            def __exit__(self, exc_type, exc_value, traceback):
++                self.digest_after = self.digest_before
++                self.temporary.cleanup()
++
++            @property
++            def integrity_error(self):
++                return None if self.digest_after == self.digest_before else "Workspace changed"
++
++        with tempfile.TemporaryDirectory() as temp:
++            workspace_args = []
++            workspace = FakeWorkspace()
++
++            def workspace_factory(repos, selected_task):
++                workspace_args.append((repos, selected_task))
++                return workspace
++
++            captured_commands = []
++
++            def capture_result(command, cwd, env, timeout, events_path):
++                captured_commands.append((command, cwd, timeout, events_path))
++                phase = len(captured_commands) - 1
++                return {
++                    "events": [{"index": 0, "elapsed_seconds": 0.25, "channel": "stdout",
++                                "data": {"text": f"phase {phase}"}}],
++                    "exit_code": 0, "timed_out": False, "elapsed_seconds": phase + 1,
++                    "started_at": "2026-11-04T00:00:00+00:00",
++                }
++
++            usage = {"classification": "measured", "source": "harness", "raw": {"tokens": 12}}
++            arm = {"id": "test-arm", "harness": "opencode"}
++            task = {"id": "IG-test", "repos": ["repo"], "prompt": "Initial prompt"}
++            manifest = {"repos": {"repo": {"path": "/unused", "commit": "pin"}},
++                        "preflight": {"test-arm": {"status": "ready"}}}
++            with patch("src.agent_eval.core.RESULTS", Path(temp)), \
++                    patch("src.agent_eval.core.read_config", return_value={
++                        "continuation_response": "Clarification response", "timeout_seconds": 60}), \
++                    patch("src.agent_eval.core.adapters.environment", return_value={}), \
++                    patch("src.agent_eval.core.adapters.command", side_effect=lambda *args: [args[1]]), \
++                    patch("src.agent_eval.core.capture", side_effect=capture_result), \
++                    patch("src.agent_eval.core.adapters.final_answer",
++                          side_effect=["Could you clarify?", "The final answer."]), \
++                    patch("src.agent_eval.core.adapters.asked_question", return_value=True), \
++                    patch("src.agent_eval.core.adapters.session_id", return_value="session-1"), \
++                    patch("src.agent_eval.core.adapters.event_text", return_value="visible"), \
++                    patch("src.agent_eval.core.adapters.usage", return_value=usage), \
++                    patch("src.agent_eval.core.adapters.tool_activity", return_value={"search_calls": 0}):
++                metrics = run_one(arm, task, manifest, "eval-test",
++                                  workspace_factory=workspace_factory)
++
++            self.assertEqual(workspace_args, [(manifest["repos"], {"repos": ["repo"]})])
++            self.assertEqual([item[0][0] for item in captured_commands],
++                             ["Initial prompt", "Clarification response"])
++            self.assertTrue(all(item[1] == workspace.path for item in captured_commands))
++            self.assertEqual(metrics["status"], "completed")
++            self.assertEqual(metrics["answer"], "The final answer.")
++            self.assertEqual(metrics["usage"], usage)
++            self.assertTrue(metrics["asked_clarification"])
++            self.assertEqual(metrics["continuations"], 1)
++            self.assertEqual(metrics["elapsed_seconds"], 3)
++            self.assertEqual(metrics["snapshot_digest_before"], "snapshot")
++            self.assertEqual(metrics["snapshot_digest_after"], "snapshot")
++            run_dir = Path(temp) / "eval-test/runs/IG-test/test-arm"
++            self.assertEqual((run_dir / "answer.md").read_text(), "The final answer.\n")
++            events = [json.loads(line) for line in (run_dir / "events.jsonl").read_text().splitlines()]
++            self.assertEqual([event["index"] for event in events], [0, 1])
++            self.assertEqual([event["phase"] for event in events], [0, 1])
++            self.assertEqual([event["elapsed_seconds"] for event in events], [0.25, 1.25])
++
+     def test_snapshot_uses_pinned_commit_and_omits_later_changes(self):
+         with tempfile.TemporaryDirectory() as temp:
+             repo = Path(temp) / "repo"

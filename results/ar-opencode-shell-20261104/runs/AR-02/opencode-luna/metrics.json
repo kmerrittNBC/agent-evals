@@ -1,0 +1,55 @@
+{
+  "task_id": "AR-02",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:29:17.895501+00:00",
+  "elapsed_seconds": 141.493082,
+  "answer": "**Decision: fail closed.** When the standalone research MCP sidecar disappears during a trial, interrupt that trial and do not restart it under the same identity, directory, socket path, or client configuration. A same-trial restart is only a possible future design after durable accounting and client-generation fencing are implemented together.\n\nI added the proposed decision and staged plan in [`docs/speculative/research-mcp-sidecar-recovery.md`](docs/speculative/research-mcp-sidecar-recovery.md), and linked it from [`docs/authoritative/research-mcp.md`](docs/authoritative/research-mcp.md). No code was changed.\n\nThe decision follows the actual contracts: the standalone `main.ts` creates a `VolatileWorkLedger`, consumes setup and credential descriptors once, and relies on an exclusive `started` marker to refuse relaunch in the same directory. The bridge connects once and has no reconnect or generation-authentication mechanism. By contrast, the separate owner-trial path has durable SQLite reservations, with uncertain work charged at its reserved maximum; that does not make the standalone sidecar restart-safe.\n\nThe plan stages are: retain the current fail-closed behavior; make interruption observable and test it; require an owner decision before pursuing restart; and, only if approved, bind restarts to durable accounting, a new private socket generation, explicit client lifecycle coordination, frozen trial/artifact identity, and fresh credential delivery through a protected descriptor. It also specifies verification and rollback, including preserving markers and accounting rather than resetting quota.\n\n**Checks:** `git diff --check` and local Markdown-link validation passed. Focused Vitest, `verify:research-mcp`, and `docs:references` could not run: dependencies are unavailable in this worktree (`vitest`, `tsc`, and `tsx` missing); the Vitest invocation also encountered the environment’s read-only npm cache.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 4125,
+        "output": 195,
+        "reasoning": 844,
+        "cache": {
+          "read": 107781,
+          "write": 0
+        }
+      },
+      "cost": 0.00200981
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 4.155739,
+  "first_substantive_seconds": 13.614263,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 141.493082,
+      "started_at": "2026-11-04T14:29:17.895501+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 45
+  },
+  "changes": {
+    "tracked_patch_bytes": 773,
+    "untracked_paths": [
+      "docs/speculative/research-mcp-sidecar-recovery.md"
+    ],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "f7c03941cf32b8e25720b5eb1aa91364a236b005",
+    "validation_checks_intact": true
+  },
+  "validation": []
+}

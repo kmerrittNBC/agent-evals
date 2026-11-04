@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 1629,
+  "untracked_paths": [
+    "tests/test_pack_status_repo_facts.py"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+  "validation_checks_intact": true
+}

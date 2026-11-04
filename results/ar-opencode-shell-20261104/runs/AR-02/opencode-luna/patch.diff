@@ -1,0 +1,14 @@
+diff --git a/docs/authoritative/research-mcp.md b/docs/authoritative/research-mcp.md
+index 6b49653..c68ff3c 100644
+--- a/docs/authoritative/research-mcp.md
++++ b/docs/authoritative/research-mcp.md
+@@ -319,6 +319,9 @@ Do not relaunch into fresh state under the old identity. Rollback selects the
+ whole prior admitted MCP/core artifact for a new authorized trial, not a mixture
+ of wrapper and core files. After a disposable trial is conclusively ended and
+ its diagnostics retained, the supervisor may remove only its exact trial directory.
++The proposed same-trial recovery alternative and staged verification plan are in
++[Research MCP Sidecar Recovery](../speculative/research-mcp-sidecar-recovery.md);
++they do not change this fail-closed contract.
+ 
+ ## Limitations
+ 

@@ -1,0 +1,10 @@
+{
+  "tracked_patch_bytes": 3498,
+  "untracked_paths": [
+    "delete_test.go"
+  ],
+  "setup_checks_intact": true,
+  "prepared_check_edits": [],
+  "final_head": "052ce21307c02f772619e4878b44949bd72f5e1b",
+  "validation_checks_intact": true
+}

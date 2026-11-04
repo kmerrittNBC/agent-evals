@@ -1,5 +1,10 @@
 # Coding agent capability evaluation
 
+**4 November 2026 correction:** The original OpenCode DU and AR runs lacked
+command access because the OpenCode V2 runner allowed `bash` instead of
+`shell`. See the [shell permission correction and reruns](docs/opencode-shell-correction-2026-11-04.md)
+before using the historical comparisons below. IG was intentionally read-only.
+
 For the small team installer and onboarding steps, use [coding-agent-setup](https://github.com/kmerrittNBC/coding-agent-setup). This repository retains the evaluation evidence and runner.
 
 This repository compares **model plus harness pairs** on the work a development team might assign an agent. It evaluates three task categories:

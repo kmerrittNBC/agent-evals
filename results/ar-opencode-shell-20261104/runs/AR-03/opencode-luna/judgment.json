@@ -1,0 +1,41 @@
+{
+  "dimensions": {
+    "factual_accuracy": {
+      "score": 5,
+      "reason": "Accurately distinguishes existing fail-closed recovery from proposed same-lease settlement and preserves the frozen 161-slot contract."
+    },
+    "task_completion": {
+      "score": 5,
+      "reason": "Delivers a concrete plan covering current behavior, alternatives, state transitions, trust checks, tests, audit, seal, and rollback."
+    },
+    "source_quality": {
+      "score": 5,
+      "reason": "Grounds the plan in the repository’s ADR, scheduler, outcome contract, and recovery runbooks, with direct links in the deliverable."
+    },
+    "synthesis_and_judgment": {
+      "score": 5,
+      "reason": "Rejects native replay, separates record-only completion from an uncertain attempt, and requires quiescence and retained evidence before terminal failure."
+    },
+    "ambiguity_handling": {
+      "score": 5,
+      "reason": "Explicitly treats missing local output as insufficient proof that the provider was never contacted; unresolved cases remain stopped."
+    },
+    "actionability_and_clarity": {
+      "score": 4,
+      "reason": "The implementation sequence and test cases are specific, but the exact recovery schema and crash-safe write ordering are left to define during implementation."
+    }
+  },
+  "overall_quality": 5,
+  "completion_status": "complete",
+  "follow_up_classification": "none",
+  "critical_errors": [],
+  "deductions": [
+    {
+      "dimension": "actionability_and_clarity",
+      "answer_passage": "“Agree a versioned recovery-record schema and exact terminal evidence shape” and “define ordering so every crash point can be retried idempotently.”",
+      "evidence": "The plan names these as implementation tasks without specifying the final schema fields or precise persistence order.",
+      "reason": "Those remaining design choices slightly limit immediate implementation readiness; they do not prevent the document from fulfilling the requested plan deliverable."
+    }
+  ],
+  "first_substantive_event_index": 74
+}

@@ -1,0 +1,104 @@
+{
+  "task_id": "AR-05",
+  "arm_id": "opencode-luna",
+  "status": "completed",
+  "reason": null,
+  "started_at": "2026-11-04T14:42:40.728391+00:00",
+  "elapsed_seconds": 158.984765,
+  "answer": "Refactored the runner in `./agent-evals` to separate workspace lifecycle from harness conversation capture.\n\n- Added a `Workspace` protocol and `SnapshotWorkspace` implementation in `src/agent_eval/core.py`. The snapshot implementation owns temporary-directory creation, pinned archive preparation, digest checks, and cleanup.\n- Extracted harness phases, event normalization, answer/session handling, and event-file writing into `_capture_conversation`. `run_one` accepts an optional workspace factory so a different workspace can be supplied without changing conversation handling.\n- Added tests for workspace cleanup and integrity reporting, plus a runner test covering continuation, event timing/indexes, answer, usage, and persisted output.\n\nA future writable-worktree implementation could implement the same context-manager interface and provide its own `integrity_error` policy—for example, allowing expected edits while still checking other invariants. The current snapshot integrity behavior remains unchanged.\n\nNo IG prompts, arm models, or output schema were changed. No `AGENTS.md` was found.\n\nChecks passed: **18 unit tests**, `compileall`, `git diff --check`, and CLI `--help`.",
+  "usage": {
+    "classification": "measured",
+    "source": "opencode step_finish",
+    "raw": {
+      "tokens": {
+        "input": 905,
+        "output": 57,
+        "reasoning": 319,
+        "cache": {
+          "read": 35368,
+          "write": 0
+        }
+      },
+      "cost": 0.0006321800000000001
+    }
+  },
+  "asked_clarification": false,
+  "continuations": 0,
+  "first_visible_seconds": 3.85672,
+  "first_substantive_seconds": 24.58316,
+  "snapshot_digest_before": null,
+  "snapshot_digest_after": null,
+  "phases": [
+    {
+      "exit_code": 0,
+      "timed_out": false,
+      "elapsed_seconds": 158.984765,
+      "started_at": "2026-11-04T14:42:40.728391+00:00"
+    }
+  ],
+  "tool_activity": {
+    "search_calls": 0,
+    "fetch_calls": 0,
+    "other_tool_calls": 27
+  },
+  "changes": {
+    "tracked_patch_bytes": 18908,
+    "untracked_paths": [],
+    "setup_checks_intact": true,
+    "prepared_check_edits": [],
+    "final_head": "76d02969bd45f5892c638d61acf96f9a6d47aa57",
+    "validation_checks_intact": true
+  },
+  "validation": [
+    {
+      "command": [
+        "bwrap",
+        "--ro-bind",
+        "/",
+        "/",
+        "--bind",
+        "/home/anodyine",
+        "/home/anodyine",
+        "--ro-bind",
+        "/home/anodyine/Projects",
+        "/home/anodyine/Projects",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/evidence",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/checks",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/config",
+        "--tmpfs",
+        "/home/anodyine/Projects/agent-evals/results",
+        "--bind",
+        "/tmp",
+        "/tmp",
+        "--bind",
+        "/tmp/agent-eval-jvqxe_wd/validation",
+        "/tmp/agent-eval-jvqxe_wd/validation",
+        "--bind",
+        "/home/anodyine/Projects/agent-evals/results/ar-opencode-shell-20261104/runs/AR-05/opencode-luna",
+        "/home/anodyine/Projects/agent-evals/results/ar-opencode-shell-20261104/runs/AR-05/opencode-luna",
+        "--dev-bind",
+        "/dev",
+        "/dev",
+        "--proc",
+        "/proc",
+        "--setenv",
+        "GIT_OPTIONAL_LOCKS",
+        "0",
+        "--",
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": "..................\n----------------------------------------------------------------------\nRan 18 tests in 0.018s\n\nOK\n",
+      "timed_out": false
+    }
+  ]
+}

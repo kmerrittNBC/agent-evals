@@ -1,3 +1,10 @@
+> **4 November 2026 correction:** The OpenCode V2 arm in the original DU and AR
+> runs could not execute commands because the runner used the V1 `bash`
+> permission name instead of V2 `shell`. Its original DU and AR scores and the
+> resulting mixed-workload exclusion below are not sound operational rankings.
+> See the [shell-enabled DU and AR reruns](opencode-shell-correction-2026-11-04.md).
+> IG was intentionally read-only for every arm.
+
 ## Executive summary
 
 ### Research Questions
